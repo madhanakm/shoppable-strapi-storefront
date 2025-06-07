@@ -1,70 +1,51 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Star, ShoppingCart, Heart } from 'lucide-react';
+import { Star, ShoppingCart, Heart, Flame } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
 
-const FeaturedProducts = () => {
+const HotSellingProducts = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const products = [
     {
-      id: '1',
-      name: 'Wireless Bluetooth Headphones',
-      price: 79.99,
-      originalPrice: 99.99,
-      rating: 4.5,
-      reviews: 128,
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop',
-      badge: 'Sale',
-      category: 'Electronics'
-    },
-    {
-      id: '2',
-      name: 'Smart Fitness Watch',
-      price: 199.99,
-      rating: 4.8,
-      reviews: 89,
-      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop',
-      badge: 'New',
-      category: 'Electronics'
-    },
-    {
-      id: '3',
-      name: 'Organic Cotton T-Shirt',
-      price: 29.99,
-      rating: 4.3,
-      reviews: 45,
-      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop',
+      id: '11',
+      name: 'Premium Leather Wallet',
+      price: 39.99,
+      originalPrice: 55.99,
+      rating: 4.9,
+      reviews: 345,
+      image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=300&h=300&fit=crop',
+      badge: 'Best Seller',
       category: 'Fashion'
     },
     {
-      id: '4',
-      name: 'Modern Table Lamp',
-      price: 49.99,
+      id: '12',
+      name: 'Wireless Charging Pad',
+      price: 29.99,
       rating: 4.6,
-      reviews: 67,
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop',
-      category: 'Home'
+      reviews: 278,
+      image: 'https://images.unsplash.com/photo-1580910051074-3eb694886505?w=300&h=300&fit=crop',
+      badge: 'Hot Sale',
+      category: 'Electronics'
     },
     {
-      id: '5',
-      name: 'Yoga Mat Premium',
-      price: 34.99,
+      id: '13',
+      name: 'Artisan Coffee Beans',
+      price: 19.99,
+      rating: 4.8,
+      reviews: 189,
+      image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=300&h=300&fit=crop',
+      category: 'Food'
+    },
+    {
+      id: '14',
+      name: 'Bamboo Phone Stand',
+      price: 15.99,
       rating: 4.7,
       reviews: 156,
-      image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=300&fit=crop',
-      category: 'Sports'
-    },
-    {
-      id: '6',
-      name: 'Coffee Bean Grinder',
-      price: 89.99,
-      rating: 4.4,
-      reviews: 93,
-      image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=300&fit=crop',
+      image: 'https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?w=300&h=300&fit=crop',
       category: 'Home'
     }
   ];
@@ -102,13 +83,16 @@ const FeaturedProducts = () => {
     <section className="py-16">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Featured Products</h2>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Flame className="w-8 h-8 text-orange-500" />
+            <h2 className="text-3xl font-bold">Hot Selling Products</h2>
+          </div>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Discover our handpicked selection of the best products with amazing deals
+            Our best-selling items that customers can't get enough of
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {products.map((product) => (
             <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
               <div className="relative overflow-hidden">
@@ -119,7 +103,7 @@ const FeaturedProducts = () => {
                 />
                 {product.badge && (
                   <span className={`absolute top-3 left-3 px-2 py-1 text-xs font-semibold rounded-full ${
-                    product.badge === 'Sale' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+                    product.badge === 'Best Seller' ? 'bg-orange-500 text-white' : 'bg-red-500 text-white'
                   }`}>
                     {product.badge}
                   </span>
@@ -161,15 +145,13 @@ const FeaturedProducts = () => {
         </div>
 
         <div className="text-center mt-12">
-          <Link to="/products">
-            <Button variant="outline" size="lg">
-              View All Products
-            </Button>
-          </Link>
+          <Button variant="outline" size="lg">
+            View All Hot Products
+          </Button>
         </div>
       </div>
     </section>
   );
 };
 
-export default FeaturedProducts;
+export default HotSellingProducts;

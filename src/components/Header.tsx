@@ -1,127 +1,131 @@
 
-import React, { useState } from 'react';
-import { Search, ShoppingCart, User, Menu, X, Heart } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Search, ShoppingCart, User, Heart, Menu, X } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { Link } from 'react-router-dom';
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(3);
   const { wishlistCount } = useWishlist();
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+    <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        {/* Top bar */}
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
-          <div className="flex items-center space-x-4">
-            <Link to="/">
-              <h1 className="text-2xl font-bold text-primary hover:text-primary/80 transition-colors">ShopHub</h1>
-            </Link>
-          </div>
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-lg lg:text-xl">E</span>
+            </div>
+            <span className="text-xl lg:text-2xl font-bold text-foreground">EStore</span>
+          </Link>
 
-          {/* Search bar - Hidden on mobile */}
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-8">
+            <Link to="/" className="text-foreground hover:text-primary transition-colors">Home</Link>
+            <Link to="/products" className="text-foreground hover:text-primary transition-colors">All Products</Link>
+            <Link to="/about" className="text-foreground hover:text-primary transition-colors">About</Link>
+            <Link to="/contact" className="text-foreground hover:text-primary transition-colors">Contact</Link>
+          </nav>
+
+          {/* Search Bar - Desktop */}
           <div className="hidden md:flex items-center flex-1 max-w-md mx-8">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input 
-                placeholder="Search products..." 
-                className="pl-10 bg-muted/50 border-muted focus:bg-background transition-colors"
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Search products..."
+                className="pl-10 w-full"
               />
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center space-x-2 md:space-x-4">
-            {/* User account */}
-            <Button variant="ghost" size="sm" className="hidden lg:flex items-center space-x-2 hover:bg-accent">
-              <User className="h-4 w-4" />
-              <span className="hidden xl:inline">Account</span>
+          <div className="flex items-center space-x-2 lg:space-x-4">
+            {/* Search - Mobile */}
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <Search className="w-5 h-5" />
             </Button>
 
             {/* Wishlist */}
-            <Button variant="ghost" size="sm" className="relative hover:bg-accent">
-              <Heart className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="relative">
+              <Heart className="w-5 h-5" />
               {wishlistCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {wishlistCount}
                 </span>
               )}
-              <span className="hidden xl:inline ml-2">Wishlist</span>
             </Button>
 
             {/* Cart */}
-            <Button variant="ghost" size="sm" className="relative hover:bg-accent">
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartCount}
-                </span>
-              )}
-              <span className="hidden xl:inline ml-2">Cart</span>
+            <Button variant="ghost" size="icon" className="relative">
+              <ShoppingCart className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                0
+              </span>
             </Button>
 
-            {/* Mobile menu toggle */}
+            {/* User */}
+            <Button variant="ghost" size="icon">
+              <User className="w-5 h-5" />
+            </Button>
+
+            {/* Mobile Menu Toggle */}
             <Button 
               variant="ghost" 
-              size="sm" 
-              className="md:hidden hover:bg-accent"
+              size="icon" 
+              className="lg:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
         </div>
 
-        {/* Navigation - Desktop */}
-        <nav className="hidden md:flex items-center space-x-8 py-3 border-t">
-          <a href="#" className="text-sm font-medium hover:text-primary transition-colors py-2">Electronics</a>
-          <a href="#" className="text-sm font-medium hover:text-primary transition-colors py-2">Fashion</a>
-          <a href="#" className="text-sm font-medium hover:text-primary transition-colors py-2">Home & Garden</a>
-          <a href="#" className="text-sm font-medium hover:text-primary transition-colors py-2">Sports</a>
-          <a href="#" className="text-sm font-medium hover:text-primary transition-colors py-2">Books</a>
-          <a href="#" className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors py-2">Sale</a>
-        </nav>
-
-        {/* Mobile menu */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t py-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
-            {/* Mobile Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input placeholder="Search products..." className="pl-10 bg-muted/50" />
-            </div>
-            
-            {/* Mobile Navigation */}
-            <nav className="space-y-2">
-              <a href="#" className="block py-3 text-sm font-medium hover:text-primary transition-colors border-b border-border/50">Electronics</a>
-              <a href="#" className="block py-3 text-sm font-medium hover:text-primary transition-colors border-b border-border/50">Fashion</a>
-              <a href="#" className="block py-3 text-sm font-medium hover:text-primary transition-colors border-b border-border/50">Home & Garden</a>
-              <a href="#" className="block py-3 text-sm font-medium hover:text-primary transition-colors border-b border-border/50">Sports</a>
-              <a href="#" className="block py-3 text-sm font-medium hover:text-primary transition-colors border-b border-border/50">Books</a>
-              <a href="#" className="block py-3 text-sm font-medium text-red-600 hover:text-red-700 transition-colors border-b border-border/50">Sale</a>
-            </nav>
-            
-            {/* Mobile Account Actions */}
-            <div className="space-y-2 pt-4 border-t">
-              <Button className="w-full justify-start" variant="outline">
-                <User className="h-4 w-4 mr-2" />
-                My Account
-              </Button>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start">
-                  <Heart className="h-4 w-4 mr-2" />
-                  Wishlist ({wishlistCount})
-                </Button>
-                <Button variant="outline" className="justify-start">
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Cart ({cartCount})
-                </Button>
+          <div className="lg:hidden border-t border-border py-4">
+            <nav className="flex flex-col space-y-4">
+              <Link 
+                to="/" 
+                className="text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link 
+                to="/products" 
+                className="text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                All Products
+              </Link>
+              <Link 
+                to="/about" 
+                className="text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link 
+                to="/contact" 
+                className="text-foreground hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              {/* Mobile Search */}
+              <div className="pt-4 border-t border-border">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    placeholder="Search products..."
+                    className="pl-10 w-full"
+                  />
+                </div>
               </div>
-            </div>
+            </nav>
           </div>
         )}
       </div>
