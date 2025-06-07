@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Facebook, Instagram, Youtube } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -25,10 +26,10 @@ const Footer = () => {
           <div className="space-y-4">
             <h4 className="font-semibold">Quick Links</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">About Us</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
+              <li><Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors">Contact</Link></li>
               <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">FAQ</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Shipping Info</a></li>
+              <li><Link to="/shipping" className="text-muted-foreground hover:text-primary transition-colors">Shipping Info</Link></li>
               <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Returns</a></li>
             </ul>
           </div>
@@ -45,21 +46,21 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Customer Service */}
+          {/* Legal & Policies */}
           <div className="space-y-4">
-            <h4 className="font-semibold">Customer Service</h4>
+            <h4 className="font-semibold">Legal & Policies</h4>
             <ul className="space-y-2">
               <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">My Account</a></li>
               <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Order Tracking</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Wishlist</a></li>
+              <li><Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms & Conditions</Link></li>
               <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Support Center</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</a></li>
             </ul>
           </div>
         </div>
 
         <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
-          <p>&copy; 2024 ShopHub. All rights reserved. Built with ❤️ for amazing shopping experiences.</p>
+          <p>&copy; 2024 ShopHub. All rights reserved. Developed with ❤️ by <a href="https://thinkaside.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ThinkAside</a></p>
         </div>
       </div>
     </footer>
