@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { getFeaturedProducts } from '@/services/products';
 import { Product, StrapiData } from '@/types/strapi';
 import { getStrapiMedia } from '@/services/api';
+import { formatPrice } from '@/lib/utils';
 
 const FeaturedProducts = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -21,7 +22,29 @@ const FeaturedProducts = () => {
       try {
         setLoading(true);
         const response = await getFeaturedProducts(6);
-        setProducts(response.data);
+        console.log('Featured products:', response);
+        
+        let productList = [];
+        if (Array.isArray(response)) {
+          productList = response;
+        } else if (response.data && Array.isArray(response.data)) {
+          productList = response.data;
+        } else if (response.products && Array.isArray(response.products)) {
+          productList = response.products;
+        }
+        
+        const formattedProducts = productList.map(item => ({
+          id: item.id,
+          name: item.title || item.name || 'Product',
+          price: parseFloat(item.price) || 0,
+          image: item.image_base64 || item.image || '/placeholder.svg',
+          rating: item.rating || 0,
+          reviews: item.reviews || 0,
+          badge: item.badge || null,
+          originalPrice: item.originalPrice || null
+        }));
+        
+        setProducts(formattedProducts);
       } catch (err) {
         console.error('Failed to fetch featured products', err);
         setError('Failed to load products. Please try again later.');
@@ -33,13 +56,13 @@ const FeaturedProducts = () => {
     loadProducts();
   }, []);
 
-  const handleWishlistToggle = (product: StrapiData<Product>) => {
+  const handleWishlistToggle = (product: any) => {
     const productData = {
       id: product.id.toString(),
-      name: product.attributes.name,
-      price: product.attributes.price,
-      image: getStrapiMedia(product.attributes.image?.data?.attributes?.url || ''),
-      category: product.attributes.category
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category
     };
 
     if (isInWishlist(productData.id)) {
@@ -49,13 +72,13 @@ const FeaturedProducts = () => {
     }
   };
 
-  const handleAddToCart = (product: StrapiData<Product>) => {
+  const handleAddToCart = (product: any) => {
     addToCart({
       id: product.id.toString(),
-      name: product.attributes.name,
-      price: product.attributes.price,
-      image: getStrapiMedia(product.attributes.image?.data?.attributes?.url || ''),
-      category: product.attributes.category
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category
     });
   };
 
@@ -115,15 +138,15 @@ const FeaturedProducts = () => {
             <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
               <div className="relative overflow-hidden">
                 <img 
-                  src={getStrapiMedia(product.attributes.image?.data?.attributes?.url || '')}
-                  alt={product.attributes.name}
+                  src={product.image}
+                  alt={product.name}
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                {product.attributes.badge && (
+                {product.badge && (
                   <span className={`absolute top-3 left-3 px-2 py-1 text-xs font-semibold rounded-full ${
-                    product.attributes.badge === 'Sale' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+                    product.badge === 'Sale' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
                   }`}>
-                    {product.attributes.badge}
+                    {product.badge}
                   </span>
                 )}
                 <Button 
@@ -138,22 +161,22 @@ const FeaturedProducts = () => {
               
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
-                  {product.attributes.name}
+                  {product.name}
                 </h3>
                 
                 <div className="flex items-center space-x-1 mb-3">
-                  {renderStars(product.attributes.rating)}
+                  {renderStars(product.rating)}
                   <span className="text-sm text-muted-foreground ml-2">
-                    ({product.attributes.reviews || 0})
+                    ({product.reviews || 0})
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
-                    <span className="text-2xl font-bold text-primary">${product.attributes.price}</span>
-                    {product.attributes.originalPrice && (
+                    <span className="text-2xl font-bold text-primary">{formatPrice(product.price)}</span>
+                    {product.originalPrice && (
                       <span className="text-lg text-muted-foreground line-through">
-                        ${product.attributes.originalPrice}
+                        {formatPrice(product.originalPrice)}
                       </span>
                     )}
                   </div>

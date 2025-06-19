@@ -1,64 +1,85 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart, TrendingUp } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useCart } from '@/contexts/CartContext';
+import { getProducts } from '@/services/products';
+import { Product, StrapiData } from '@/types/strapi';
+import { getStrapiMedia } from '@/services/api';
+import { formatPrice } from '@/lib/utils';
 
 const TrendingProducts = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToCart } = useCart();
+  const [products, setProducts] = useState<StrapiData<Product>[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const products = [
-    {
-      id: '7',
-      name: 'Wireless Gaming Mouse',
-      price: 45.99,
-      originalPrice: 59.99,
-      rating: 4.7,
-      reviews: 234,
-      image: 'https://images.unsplash.com/photo-1527814050087-3793815479db?w=300&h=300&fit=crop',
-      badge: 'Trending',
-      category: 'Electronics'
-    },
-    {
-      id: '8',
-      name: 'Smart Home Speaker',
-      price: 129.99,
-      rating: 4.6,
-      reviews: 189,
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop',
-      badge: 'Hot',
-      category: 'Electronics'
-    },
-    {
-      id: '9',
-      name: 'Eco-Friendly Water Bottle',
-      price: 24.99,
-      rating: 4.8,
-      reviews: 156,
-      image: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300&h=300&fit=crop',
-      category: 'Sports'
-    },
-    {
-      id: '10',
-      name: 'Minimalist Desk Organizer',
-      price: 34.99,
-      rating: 4.5,
-      reviews: 98,
-      image: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=300&fit=crop',
-      category: 'Home'
-    }
-  ];
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await getProducts(1, 4, { trending: true });
+        console.log('Trending products:', response);
+        
+        let productList = [];
+        if (Array.isArray(response)) {
+          productList = response;
+        } else if (response.data && Array.isArray(response.data)) {
+          productList = response.data;
+        } else if (response.products && Array.isArray(response.products)) {
+          productList = response.products;
+        }
+        
+        const formattedProducts = productList.map(item => ({
+          id: item.id,
+          name: item.title || item.name || 'Product',
+          price: parseFloat(item.price) || 0,
+          image: item.image_base64 || item.image || '/placeholder.svg',
+          rating: item.rating || 0,
+          reviews: item.reviews || 0,
+          badge: item.badge || null,
+          originalPrice: item.originalPrice || null
+        }));
+        
+        setProducts(formattedProducts);
+      } catch (error) {
+        console.error('Failed to fetch trending products', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   const handleWishlistToggle = (product: any) => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
+    const productData = {
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category
+    };
+
+    if (isInWishlist(productData.id)) {
+      removeFromWishlist(productData.id);
     } else {
-      addToWishlist(product);
+      addToWishlist(productData);
     }
   };
 
-  const renderStars = (rating: number) => {
+  const handleAddToCart = (product: any) => {
+    addToCart({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category
+    });
+  };
+
+  const renderStars = (rating: number = 0) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
@@ -78,6 +99,16 @@ const TrendingProducts = () => {
     
     return stars;
   };
+
+  if (loading) {
+    return (
+      <section className="py-16 bg-gradient-to-b from-background to-muted/30">
+        <div className="container mx-auto px-4 text-center">
+          <p>Loading trending products...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16 bg-gradient-to-b from-background to-muted/30">
@@ -114,7 +145,7 @@ const TrendingProducts = () => {
                   className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={() => handleWishlistToggle(product)}
                 >
-                  <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                  <Heart className={`w-4 h-4 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
               </div>
               
@@ -123,19 +154,19 @@ const TrendingProducts = () => {
                 
                 <div className="flex items-center space-x-1 mb-3">
                   {renderStars(product.rating)}
-                  <span className="text-sm text-muted-foreground ml-2">({product.reviews})</span>
+                  <span className="text-sm text-muted-foreground ml-2">({product.reviews || 0})</span>
                 </div>
                 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
-                    <span className="text-2xl font-bold text-primary">${product.price}</span>
+                    <span className="text-2xl font-bold text-primary">{formatPrice(product.price)}</span>
                     {product.originalPrice && (
-                      <span className="text-lg text-muted-foreground line-through">${product.originalPrice}</span>
+                      <span className="text-lg text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
                     )}
                   </div>
                 </div>
                 
-                <Button className="w-full group/btn">
+                <Button className="w-full group/btn" onClick={() => handleAddToCart(product)}>
                   <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
                   Add to Cart
                 </Button>

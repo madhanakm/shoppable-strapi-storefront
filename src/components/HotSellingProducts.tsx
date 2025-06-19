@@ -1,64 +1,85 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart, Flame } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useCart } from '@/contexts/CartContext';
+import { getProducts } from '@/services/products';
+import { Product, StrapiData } from '@/types/strapi';
+import { getStrapiMedia } from '@/services/api';
+import { formatPrice } from '@/lib/utils';
 
 const HotSellingProducts = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToCart } = useCart();
+  const [products, setProducts] = useState<StrapiData<Product>[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const products = [
-    {
-      id: '11',
-      name: 'Premium Leather Wallet',
-      price: 39.99,
-      originalPrice: 55.99,
-      rating: 4.9,
-      reviews: 345,
-      image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=300&h=300&fit=crop',
-      badge: 'Best Seller',
-      category: 'Fashion'
-    },
-    {
-      id: '12',
-      name: 'Wireless Charging Pad',
-      price: 29.99,
-      rating: 4.6,
-      reviews: 278,
-      image: 'https://images.unsplash.com/photo-1580910051074-3eb694886505?w=300&h=300&fit=crop',
-      badge: 'Hot Sale',
-      category: 'Electronics'
-    },
-    {
-      id: '13',
-      name: 'Artisan Coffee Beans',
-      price: 19.99,
-      rating: 4.8,
-      reviews: 189,
-      image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=300&h=300&fit=crop',
-      category: 'Food'
-    },
-    {
-      id: '14',
-      name: 'Bamboo Phone Stand',
-      price: 15.99,
-      rating: 4.7,
-      reviews: 156,
-      image: 'https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?w=300&h=300&fit=crop',
-      category: 'Home'
-    }
-  ];
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const response = await getProducts(1, 4, { hot_selling: true });
+        console.log('Hot selling products:', response);
+        
+        let productList = [];
+        if (Array.isArray(response)) {
+          productList = response;
+        } else if (response.data && Array.isArray(response.data)) {
+          productList = response.data;
+        } else if (response.products && Array.isArray(response.products)) {
+          productList = response.products;
+        }
+        
+        const formattedProducts = productList.map(item => ({
+          id: item.id,
+          name: item.title || item.name || 'Product',
+          price: parseFloat(item.price) || 0,
+          image: item.image_base64 || item.image || '/placeholder.svg',
+          rating: item.rating || 0,
+          reviews: item.reviews || 0,
+          badge: item.badge || null,
+          originalPrice: item.originalPrice || null
+        }));
+        
+        setProducts(formattedProducts);
+      } catch (error) {
+        console.error('Failed to fetch hot selling products', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   const handleWishlistToggle = (product: any) => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
+    const productData = {
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category
+    };
+
+    if (isInWishlist(productData.id)) {
+      removeFromWishlist(productData.id);
     } else {
-      addToWishlist(product);
+      addToWishlist(productData);
     }
   };
 
-  const renderStars = (rating: number) => {
+  const handleAddToCart = (product: any) => {
+    addToCart({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category
+    });
+  };
+
+  const renderStars = (rating: number = 0) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
@@ -78,6 +99,16 @@ const HotSellingProducts = () => {
     
     return stars;
   };
+
+  if (loading) {
+    return (
+      <section className="py-16">
+        <div className="container mx-auto px-4 text-center">
+          <p>Loading hot selling products...</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-16">
@@ -114,7 +145,7 @@ const HotSellingProducts = () => {
                   className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={() => handleWishlistToggle(product)}
                 >
-                  <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                  <Heart className={`w-4 h-4 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
               </div>
               
@@ -123,19 +154,19 @@ const HotSellingProducts = () => {
                 
                 <div className="flex items-center space-x-1 mb-3">
                   {renderStars(product.rating)}
-                  <span className="text-sm text-muted-foreground ml-2">({product.reviews})</span>
+                  <span className="text-sm text-muted-foreground ml-2">({product.reviews || 0})</span>
                 </div>
                 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
-                    <span className="text-2xl font-bold text-primary">${product.price}</span>
+                    <span className="text-2xl font-bold text-primary">{formatPrice(product.price)}</span>
                     {product.originalPrice && (
-                      <span className="text-lg text-muted-foreground line-through">${product.originalPrice}</span>
+                      <span className="text-lg text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
                     )}
                   </div>
                 </div>
                 
-                <Button className="w-full group/btn">
+                <Button className="w-full group/btn" onClick={() => handleAddToCart(product)}>
                   <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
                   Add to Cart
                 </Button>

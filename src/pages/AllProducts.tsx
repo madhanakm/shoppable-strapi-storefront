@@ -3,322 +3,194 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Star, ShoppingCart, Heart, Search, Filter, Loader2 } from 'lucide-react';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { useToast } from '@/hooks/use-toast';
-import { getProducts, searchProducts } from '@/services/products';
-import { getCategories } from '@/services/categories';
-import { getStrapiMedia } from '@/services/api';
-import { Product, StrapiData, Category } from '@/types/strapi';
-import { useApiQuery } from '@/hooks/use-api';
 
 const AllProducts = () => {
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
-  const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('name');
-  const [filterCategory, setFilterCategory] = useState('all');
-  const [page, setPage] = useState(1);
-  const [categories, setCategories] = useState<string[]>(['all']);
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedBrand, setSelectedBrand] = useState('all');
 
-  // Fetch products
-  const {
-    data: productsData,
-    isLoading: isLoadingProducts,
-    error: productsError,
-    refetch: refetchProducts
-  } = useApiQuery(
-    ['products', page, filterCategory],
-    '/products',
-    {
-      'pagination[page]': page.toString(),
-      'pagination[pageSize]': '12',
-      'populate': 'image',
-      ...(filterCategory !== 'all' ? { 'filters[category]': filterCategory } : {})
-    },
-    {
-      enabled: !searchTerm
-    }
-  );
-
-  // Fetch categories
-  const {
-    data: categoriesData,
-    isLoading: isLoadingCategories
-  } = useApiQuery(['categories'], '/categories', {});
-
-  // Handle search
   useEffect(() => {
-    if (searchTerm) {
-      const delaySearch = setTimeout(() => {
-        searchProducts(searchTerm, page, 12)
-          .then(data => {
-            // Handle search results
-          })
-          .catch(error => {
-            console.error('Search error:', error);
-          });
-      }, 500);
-      
-      return () => clearTimeout(delaySearch);
-    }
-  }, [searchTerm, page]);
-
-  // Process categories data
-  useEffect(() => {
-    if (categoriesData?.data) {
-      const categoryNames = ['all', ...categoriesData.data.map(cat => cat.attributes.name)];
-      setCategories(categoryNames);
-    }
-  }, [categoriesData]);
-
-  const handleWishlistToggle = (product: StrapiData<Product>) => {
-    const productData = {
-      id: product.id.toString(),
-      name: product.attributes.name,
-      price: product.attributes.price,
-      image: getStrapiMedia(product.attributes.image?.data?.attributes?.url || ''),
-      category: product.attributes.category
-    };
-
-    if (isInWishlist(productData.id)) {
-      removeFromWishlist(productData.id);
-      toast({
-        title: "Removed from Wishlist",
-        description: `${productData.name} has been removed from your wishlist.`,
+    fetch('https://api.dharaniherbbals.com/api/product-masters')
+      .then(response => response.json())
+      .then(data => {
+        console.log('API response:', data);
+        
+        // Extract products from Strapi format
+        let productArray = [];
+        if (data && data.data && Array.isArray(data.data)) {
+          productArray = data.data;
+        } else if (Array.isArray(data)) {
+          productArray = data;
+        }
+        
+        setProducts(productArray);
+        
+        // Extract unique categories and brands
+        // Clean up categories by trimming whitespace and removing duplicates
+        const uniqueCategories = [...new Set(
+          productArray
+            .map(p => p.attributes?.category?.trim())
+            .filter(Boolean)
+            .filter(cat => cat !== "undefined" && cat !== "null")
+        )];
+        
+        // Clean up brands by trimming whitespace and removing duplicates
+        const uniqueBrands = [...new Set(
+          productArray
+            .map(p => p.attributes?.brand?.trim())
+            .filter(Boolean)
+            .filter(brand => brand !== "undefined" && brand !== "null")
+        )];
+        
+        console.log('Unique categories:', uniqueCategories);
+        console.log('Unique brands:', uniqueBrands);
+        
+        setCategories(uniqueCategories);
+        setBrands(uniqueBrands);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        setLoading(false);
       });
-    } else {
-      addToWishlist(productData);
-      toast({
-        title: "Added to Wishlist",
-        description: `${productData.name} has been added to your wishlist.`,
-      });
-    }
+  }, []);
+
+  // Format price in Indian Rupees
+  const formatPrice = (price) => {
+    return `₹${Number(price || 0).toLocaleString('en-IN')}`;
   };
+  
+  // Filter products based on selected category and brand
+  const filteredProducts = products.filter(product => {
+    const matchesCategory = selectedCategory === 'all' || product.attributes?.category === selectedCategory;
+    const matchesBrand = selectedBrand === 'all' || product.attributes?.brand === selectedBrand;
+    return matchesCategory && matchesBrand;
+  });
 
-  const handleAddToCart = (product: StrapiData<Product>) => {
-    const productData = {
-      id: product.id.toString(),
-      name: product.attributes.name,
-      price: product.attributes.price,
-      image: getStrapiMedia(product.attributes.image?.data?.attributes?.url || ''),
-      category: product.attributes.category
-    };
-
-    addToCart(productData);
-    toast({
-      title: "Added to Cart",
-      description: `${productData.name} has been added to your cart.`,
-    });
-  };
-
-  const renderStars = (rating: number = 0) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />);
-    }
-    
-    if (hasHalfStar) {
-      stars.push(<Star key="half" className="w-4 h-4 fill-yellow-400/50 text-yellow-400" />);
-    }
-    
-    const remainingStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < remainingStars; i++) {
-      stars.push(<Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />);
-    }
-    
-    return stars;
-  };
-
-  // Sort products
-  const sortProducts = (products: StrapiData<Product>[]) => {
-    return [...products].sort((a, b) => {
-      switch (sortBy) {
-        case 'price-low':
-          return a.attributes.price - b.attributes.price;
-        case 'price-high':
-          return b.attributes.price - a.attributes.price;
-        case 'rating':
-          return (b.attributes.rating || 0) - (a.attributes.rating || 0);
-        default:
-          return a.attributes.name.localeCompare(b.attributes.name);
-      }
-    });
-  };
-
-  const products = productsData?.data ? sortProducts(productsData.data) : [];
+  if (loading) {
+    return (
+      <div>
+        <Header />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <p>Loading products...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div>
       <Header />
-      <main className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-4">All Products</h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Browse our complete collection of high-quality products
-            </p>
+      <div className="container mx-auto px-4 py-16">
+        <h1 className="text-3xl font-bold text-center mb-8">All Products</h1>
+        
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Sidebar */}
+          <div className="w-full md:w-64 flex-shrink-0">
+            <div className="bg-gray-50 p-4 rounded-lg shadow">
+              <h2 className="font-bold text-lg mb-4">Categories</h2>
+              <ul className="space-y-2">
+                <li>
+                  <button 
+                    className={`w-full text-left px-2 py-1 rounded ${selectedCategory === 'all' ? 'bg-primary text-white' : 'hover:bg-gray-200'}`}
+                    onClick={() => setSelectedCategory('all')}
+                  >
+                    All Categories
+                  </button>
+                </li>
+                {categories.length > 0 ? (
+                  categories.map(category => (
+                    <li key={category}>
+                      <button 
+                        className={`w-full text-left px-2 py-1 rounded ${selectedCategory === category ? 'bg-primary text-white' : 'hover:bg-gray-200'}`}
+                        onClick={() => setSelectedCategory(category)}
+                      >
+                        {category}
+                      </button>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-gray-500 text-sm px-2">No categories found</li>
+                )}
+              </ul>
+              
+              <h2 className="font-bold text-lg mt-6 mb-4">Brands</h2>
+              <ul className="space-y-2">
+                <li>
+                  <button 
+                    className={`w-full text-left px-2 py-1 rounded ${selectedBrand === 'all' ? 'bg-primary text-white' : 'hover:bg-gray-200'}`}
+                    onClick={() => setSelectedBrand('all')}
+                  >
+                    All Brands
+                  </button>
+                </li>
+                {brands.length > 0 ? (
+                  brands.map(brand => (
+                    <li key={brand}>
+                      <button 
+                        className={`w-full text-left px-2 py-1 rounded ${selectedBrand === brand ? 'bg-primary text-white' : 'hover:bg-gray-200'}`}
+                        onClick={() => setSelectedBrand(brand)}
+                      >
+                        {brand}
+                      </button>
+                    </li>
+                  ))
+                ) : (
+                  <li className="text-gray-500 text-sm px-2">No brands found</li>
+                )}
+              </ul>
+            </div>
           </div>
-
-          {/* Search and Filter Bar */}
-          <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <div className="flex gap-4">
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-40">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category === 'all' ? 'All Categories' : category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Loading State */}
-          {(isLoadingProducts || isLoadingCategories) && (
-            <div className="flex justify-center items-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <span className="ml-2">Loading products...</span>
-            </div>
-          )}
-
-          {/* Error State */}
-          {productsError && (
-            <div className="text-center py-12">
-              <p className="text-red-500 text-lg">Failed to load products. Please try again later.</p>
-              <Button onClick={() => refetchProducts()} className="mt-4">
-                Retry
-              </Button>
-            </div>
-          )}
-
+          
           {/* Products Grid */}
-          {!isLoadingProducts && !productsError && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {products.map((product) => (
-                <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
-                  <div className="relative overflow-hidden">
+          <div className="flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProducts.map((product) => (
+                <Card key={product.id}>
+                  <div className="aspect-square overflow-hidden">
                     <img 
-                      src={getStrapiMedia(product.attributes.image?.data?.attributes?.url || '')}
-                      alt={product.attributes.name}
-                      className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                      src={product.attributes?.photo || '/placeholder.svg'} 
+                      alt={product.attributes?.Name || 'Product'} 
+                      className="w-full h-full object-cover"
                     />
-                    {product.attributes.badge && (
-                      <span className={`absolute top-3 left-3 px-2 py-1 text-xs font-semibold rounded-full ${
-                        product.attributes.badge === 'Sale' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
-                      }`}>
-                        {product.attributes.badge}
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-medium text-lg">{product.attributes?.Name || 'Product'}</h3>
+                    <p className="text-xl font-bold mt-2">{formatPrice(product.attributes?.mrp)}</p>
+                    {product.attributes?.type && (
+                      <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full mt-2 inline-block">
+                        {product.attributes.type}
                       </span>
                     )}
                     <Button 
-                      size="sm" 
-                      variant="secondary" 
-                      className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => handleWishlistToggle(product)}
+                      className="w-full mt-4"
+                      onClick={() => addToCart({
+                        id: product.id,
+                        name: product.attributes?.Name,
+                        price: product.attributes?.mrp
+                      })}
                     >
-                      <Heart className={`w-4 h-4 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
-                    </Button>
-                  </div>
-                  
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
-                      {product.attributes.name}
-                    </h3>
-                    
-                    <div className="flex items-center space-x-1 mb-3">
-                      {renderStars(product.attributes.rating)}
-                      <span className="text-sm text-muted-foreground ml-2">
-                        ({product.attributes.reviews || 0})
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-2xl font-bold text-primary">${product.attributes.price}</span>
-                        {product.attributes.originalPrice && (
-                          <span className="text-lg text-muted-foreground line-through">
-                            ${product.attributes.originalPrice}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      className="w-full group/btn"
-                      onClick={() => handleAddToCart(product)}
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
+                      <ShoppingCart className="mr-2 h-4 w-4" />
                       Add to Cart
                     </Button>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          )}
-
-          {!isLoadingProducts && !productsError && products.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
-            </div>
-          )}
-
-          {/* Pagination */}
-          {productsData?.meta?.pagination && (
-            <div className="flex justify-center mt-12">
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  disabled={page === productsData.meta.pagination.pageCount}
-                  onClick={() => setPage(page + 1)}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
+            
+            {filteredProducts.length === 0 && (
+              <p className="text-center py-12">No products found matching your filters.</p>
+            )}
+          </div>
         </div>
-      </main>
+      </div>
       <Footer />
     </div>
   );
