@@ -1,21 +1,14 @@
-
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  mobile: string;
-}
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { auth } from '@/services/api';
+import { User } from '@/types/strapi';
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, mobile: string, password: string) => Promise<boolean>;
+  register: (username: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
-  verifyOTP: (mobile: string, otp: string) => Promise<boolean>;
-  sendOTP: (mobile: string) => Promise<boolean>;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,48 +27,66 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulate API call
-    if (email && password) {
-      setUser({
-        id: '1',
-        name: 'Test User',
-        email,
-        mobile: '+1234567890'
-      });
-      return true;
+  // Check for existing token on mount
+  useEffect(() => {
+    const token = localStorage.getItem('jwt');
+    const storedUser = localStorage.getItem('user');
+    
+    if (token && storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error('Failed to parse stored user data', error);
+        localStorage.removeItem('jwt');
+        localStorage.removeItem('user');
+      }
     }
-    return false;
+    
+    setLoading(false);
+  }, []);
+
+  const login = async (identifier: string, password: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      const response = await auth.login(identifier, password);
+      
+      localStorage.setItem('jwt', response.jwt);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      setUser(response.user);
+      
+      return true;
+    } catch (error) {
+      console.error('Login failed', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const register = async (name: string, email: string, mobile: string, password: string): Promise<boolean> => {
-    // Simulate API call
-    if (name && email && mobile && password) {
-      setUser({
-        id: '1',
-        name,
-        email,
-        mobile
-      });
+  const register = async (username: string, email: string, password: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      const response = await auth.register(username, email, password);
+      
+      localStorage.setItem('jwt', response.jwt);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      setUser(response.user);
+      
       return true;
+    } catch (error) {
+      console.error('Registration failed', error);
+      return false;
+    } finally {
+      setLoading(false);
     }
-    return false;
   };
 
   const logout = () => {
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('user');
     setUser(null);
-  };
-
-  const sendOTP = async (mobile: string): Promise<boolean> => {
-    // Simulate sending OTP
-    console.log(`OTP sent to ${mobile}`);
-    return true;
-  };
-
-  const verifyOTP = async (mobile: string, otp: string): Promise<boolean> => {
-    // Simulate OTP verification
-    return otp === '123456';
   };
 
   return (
@@ -85,8 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       register,
       logout,
       isAuthenticated: !!user,
-      verifyOTP,
-      sendOTP
+      loading
     }}>
       {children}
     </AuthContext.Provider>

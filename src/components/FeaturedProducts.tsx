@@ -1,83 +1,65 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useCart } from '@/contexts/CartContext';
+import { getFeaturedProducts } from '@/services/products';
+import { Product, StrapiData } from '@/types/strapi';
+import { getStrapiMedia } from '@/services/api';
 
 const FeaturedProducts = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToCart } = useCart();
+  const [products, setProducts] = useState<StrapiData<Product>[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const products = [
-    {
-      id: '1',
-      name: 'Wireless Bluetooth Headphones',
-      price: 79.99,
-      originalPrice: 99.99,
-      rating: 4.5,
-      reviews: 128,
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop',
-      badge: 'Sale',
-      category: 'Electronics'
-    },
-    {
-      id: '2',
-      name: 'Smart Fitness Watch',
-      price: 199.99,
-      rating: 4.8,
-      reviews: 89,
-      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=300&fit=crop',
-      badge: 'New',
-      category: 'Electronics'
-    },
-    {
-      id: '3',
-      name: 'Organic Cotton T-Shirt',
-      price: 29.99,
-      rating: 4.3,
-      reviews: 45,
-      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop',
-      category: 'Fashion'
-    },
-    {
-      id: '4',
-      name: 'Modern Table Lamp',
-      price: 49.99,
-      rating: 4.6,
-      reviews: 67,
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop',
-      category: 'Home'
-    },
-    {
-      id: '5',
-      name: 'Yoga Mat Premium',
-      price: 34.99,
-      rating: 4.7,
-      reviews: 156,
-      image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&h=300&fit=crop',
-      category: 'Sports'
-    },
-    {
-      id: '6',
-      name: 'Coffee Bean Grinder',
-      price: 89.99,
-      rating: 4.4,
-      reviews: 93,
-      image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=300&fit=crop',
-      category: 'Home'
-    }
-  ];
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await getFeaturedProducts(6);
+        setProducts(response.data);
+      } catch (err) {
+        console.error('Failed to fetch featured products', err);
+        setError('Failed to load products. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleWishlistToggle = (product: any) => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
+    loadProducts();
+  }, []);
+
+  const handleWishlistToggle = (product: StrapiData<Product>) => {
+    const productData = {
+      id: product.id.toString(),
+      name: product.attributes.name,
+      price: product.attributes.price,
+      image: getStrapiMedia(product.attributes.image?.data?.attributes?.url || ''),
+      category: product.attributes.category
+    };
+
+    if (isInWishlist(productData.id)) {
+      removeFromWishlist(productData.id);
     } else {
-      addToWishlist(product);
+      addToWishlist(productData);
     }
   };
 
-  const renderStars = (rating: number) => {
+  const handleAddToCart = (product: StrapiData<Product>) => {
+    addToCart({
+      id: product.id.toString(),
+      name: product.attributes.name,
+      price: product.attributes.price,
+      image: getStrapiMedia(product.attributes.image?.data?.attributes?.url || ''),
+      category: product.attributes.category
+    });
+  };
+
+  const renderStars = (rating: number = 0) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
@@ -98,6 +80,26 @@ const FeaturedProducts = () => {
     return stars;
   };
 
+  if (loading) {
+    return (
+      <section className="py-16">
+        <div className="container mx-auto px-4 text-center">
+          <p>Loading featured products...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-16">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-red-500">{error}</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
@@ -113,15 +115,15 @@ const FeaturedProducts = () => {
             <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
               <div className="relative overflow-hidden">
                 <img 
-                  src={product.image} 
-                  alt={product.name}
+                  src={getStrapiMedia(product.attributes.image?.data?.attributes?.url || '')}
+                  alt={product.attributes.name}
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                {product.badge && (
+                {product.attributes.badge && (
                   <span className={`absolute top-3 left-3 px-2 py-1 text-xs font-semibold rounded-full ${
-                    product.badge === 'Sale' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+                    product.attributes.badge === 'Sale' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
                   }`}>
-                    {product.badge}
+                    {product.attributes.badge}
                   </span>
                 )}
                 <Button 
@@ -130,28 +132,37 @@ const FeaturedProducts = () => {
                   className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={() => handleWishlistToggle(product)}
                 >
-                  <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                  <Heart className={`w-4 h-4 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
               </div>
               
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">{product.name}</h3>
+                <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                  {product.attributes.name}
+                </h3>
                 
                 <div className="flex items-center space-x-1 mb-3">
-                  {renderStars(product.rating)}
-                  <span className="text-sm text-muted-foreground ml-2">({product.reviews})</span>
+                  {renderStars(product.attributes.rating)}
+                  <span className="text-sm text-muted-foreground ml-2">
+                    ({product.attributes.reviews || 0})
+                  </span>
                 </div>
                 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
-                    <span className="text-2xl font-bold text-primary">${product.price}</span>
-                    {product.originalPrice && (
-                      <span className="text-lg text-muted-foreground line-through">${product.originalPrice}</span>
+                    <span className="text-2xl font-bold text-primary">${product.attributes.price}</span>
+                    {product.attributes.originalPrice && (
+                      <span className="text-lg text-muted-foreground line-through">
+                        ${product.attributes.originalPrice}
+                      </span>
                     )}
                   </div>
                 </div>
                 
-                <Button className="w-full group/btn">
+                <Button 
+                  className="w-full group/btn"
+                  onClick={() => handleAddToCart(product)}
+                >
                   <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
                   Add to Cart
                 </Button>
