@@ -28,19 +28,20 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg lg:text-xl">E</span>
-            </div>
-            <span className="text-xl lg:text-2xl font-bold text-foreground">EStore</span>
+          <Link to="/" className="flex items-center space-x-3">
+            <img 
+              src="/lovable-uploads/6416e97f-9561-4de9-a193-d5af27824b56.png" 
+              alt="Dharani Herbals"
+              className="h-8 lg:h-12 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
-            <Link to="/" className="text-foreground hover:text-primary transition-colors">Home</Link>
-            <Link to="/products" className="text-foreground hover:text-primary transition-colors">All Products</Link>
-            <Link to="/about" className="text-foreground hover:text-primary transition-colors">About</Link>
-            <Link to="/contact" className="text-foreground hover:text-primary transition-colors">Contact</Link>
+            <Link to="/" className="text-foreground hover:text-primary transition-colors font-medium">Home</Link>
+            <Link to="/products" className="text-foreground hover:text-primary transition-colors font-medium">All Products</Link>
+            <Link to="/about" className="text-foreground hover:text-primary transition-colors font-medium">About</Link>
+            <Link to="/contact" className="text-foreground hover:text-primary transition-colors font-medium">Contact</Link>
           </nav>
 
           {/* Search Bar - Desktop */}
@@ -48,8 +49,8 @@ const Header = () => {
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search products..."
-                className="pl-10 w-full"
+                placeholder="Search herbal products..."
+                className="pl-10 w-full border-primary/20 focus:border-primary"
               />
             </div>
           </div>
@@ -63,7 +64,7 @@ const Header = () => {
 
             {/* Wishlist */}
             <Link to="/wishlist">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative hover:bg-primary/10">
                 <Heart className="w-5 h-5" />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -75,7 +76,7 @@ const Header = () => {
 
             {/* Cart */}
             <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative hover:bg-primary/10">
                 <ShoppingCart className="w-5 h-5" />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -86,7 +87,7 @@ const Header = () => {
             </Link>
 
             {/* User */}
-            <Button variant="ghost" size="icon" onClick={handleAuthClick} title={isAuthenticated ? `Logout (${user?.name})` : 'Login'}>
+            <Button variant="ghost" size="icon" onClick={handleAuthClick} title={isAuthenticated ? `Logout (${user?.name})` : 'Login'} className="hover:bg-primary/10">
               <User className="w-5 h-5" />
             </Button>
 
@@ -108,28 +109,28 @@ const Header = () => {
             <nav className="flex flex-col space-y-4">
               <Link 
                 to="/" 
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-foreground hover:text-primary transition-colors font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </Link>
               <Link 
                 to="/products" 
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-foreground hover:text-primary transition-colors font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
                 All Products
               </Link>
               <Link 
                 to="/about" 
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-foreground hover:text-primary transition-colors font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
                 About
               </Link>
               <Link 
                 to="/contact" 
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-foreground hover:text-primary transition-colors font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact
@@ -141,14 +142,14 @@ const Header = () => {
                     logout();
                     setIsMenuOpen(false);
                   }}
-                  className="justify-start"
+                  className="justify-start font-medium"
                 >
                   Logout ({user?.name})
                 </Button>
               ) : (
                 <Link 
                   to="/login" 
-                  className="text-foreground hover:text-primary transition-colors"
+                  className="text-foreground hover:text-primary transition-colors font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Login
@@ -159,8 +160,8 @@ const Header = () => {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
-                    placeholder="Search products..."
-                    className="pl-10 w-full"
+                    placeholder="Search herbal products..."
+                    className="pl-10 w-full border-primary/20 focus:border-primary"
                   />
                 </div>
               </div>
