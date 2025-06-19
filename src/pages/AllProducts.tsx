@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -8,9 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Star, ShoppingCart, Heart, Search, Filter } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
 
 const AllProducts = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToCart } = useCart();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -115,9 +118,25 @@ const AllProducts = () => {
   const handleWishlistToggle = (product: any) => {
     if (isInWishlist(product.id)) {
       removeFromWishlist(product.id);
+      toast({
+        title: "Removed from Wishlist",
+        description: `${product.name} has been removed from your wishlist.`,
+      });
     } else {
       addToWishlist(product);
+      toast({
+        title: "Added to Wishlist",
+        description: `${product.name} has been added to your wishlist.`,
+      });
     }
+  };
+
+  const handleAddToCart = (product: any) => {
+    addToCart(product);
+    toast({
+      title: "Added to Cart",
+      description: `${product.name} has been added to your cart.`,
+    });
   };
 
   const renderStars = (rating: number) => {
@@ -231,7 +250,10 @@ const AllProducts = () => {
                     </div>
                   </div>
                   
-                  <Button className="w-full group/btn">
+                  <Button 
+                    className="w-full group/btn"
+                    onClick={() => handleAddToCart(product)}
+                  >
                     <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
                     Add to Cart
                   </Button>
