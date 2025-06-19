@@ -51,32 +51,34 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-16">
-        <div className="max-w-md mx-auto">
+      <main className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
+        <div className="max-w-sm md:max-w-md mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl text-center">Login</CardTitle>
+              <CardTitle className="text-xl md:text-2xl text-center">Login</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 md:p-6">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-sm md:text-base">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-sm md:text-base">Password</Label>
                   <Input
                     id="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    className="mt-1"
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>

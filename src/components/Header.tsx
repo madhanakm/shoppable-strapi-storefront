@@ -26,48 +26,48 @@ const Header = () => {
   return (
     <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+        <div className="flex items-center justify-between h-14 md:h-16 lg:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
+          <Link to="/" className="flex items-center space-x-2 md:space-x-3">
             <img 
               src="/lovable-uploads/6416e97f-9561-4de9-a193-d5af27824b56.png" 
               alt="Dharani Herbals"
-              className="h-8 lg:h-12 w-auto"
+              className="h-6 md:h-8 lg:h-12 w-auto"
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
-            <Link to="/" className="text-foreground hover:text-primary transition-colors font-medium">Home</Link>
-            <Link to="/products" className="text-foreground hover:text-primary transition-colors font-medium">All Products</Link>
-            <Link to="/about" className="text-foreground hover:text-primary transition-colors font-medium">About</Link>
-            <Link to="/contact" className="text-foreground hover:text-primary transition-colors font-medium">Contact</Link>
+          <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+            <Link to="/" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">Home</Link>
+            <Link to="/products" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">All Products</Link>
+            <Link to="/about" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">About</Link>
+            <Link to="/contact" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">Contact</Link>
           </nav>
 
           {/* Search Bar - Desktop */}
-          <div className="hidden md:flex items-center flex-1 max-w-md mx-8">
+          <div className="hidden md:flex items-center flex-1 max-w-sm lg:max-w-md mx-4 lg:mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search herbal products..."
-                className="pl-10 w-full border-primary/20 focus:border-primary"
+                className="pl-10 w-full border-primary/20 focus:border-primary text-sm"
               />
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center space-x-2 lg:space-x-4">
+          <div className="flex items-center space-x-1 md:space-x-2 lg:space-x-4">
             {/* Search - Mobile */}
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Search className="w-5 h-5" />
+            <Button variant="ghost" size="icon" className="md:hidden p-2">
+              <Search className="w-4 h-4 md:w-5 md:h-5" />
             </Button>
 
             {/* Wishlist */}
             <Link to="/wishlist">
-              <Button variant="ghost" size="icon" className="relative hover:bg-primary/10">
-                <Heart className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 p-2">
+                <Heart className="w-4 h-4 md:w-5 md:h-5" />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs">
                     {wishlistCount}
                   </span>
                 )}
@@ -76,10 +76,10 @@ const Header = () => {
 
             {/* Cart */}
             <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative hover:bg-primary/10">
-                <ShoppingCart className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 p-2">
+                <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs">
                     {cartCount}
                   </span>
                 )}
@@ -87,18 +87,18 @@ const Header = () => {
             </Link>
 
             {/* User */}
-            <Button variant="ghost" size="icon" onClick={handleAuthClick} title={isAuthenticated ? `Logout (${user?.name})` : 'Login'} className="hover:bg-primary/10">
-              <User className="w-5 h-5" />
+            <Button variant="ghost" size="icon" onClick={handleAuthClick} title={isAuthenticated ? `Logout (${user?.name})` : 'Login'} className="hover:bg-primary/10 p-2">
+              <User className="w-4 h-4 md:w-5 md:h-5" />
             </Button>
 
             {/* Mobile Menu Toggle */}
             <Button 
               variant="ghost" 
               size="icon" 
-              className="lg:hidden"
+              className="lg:hidden p-2"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMenuOpen ? <X className="w-4 h-4 md:w-5 md:h-5" /> : <Menu className="w-4 h-4 md:w-5 md:h-5" />}
             </Button>
           </div>
         </div>
@@ -109,28 +109,28 @@ const Header = () => {
             <nav className="flex flex-col space-y-4">
               <Link 
                 to="/" 
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                className="text-foreground hover:text-primary transition-colors font-medium text-base"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </Link>
               <Link 
                 to="/products" 
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                className="text-foreground hover:text-primary transition-colors font-medium text-base"
                 onClick={() => setIsMenuOpen(false)}
               >
                 All Products
               </Link>
               <Link 
                 to="/about" 
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                className="text-foreground hover:text-primary transition-colors font-medium text-base"
                 onClick={() => setIsMenuOpen(false)}
               >
                 About
               </Link>
               <Link 
                 to="/contact" 
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                className="text-foreground hover:text-primary transition-colors font-medium text-base"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact
@@ -142,14 +142,14 @@ const Header = () => {
                     logout();
                     setIsMenuOpen(false);
                   }}
-                  className="justify-start font-medium"
+                  className="justify-start font-medium text-base p-0 h-auto"
                 >
                   Logout ({user?.name})
                 </Button>
               ) : (
                 <Link 
                   to="/login" 
-                  className="text-foreground hover:text-primary transition-colors font-medium"
+                  className="text-foreground hover:text-primary transition-colors font-medium text-base"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Login
