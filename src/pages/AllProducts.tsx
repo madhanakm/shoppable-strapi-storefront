@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { formatPrice } from '@/lib/utils';
 
 const AllProducts = () => {
   const { addToCart } = useCart();
@@ -14,14 +15,13 @@ const AllProducts = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 6; // Show fewer items per page to ensure pagination is visible
 
   useEffect(() => {
     fetch('https://api.dharaniherbbals.com/api/product-masters')
       .then(response => response.json())
       .then(data => {
-        console.log('API response:', data);
-        
-        // Extract products from Strapi format
         let productArray = [];
         if (data && data.data && Array.isArray(data.data)) {
           productArray = data.data;
@@ -31,25 +31,17 @@ const AllProducts = () => {
         
         setProducts(productArray);
         
-        // Extract unique categories and brands
-        // Clean up categories by trimming whitespace and removing duplicates
         const uniqueCategories = [...new Set(
           productArray
-            .map(p => p.attributes?.category?.trim())
+            .map(p => p.attributes?.category)
             .filter(Boolean)
-            .filter(cat => cat !== "undefined" && cat !== "null")
         )];
         
-        // Clean up brands by trimming whitespace and removing duplicates
         const uniqueBrands = [...new Set(
           productArray
-            .map(p => p.attributes?.brand?.trim())
+            .map(p => p.attributes?.brand)
             .filter(Boolean)
-            .filter(brand => brand !== "undefined" && brand !== "null")
         )];
-        
-        console.log('Unique categories:', uniqueCategories);
-        console.log('Unique brands:', uniqueBrands);
         
         setCategories(uniqueCategories);
         setBrands(uniqueBrands);
@@ -60,18 +52,18 @@ const AllProducts = () => {
         setLoading(false);
       });
   }, []);
-
-  // Format price in Indian Rupees
-  const formatPrice = (price) => {
-    return `₹${Number(price || 0).toLocaleString('en-IN')}`;
-  };
   
-  // Filter products based on selected category and brand
+  // Filter products
   const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === 'all' || product.attributes?.category === selectedCategory;
     const matchesBrand = selectedBrand === 'all' || product.attributes?.brand === selectedBrand;
     return matchesCategory && matchesBrand;
   });
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const startIndex = (page - 1) * itemsPerPage;
+  const displayedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
 
   if (loading) {
     return (
@@ -100,25 +92,27 @@ const AllProducts = () => {
                 <li>
                   <button 
                     className={`w-full text-left px-2 py-1 rounded ${selectedCategory === 'all' ? 'bg-primary text-white' : 'hover:bg-gray-200'}`}
-                    onClick={() => setSelectedCategory('all')}
+                    onClick={() => {
+                      setSelectedCategory('all');
+                      setPage(1);
+                    }}
                   >
                     All Categories
                   </button>
                 </li>
-                {categories.length > 0 ? (
-                  categories.map(category => (
-                    <li key={category}>
-                      <button 
-                        className={`w-full text-left px-2 py-1 rounded ${selectedCategory === category ? 'bg-primary text-white' : 'hover:bg-gray-200'}`}
-                        onClick={() => setSelectedCategory(category)}
-                      >
-                        {category}
-                      </button>
-                    </li>
-                  ))
-                ) : (
-                  <li className="text-gray-500 text-sm px-2">No categories found</li>
-                )}
+                {categories.map(category => (
+                  <li key={category}>
+                    <button 
+                      className={`w-full text-left px-2 py-1 rounded ${selectedCategory === category ? 'bg-primary text-white' : 'hover:bg-gray-200'}`}
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setPage(1);
+                      }}
+                    >
+                      {category}
+                    </button>
+                  </li>
+                ))}
               </ul>
               
               <h2 className="font-bold text-lg mt-6 mb-4">Brands</h2>
@@ -126,25 +120,27 @@ const AllProducts = () => {
                 <li>
                   <button 
                     className={`w-full text-left px-2 py-1 rounded ${selectedBrand === 'all' ? 'bg-primary text-white' : 'hover:bg-gray-200'}`}
-                    onClick={() => setSelectedBrand('all')}
+                    onClick={() => {
+                      setSelectedBrand('all');
+                      setPage(1);
+                    }}
                   >
                     All Brands
                   </button>
                 </li>
-                {brands.length > 0 ? (
-                  brands.map(brand => (
-                    <li key={brand}>
-                      <button 
-                        className={`w-full text-left px-2 py-1 rounded ${selectedBrand === brand ? 'bg-primary text-white' : 'hover:bg-gray-200'}`}
-                        onClick={() => setSelectedBrand(brand)}
-                      >
-                        {brand}
-                      </button>
-                    </li>
-                  ))
-                ) : (
-                  <li className="text-gray-500 text-sm px-2">No brands found</li>
-                )}
+                {brands.map(brand => (
+                  <li key={brand}>
+                    <button 
+                      className={`w-full text-left px-2 py-1 rounded ${selectedBrand === brand ? 'bg-primary text-white' : 'hover:bg-gray-200'}`}
+                      onClick={() => {
+                        setSelectedBrand(brand);
+                        setPage(1);
+                      }}
+                    >
+                      {brand}
+                    </button>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -152,13 +148,13 @@ const AllProducts = () => {
           {/* Products Grid */}
           <div className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((product) => (
+              {displayedProducts.map((product) => (
                 <Card key={product.id}>
                   <div className="aspect-square overflow-hidden">
                     <img 
                       src={product.attributes?.photo || '/placeholder.svg'} 
                       alt={product.attributes?.Name || 'Product'} 
-                      className="w-full h-full object-cover"
+                      className="w-full h-64 object-cover"
                     />
                   </div>
                   <CardContent className="p-4">
@@ -188,6 +184,68 @@ const AllProducts = () => {
             {filteredProducts.length === 0 && (
               <p className="text-center py-12">No products found matching your filters.</p>
             )}
+            
+            {/* Modern Pagination */}
+            <div className="mt-12 flex flex-col items-center">
+              <div className="flex items-center space-x-1 rounded-lg bg-gray-100 p-1 shadow-sm">
+                <Button 
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full h-8 w-8 p-0 flex items-center justify-center"
+                  disabled={page === 1}
+                >
+                  ←
+                </Button>
+                
+                <div className="flex space-x-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    // Calculate page numbers to show
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (page <= 3) {
+                      pageNum = i + 1;
+                    } else if (page >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = page - 2 + i;
+                    }
+                    
+                    return (
+                      <Button
+                        key={i}
+                        onClick={() => setPage(pageNum)}
+                        variant={page === pageNum ? "default" : "ghost"}
+                        size="sm"
+                        className="rounded-full h-8 w-8 p-0"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+                
+                <Button 
+                  onClick={() => setPage(p => Math.min(totalPages || 1, p + 1))}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full h-8 w-8 p-0 flex items-center justify-center"
+                  disabled={page >= totalPages}
+                >
+                  →
+                </Button>
+              </div>
+              
+              <div className="text-sm text-gray-500 mt-2">
+                Page {page} of {Math.max(1, totalPages)}
+              </div>
+            </div>
+            
+            {/* Products count */}
+            <div className="text-center text-sm text-gray-500 mt-4">
+              Showing {filteredProducts.length > 0 ? startIndex + 1 : 0}-{Math.min(startIndex + itemsPerPage, filteredProducts.length)} of {filteredProducts.length} products
+            </div>
           </div>
         </div>
       </div>
