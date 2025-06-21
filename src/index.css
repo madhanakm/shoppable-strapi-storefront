@@ -1,4 +1,6 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -89,9 +91,11 @@
 @layer base {
   * {
     @apply border-border;
+    font-family: 'Raleway', sans-serif;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Raleway', sans-serif;
   }
 }

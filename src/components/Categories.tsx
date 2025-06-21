@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
+import { useCategories } from '@/hooks/use-categories';
+import { useApiQuery } from '@/hooks/use-api';
 
 const Categories = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [displayCategories, setDisplayCategories] = useState([]);
   
   // Background colors for categories
   const bgColors = [
@@ -17,83 +17,46 @@ const Categories = () => {
     'bg-gradient-to-br from-indigo-500 to-indigo-600',
   ];
 
-  // Hardcoded categories as fallback
-  const dummyCategories = [
-    { id: 1, name: 'Hair Oil', count: '25+ items', color: bgColors[0] },
-    { id: 2, name: 'Skin Care', count: '18+ items', color: bgColors[1] },
-    { id: 3, name: 'Herbal', count: '32+ items', color: bgColors[2] },
-    { id: 4, name: 'Ayurvedic', count: '15+ items', color: bgColors[3] },
-    { id: 5, name: 'Medicine', count: '20+ items', color: bgColors[4] },
-    { id: 6, name: 'Health', count: '28+ items', color: bgColors[5] },
-  ];
-
-  // Fetch categories from API
+  // Fetch categories using our custom hook
+  const { 
+    data: categories, 
+    isLoading: categoriesLoading, 
+    error: categoriesError 
+  } = useCategories();
+  
+  // Fetch products to get counts and images
+  const { 
+    data: productsData, 
+    isLoading: productsLoading 
+  } = useApiQuery('products', '/product-masters');
+  
+  // Process categories and products when data is available
   useEffect(() => {
-    // Start with dummy data to ensure something shows
-    setCategories(dummyCategories);
-    
-    // Try product-masters endpoint to get categories with images
-    fetch('https://api.dharaniherbbals.com/api/product-masters')
-      .then(response => {
-        console.log('API Response Status:', response.status);
-        return response.json();
-      })
-      .then(data => {
-        console.log('Products API data:', data);
+    if (categories && productsData) {
+      const productArray = productsData.data || [];
+      
+      // Map the categories to our display format with product counts and images
+      const formattedCategories = categories.map((category, index) => {
+        const productsInCategory = productArray.filter(
+          p => p.attributes?.category === category.name
+        );
         
-        let productArray = [];
-        if (data && data.data && Array.isArray(data.data)) {
-          productArray = data.data;
-        } else if (Array.isArray(data)) {
-          productArray = data;
-        }
+        // Find first product with an image
+        const productWithImage = productsInCategory.find(p => p.attributes?.photo);
         
-        // Extract unique categories
-        const uniqueCategories = [...new Set(
-          productArray
-            .map(p => p.attributes?.category)
-            .filter(Boolean)
-        )];
-        
-        console.log('Unique categories:', uniqueCategories);
-        
-        if (uniqueCategories.length > 0) {
-          // Create categories with images from products
-          const categoriesWithImages = uniqueCategories.map((categoryName, index) => {
-            const productsInCategory = productArray.filter(p => p.attributes?.category === categoryName);
-            const count = productsInCategory.length;
-            
-            // Find first product with an image
-            const productWithImage = productsInCategory.find(p => p.attributes?.photo);
-            const image = productWithImage?.attributes?.photo || null;
-            
-            console.log(`Category ${categoryName} image:`, image ? 'has image' : 'no image');
-            
-            return {
-              id: `cat-${index}`,
-              name: categoryName,
-              count: `${count}+ items`,
-              image: image,
-              color: bgColors[index % bgColors.length]
-            };
-          });
-          
-          console.log('Categories with images:', categoriesWithImages);
-          setCategories(categoriesWithImages);
-        } else {
-          console.log('No categories found in products, using dummy data');
-          // Keep using dummy data if no categories found
-        }
-        
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching categories:', error);
-        setError(error.message);
-        // Keep using dummy data on error
-        setLoading(false);
+        return {
+          id: category.id,
+          name: category.name,
+          slug: category.slug,
+          count: `${productsInCategory.length || 0}+ items`,
+          color: bgColors[index % bgColors.length],
+          image: productWithImage?.attributes?.photo || null
+        };
       });
-  }, []);
+      
+      setDisplayCategories(formattedCategories);
+    }
+  }, [categories, productsData]);
 
   return (
     <section className="py-12 bg-gradient-to-b from-primary/5 to-background">
@@ -103,22 +66,39 @@ const Categories = () => {
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Explore our wide range of natural and organic herbal products
           </p>
-          {error && <p className="text-red-500 mt-2">Error: {error}</p>}
         </div>
 
-        {loading ? (
+        {categoriesLoading || productsLoading ? (
           <div className="text-center py-12">Loading categories...</div>
+        ) : categoriesError ? (
+          <div className="text-center py-12 text-red-500">Error loading categories</div>
         ) : (
           <div className="relative">
-            <div className="flex overflow-x-auto pb-6" style={{ scrollbarWidth: 'none' }}>
+            <div className="absolute top-1/2 -left-4 transform -translate-y-1/2 z-10">
+              <button 
+                onClick={() => {
+                  const container = document.getElementById('categories-slider');
+                  container.scrollBy({ left: -300, behavior: 'smooth' });
+                }}
+                className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100"
+              >
+                ←
+              </button>
+            </div>
+            
+            <div 
+              id="categories-slider"
+              className="flex overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory scroll-smooth"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
               <div className="flex gap-4 px-2">
-                {categories.map((category, index) => (
+                {displayCategories.map((category, index) => (
                   <Link 
                     to={`/products?category=${encodeURIComponent(category.name)}`} 
-                    key={index} // Use index as key for reliability
-                    className="flex-shrink-0 w-40"
+                    key={category.id || index}
+                    className="snap-start flex-shrink-0 w-40"
                   >
-                    <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                    <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-primary/10 shadow-md hover:border-primary/30 h-full">
                       <CardContent className="p-4 text-center">
                         <div className={`w-16 h-16 ${category.color} rounded-xl mx-auto mb-4 flex items-center justify-center overflow-hidden`}>
                           {category.image ? (
@@ -127,7 +107,6 @@ const Categories = () => {
                               alt={category.name}
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                console.log(`Image failed to load for ${category.name}`);
                                 e.target.style.display = 'none';
                                 e.target.parentNode.innerHTML = `<span class="text-2xl text-white">${category.name.charAt(0).toUpperCase()}</span>`;
                               }}
@@ -138,13 +117,25 @@ const Categories = () => {
                             </span>
                           )}
                         </div>
-                        <h3 className="font-semibold text-sm mb-1">{category.name}</h3>
+                        <h3 className="font-bold text-sm mb-1">{category.name}</h3>
                         <p className="text-xs text-muted-foreground">{category.count}</p>
                       </CardContent>
                     </Card>
                   </Link>
                 ))}
               </div>
+            </div>
+            
+            <div className="absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+              <button 
+                onClick={() => {
+                  const container = document.getElementById('categories-slider');
+                  container.scrollBy({ left: 300, behavior: 'smooth' });
+                }}
+                className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100"
+              >
+                →
+              </button>
             </div>
           </div>
         )}
