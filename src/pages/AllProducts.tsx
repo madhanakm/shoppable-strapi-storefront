@@ -17,7 +17,7 @@ const AllProducts = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
   const [page, setPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 15; // 5 rows x 3 columns
 
   useEffect(() => {
     fetch('https://api.dharaniherbbals.com/api/product-masters')
@@ -148,7 +148,7 @@ const AllProducts = () => {
           
           {/* Products Grid */}
           <div className="flex-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {displayedProducts.map((product) => (
                 <Card key={product.id}>
                   <Link to={`/product/${product.id}`} className="block">
