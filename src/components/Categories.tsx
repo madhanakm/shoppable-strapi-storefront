@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { useCategories } from '@/hooks/use-categories';
-import { useApiQuery } from '@/hooks/use-api';
+import { getStrapiMedia } from '@/services/api';
 
 const Categories = () => {
-  const [displayCategories, setDisplayCategories] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   // Background colors for categories
   const bgColors = [
@@ -17,46 +17,100 @@ const Categories = () => {
     'bg-gradient-to-br from-indigo-500 to-indigo-600',
   ];
 
-  // Fetch categories using our custom hook
-  const { 
-    data: categories, 
-    isLoading: categoriesLoading, 
-    error: categoriesError 
-  } = useCategories();
-  
-  // Fetch products to get counts and images
-  const { 
-    data: productsData, 
-    isLoading: productsLoading 
-  } = useApiQuery('products', '/product-masters');
-  
-  // Process categories and products when data is available
   useEffect(() => {
-    if (categories && productsData) {
-      const productArray = productsData.data || [];
-      
-      // Map the categories to our display format with product counts and images
-      const formattedCategories = categories.map((category, index) => {
-        const productsInCategory = productArray.filter(
-          p => p.attributes?.category === category.name
-        );
+    // First try with product-categories endpoint
+    fetch('https://api.dharaniherbbals.com/api/product-categories')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Categories API response:', data);
         
-        // Find first product with an image
-        const productWithImage = productsInCategory.find(p => p.attributes?.photo);
+        if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+          processCategories(data);
+        } else {
+          // Fallback to categories endpoint
+          return fetch('https://api.dharaniherbbals.com/api/categories');
+        }
+      })
+      .then(response => {
+        if (response) return response.json();
+        return null;
+      })
+      .then(data => {
+        if (data) {
+          console.log('Fallback categories API response:', data);
+          processCategories(data);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching categories:', error);
+        // Use hardcoded categories as last resort
+        const fallbackCategories = [
+          { id: 1, name: 'Hair Care', slug: 'hair-care', count: '10+ items', color: bgColors[0] },
+          { id: 2, name: 'Skin Care', slug: 'skin-care', count: '15+ items', color: bgColors[1] },
+          { id: 3, name: 'Herbal', slug: 'herbal', count: '20+ items', color: bgColors[2] },
+          { id: 4, name: 'Ayurvedic', slug: 'ayurvedic', count: '12+ items', color: bgColors[3] },
+          { id: 5, name: 'Medicine', slug: 'medicine', count: '18+ items', color: bgColors[4] },
+        ];
+        setCategories(fallbackCategories);
+        setLoading(false);
+      });
+  }, []);
+
+  // Process categories data from API
+  const processCategories = (data) => {
+    if (data && data.data && Array.isArray(data.data)) {
+      // Map the data with image and count information
+      const formattedCategories = data.data.map((item, index) => {
+        // Get category name - try different possible field names
+        const name = item.attributes?.name || 
+                    item.attributes?.Name || 
+                    item.attributes?.title || 
+                    `Category ${index + 1}`;
         
         return {
-          id: category.id,
-          name: category.name,
-          slug: category.slug,
-          count: `${productsInCategory.length || 0}+ items`,
-          color: bgColors[index % bgColors.length],
-          image: productWithImage?.attributes?.photo || null
+          id: item.id,
+          name: name,
+          slug: item.attributes?.slug || name.toLowerCase().replace(/\s+/g, '-'),
+          count: '0+ items',
+          color: bgColors[index % bgColors.length]
         };
       });
       
-      setDisplayCategories(formattedCategories);
+      setCategories(formattedCategories);
     }
-  }, [categories, productsData]);
+    setLoading(false);
+  };
+
+  // Fetch product counts after categories are loaded
+  useEffect(() => {
+    if (categories.length > 0) {
+      fetch('https://api.dharaniherbbals.com/api/product-masters')
+        .then(response => response.json())
+        .then(data => {
+          let productArray = [];
+          if (data && data.data && Array.isArray(data.data)) {
+            productArray = data.data;
+          }
+          
+          // Update categories with product counts
+          const updatedCategories = categories.map(category => {
+            const productsInCategory = productArray.filter(
+              p => p.attributes?.category === category.name
+            );
+            
+            return {
+              ...category,
+              count: `${productsInCategory.length || 0}+ items`
+            };
+          });
+          
+          setCategories(updatedCategories);
+        })
+        .catch(error => {
+          console.error('Error fetching products:', error);
+        });
+    }
+  }, [categories.length]);
 
   return (
     <section className="py-12 bg-gradient-to-b from-primary/5 to-background">
@@ -68,17 +122,17 @@ const Categories = () => {
           </p>
         </div>
 
-        {categoriesLoading || productsLoading ? (
+        {loading ? (
           <div className="text-center py-12">Loading categories...</div>
-        ) : categoriesError ? (
-          <div className="text-center py-12 text-red-500">Error loading categories</div>
+        ) : categories.length === 0 ? (
+          <div className="text-center py-12">No categories found</div>
         ) : (
           <div className="relative">
             <div className="absolute top-1/2 -left-4 transform -translate-y-1/2 z-10">
               <button 
                 onClick={() => {
                   const container = document.getElementById('categories-slider');
-                  container.scrollBy({ left: -300, behavior: 'smooth' });
+                  if (container) container.scrollBy({ left: -300, behavior: 'smooth' });
                 }}
                 className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100"
               >
@@ -92,30 +146,18 @@ const Categories = () => {
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               <div className="flex gap-4 px-2">
-                {displayCategories.map((category, index) => (
+                {categories.map((category) => (
                   <Link 
                     to={`/products?category=${encodeURIComponent(category.name)}`} 
-                    key={category.id || index}
+                    key={category.id}
                     className="snap-start flex-shrink-0 w-40"
                   >
                     <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-primary/10 shadow-md hover:border-primary/30 h-full">
                       <CardContent className="p-4 text-center">
                         <div className={`w-16 h-16 ${category.color} rounded-xl mx-auto mb-4 flex items-center justify-center overflow-hidden`}>
-                          {category.image ? (
-                            <img 
-                              src={category.image} 
-                              alt={category.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                                e.target.parentNode.innerHTML = `<span class="text-2xl text-white">${category.name.charAt(0).toUpperCase()}</span>`;
-                              }}
-                            />
-                          ) : (
-                            <span className="text-2xl text-white">
-                              {category.name.charAt(0).toUpperCase()}
-                            </span>
-                          )}
+                          <span className="text-2xl text-white">
+                            {category.name.charAt(0).toUpperCase()}
+                          </span>
                         </div>
                         <h3 className="font-bold text-sm mb-1">{category.name}</h3>
                         <p className="text-xs text-muted-foreground">{category.count}</p>
@@ -130,7 +172,7 @@ const Categories = () => {
               <button 
                 onClick={() => {
                   const container = document.getElementById('categories-slider');
-                  container.scrollBy({ left: 300, behavior: 'smooth' });
+                  if (container) container.scrollBy({ left: 300, behavior: 'smooth' });
                 }}
                 className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100"
               >

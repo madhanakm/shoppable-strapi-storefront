@@ -7,6 +7,7 @@ import TrendingProducts from '@/components/TrendingProducts';
 import HotSellingProducts from '@/components/HotSellingProducts';
 import Categories from '@/components/Categories';
 import Footer from '@/components/Footer';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const Index = () => {
   return (
@@ -14,7 +15,9 @@ const Index = () => {
       <Header />
       <main className="overflow-hidden">
         <Hero />
-        <Categories />
+        <ErrorBoundary>
+          <Categories />
+        </ErrorBoundary>
         <FeaturedProducts />
         <TrendingProducts />
         <HotSellingProducts />
