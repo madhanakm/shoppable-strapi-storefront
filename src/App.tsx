@@ -8,7 +8,8 @@ import { WishlistProvider } from "@/contexts/WishlistContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
-import AllProducts from "./pages/AllProducts";
+import AllProducts from "./pages/AllProducts.tsx";
+import ProductDetail from "./pages/ProductDetail";
 import AboutUs from "./pages/AboutUs";
 import ContactUs from "./pages/ContactUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -35,6 +36,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/products" element={<AllProducts />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/contact" element={<ContactUs />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
