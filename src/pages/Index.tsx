@@ -8,12 +8,16 @@ import HotSellingProducts from '@/components/HotSellingProducts';
 import Categories from '@/components/Categories';
 import Footer from '@/components/Footer';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import ImageSlider from '@/components/ImageSlider';
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="overflow-hidden">
+        <ErrorBoundary>
+          <ImageSlider />
+        </ErrorBoundary>
         <Hero />
         <ErrorBoundary>
           <Categories />

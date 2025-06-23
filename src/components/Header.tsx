@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,8 @@ import { Search, ShoppingCart, User, Heart, Menu, X } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/components/TranslationProvider';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Header = () => {
   const { wishlistCount } = useWishlist();
@@ -14,6 +15,7 @@ const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const navigate = useNavigate();
+  const { translate } = useTranslation();
 
   const handleAuthClick = () => {
     if (isAuthenticated) {
@@ -38,10 +40,10 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-            <Link to="/" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">Home</Link>
-            <Link to="/products" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">All Products</Link>
-            <Link to="/about" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">About</Link>
-            <Link to="/contact" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">Contact</Link>
+            <Link to="/" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">{translate('header.home')}</Link>
+            <Link to="/products" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">{translate('header.products')}</Link>
+            <Link to="/about" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">{translate('header.about')}</Link>
+            <Link to="/contact" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">{translate('header.contact')}</Link>
           </nav>
 
           {/* Search Bar - Desktop */}
@@ -49,7 +51,7 @@ const Header = () => {
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Search herbal products..."
+                placeholder={translate('header.search') + '...'}
                 className="pl-10 w-full border-primary/20 focus:border-primary text-sm"
               />
             </div>
@@ -57,6 +59,9 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center space-x-1 md:space-x-2 lg:space-x-4">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+            
             {/* Search - Mobile */}
             <Button variant="ghost" size="icon" className="md:hidden p-2">
               <Search className="w-4 h-4 md:w-5 md:h-5" />
@@ -87,7 +92,7 @@ const Header = () => {
             </Link>
 
             {/* User */}
-            <Button variant="ghost" size="icon" onClick={handleAuthClick} title={isAuthenticated ? `Logout (${user?.name})` : 'Login'} className="hover:bg-primary/10 p-2">
+            <Button variant="ghost" size="icon" onClick={handleAuthClick} title={isAuthenticated ? `Logout (${user?.name})` : translate('header.login')} className="hover:bg-primary/10 p-2">
               <User className="w-4 h-4 md:w-5 md:h-5" />
             </Button>
 
@@ -112,28 +117,28 @@ const Header = () => {
                 className="text-foreground hover:text-primary transition-colors font-medium text-base"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Home
+                {translate('header.home')}
               </Link>
               <Link 
                 to="/products" 
                 className="text-foreground hover:text-primary transition-colors font-medium text-base"
                 onClick={() => setIsMenuOpen(false)}
               >
-                All Products
+                {translate('header.products')}
               </Link>
               <Link 
                 to="/about" 
                 className="text-foreground hover:text-primary transition-colors font-medium text-base"
                 onClick={() => setIsMenuOpen(false)}
               >
-                About
+                {translate('header.about')}
               </Link>
               <Link 
                 to="/contact" 
                 className="text-foreground hover:text-primary transition-colors font-medium text-base"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Contact
+                {translate('header.contact')}
               </Link>
               {isAuthenticated ? (
                 <Button 
@@ -152,7 +157,7 @@ const Header = () => {
                   className="text-foreground hover:text-primary transition-colors font-medium text-base"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Login
+                  {translate('header.login')}
                 </Link>
               )}
               {/* Mobile Search */}
@@ -160,7 +165,7 @@ const Header = () => {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
-                    placeholder="Search herbal products..."
+                    placeholder={translate('header.search') + '...'}
                     className="pl-10 w-full border-primary/20 focus:border-primary"
                   />
                 </div>

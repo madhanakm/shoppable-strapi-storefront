@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { getStrapiMedia } from '@/services/api';
+import { getProductCategories } from '@/services/categories';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -18,99 +18,72 @@ const Categories = () => {
   ];
 
   useEffect(() => {
-    // First try with product-categories endpoint
-    fetch('https://api.dharaniherbbals.com/api/product-categories')
-      .then(response => response.json())
-      .then(data => {
-        console.log('Categories API response:', data);
+    // Fetch product categories with images
+    getProductCategories()
+      .then(categoryData => {
+        console.log('Product categories data:', categoryData);
         
-        if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
-          processCategories(data);
-        } else {
-          // Fallback to categories endpoint
-          return fetch('https://api.dharaniherbbals.com/api/categories');
+        let formattedCategories = [];
+        
+        if (Array.isArray(categoryData)) {
+          // Direct array format
+          formattedCategories = categoryData.map((item, index) => ({
+            id: index,
+            name: item.Name,
+            count: '0+ items',
+            color: bgColors[index % bgColors.length],
+            photo: item.photo
+          }));
+        } else if (categoryData && Array.isArray(categoryData.data)) {
+          // Strapi format
+          formattedCategories = categoryData.data.map((item, index) => ({
+            id: item.id || index,
+            name: item.Name || item.name || item.attributes?.Name || item.attributes?.name,
+            count: '0+ items',
+            color: bgColors[index % bgColors.length],
+            photo: item.photo || item.attributes?.photo
+          }));
         }
-      })
-      .then(response => {
-        if (response) return response.json();
-        return null;
-      })
-      .then(data => {
-        if (data) {
-          console.log('Fallback categories API response:', data);
-          processCategories(data);
-        }
+        
+        // Now fetch products to get accurate counts
+        fetch('https://api.dharaniherbbals.com/api/product-masters')
+          .then(response => response.json())
+          .then(productData => {
+            let productArray = [];
+            if (productData && productData.data && Array.isArray(productData.data)) {
+              productArray = productData.data;
+            } else if (Array.isArray(productData)) {
+              productArray = productData;
+            }
+            
+            // Update categories with accurate product counts
+            const categoriesWithCounts = formattedCategories.map(category => {
+              const productsInCategory = productArray.filter(
+                p => p.attributes?.category === category.name
+              );
+              
+              const count = productsInCategory.length;
+              
+              return {
+                ...category,
+                count: count === 1 ? '1 item' : `${count} items`
+              };
+            });
+            
+            setCategories(categoriesWithCounts);
+            setLoading(false);
+          })
+          .catch(error => {
+            console.error('Error fetching products:', error);
+            setCategories(formattedCategories);
+            setLoading(false);
+          });
       })
       .catch(error => {
-        console.error('Error fetching categories:', error);
-        // Use hardcoded categories as last resort
-        const fallbackCategories = [
-          { id: 1, name: 'Hair Care', slug: 'hair-care', count: '10+ items', color: bgColors[0] },
-          { id: 2, name: 'Skin Care', slug: 'skin-care', count: '15+ items', color: bgColors[1] },
-          { id: 3, name: 'Herbal', slug: 'herbal', count: '20+ items', color: bgColors[2] },
-          { id: 4, name: 'Ayurvedic', slug: 'ayurvedic', count: '12+ items', color: bgColors[3] },
-          { id: 5, name: 'Medicine', slug: 'medicine', count: '18+ items', color: bgColors[4] },
-        ];
-        setCategories(fallbackCategories);
+        console.error('Error fetching product categories:', error);
         setLoading(false);
       });
   }, []);
-
-  // Process categories data from API
-  const processCategories = (data) => {
-    if (data && data.data && Array.isArray(data.data)) {
-      // Map the data with image and count information
-      const formattedCategories = data.data.map((item, index) => {
-        // Get category name - try different possible field names
-        const name = item.attributes?.name || 
-                    item.attributes?.Name || 
-                    item.attributes?.title || 
-                    `Category ${index + 1}`;
-        
-        return {
-          id: item.id,
-          name: name,
-          slug: item.attributes?.slug || name.toLowerCase().replace(/\s+/g, '-'),
-          count: '0+ items',
-          color: bgColors[index % bgColors.length]
-        };
-      });
-      
-      setCategories(formattedCategories);
-    }
-    setLoading(false);
-  };
-
-  // Fetch product counts after categories are loaded
-  useEffect(() => {
-    if (categories.length > 0) {
-      fetch('https://api.dharaniherbbals.com/api/product-masters')
-        .then(response => response.json())
-        .then(data => {
-          let productArray = [];
-          if (data && data.data && Array.isArray(data.data)) {
-            productArray = data.data;
-          }
-          
-          // Update categories with product counts
-          const updatedCategories = categories.map(category => {
-            const productsInCategory = productArray.filter(
-              p => p.attributes?.category === category.name
-            );
-            
-            return {
-              ...category,
-              count: `${productsInCategory.length || 0}+ items`
-            };
-          });
-          
-          setCategories(updatedCategories);
-        })
-        .catch(error => {
-          console.error('Error fetching products:', error);
-        });
-    }
-  }, [categories.length]);
 
   return (
     <section className="py-12 bg-gradient-to-b from-primary/5 to-background">
@@ -124,8 +97,6 @@ const Categories = () => {
 
         {loading ? (
           <div className="text-center py-12">Loading categories...</div>
-        ) : categories.length === 0 ? (
-          <div className="text-center py-12">No categories found</div>
         ) : (
           <div className="relative">
             <div className="absolute top-1/2 -left-4 transform -translate-y-1/2 z-10">
@@ -148,16 +119,29 @@ const Categories = () => {
               <div className="flex gap-4 px-2">
                 {categories.map((category) => (
                   <Link 
-                    to={`/products?category=${encodeURIComponent(category.name)}`} 
+                    to={`/products?category=${encodeURIComponent(category.name)}`}
                     key={category.id}
                     className="snap-start flex-shrink-0 w-40"
                   >
                     <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-primary/10 shadow-md hover:border-primary/30 h-full">
                       <CardContent className="p-4 text-center">
                         <div className={`w-16 h-16 ${category.color} rounded-xl mx-auto mb-4 flex items-center justify-center overflow-hidden`}>
-                          <span className="text-2xl text-white">
-                            {category.name.charAt(0).toUpperCase()}
-                          </span>
+                          {category.photo ? (
+                            <img 
+                              src={category.photo}
+                              alt={category.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.log(`Image load error for ${category.name}`);
+                                e.target.style.display = 'none';
+                                e.target.parentNode.innerHTML = `<span class="text-2xl text-white">${category.name.charAt(0).toUpperCase()}</span>`;
+                              }}
+                            />
+                          ) : (
+                            <span className="text-2xl text-white">
+                              {category.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
                         </div>
                         <h3 className="font-bold text-sm mb-1">{category.name}</h3>
                         <p className="text-xs text-muted-foreground">{category.count}</p>

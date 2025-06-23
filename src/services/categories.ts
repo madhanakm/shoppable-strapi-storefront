@@ -9,6 +9,13 @@ export const getCategories = async (): Promise<StrapiResponse<Category>> => {
 };
 
 /**
+ * Get product categories with images
+ */
+export const getProductCategories = async () => {
+  return get('/product-categories');
+};
+
+/**
  * Get a single category by slug
  */
 export const getCategory = async (slug: string): Promise<StrapiSingleResponse<Category>> => {

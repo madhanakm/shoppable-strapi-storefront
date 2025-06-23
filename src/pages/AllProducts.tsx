@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { formatPrice } from '@/lib/utils';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 const AllProducts = () => {
   const { addToCart } = useCart();
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -18,6 +19,14 @@ const AllProducts = () => {
   const [selectedBrand, setSelectedBrand] = useState('all');
   const [page, setPage] = useState(1);
   const itemsPerPage = 8; // 2 rows x 4 columns
+
+  // Get category from URL if present
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     // Track loading state for all requests
