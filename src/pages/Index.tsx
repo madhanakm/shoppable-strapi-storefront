@@ -1,14 +1,11 @@
-
 import React from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
-import FeaturedProducts from '@/components/FeaturedProducts';
-import TrendingProducts from '@/components/TrendingProducts';
-import HotSellingProducts from '@/components/HotSellingProducts';
 import Categories from '@/components/Categories';
 import Footer from '@/components/Footer';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ImageSlider from '@/components/ImageSlider';
+import ProductBlocks from '@/components/ProductBlocks';
 
 const Index = () => {
   return (
@@ -22,9 +19,9 @@ const Index = () => {
         <ErrorBoundary>
           <Categories />
         </ErrorBoundary>
-        <FeaturedProducts />
-        <TrendingProducts />
-        <HotSellingProducts />
+        <ErrorBoundary>
+          <ProductBlocks />
+        </ErrorBoundary>
       </main>
       <Footer />
     </div>

@@ -5,49 +5,97 @@ import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
-import { getFeaturedProducts } from '@/services/products';
-import { Product, StrapiData } from '@/types/strapi';
-import { getStrapiMedia } from '@/services/api';
 import { formatPrice } from '@/lib/utils';
+import { useTranslation, LANGUAGES } from './TranslationProvider';
+
+// Fallback products in case API fails
+const fallbackProducts = [
+  {
+    id: '1',
+    name: 'Herbal Hair Oil',
+    price: 299,
+    image: 'https://via.placeholder.com/300x300?text=Hair+Oil',
+    rating: 4.5,
+    reviews: 120,
+    badge: 'Bestseller',
+    originalPrice: 350
+  },
+  {
+    id: '2',
+    name: 'Ayurvedic Skin Cream',
+    price: 399,
+    image: 'https://via.placeholder.com/300x300?text=Skin+Cream',
+    rating: 4.2,
+    reviews: 85,
+    badge: 'New',
+    originalPrice: null
+  },
+  {
+    id: '3',
+    name: 'Herbal Supplements',
+    price: 499,
+    image: 'https://via.placeholder.com/300x300?text=Supplements',
+    rating: 4.8,
+    reviews: 210,
+    badge: 'Sale',
+    originalPrice: 599
+  }
+];
 
 const FeaturedProducts = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
-  const [products, setProducts] = useState<StrapiData<Product>[]>([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
+  const { language } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
         setLoading(true);
-        const response = await getFeaturedProducts(6);
-        console.log('Featured products:', response);
+        // Fetch products with type=featured
+        const response = await fetch('https://api.dharaniherbbals.com/api/product-masters?type=featured&limit=6');
         
-        let productList = [];
-        if (Array.isArray(response)) {
-          productList = response;
-        } else if (response.data && Array.isArray(response.data)) {
-          productList = response.data;
-        } else if (response.products && Array.isArray(response.products)) {
-          productList = response.products;
+        if (!response.ok) {
+          throw new Error(`API responded with status: ${response.status}`);
         }
         
-        const formattedProducts = productList.map(item => ({
-          id: item.id,
-          name: item.title || item.name || 'Product',
-          price: parseFloat(item.price) || 0,
-          image: item.image_base64 || item.image || '/placeholder.svg',
-          rating: item.rating || 0,
-          reviews: item.reviews || 0,
-          badge: item.badge || null,
-          originalPrice: item.originalPrice || null
-        }));
+        const data = await response.json();
+        console.log('Featured products API response:', data);
         
-        setProducts(formattedProducts);
+        let productList = [];
+        if (Array.isArray(data)) {
+          productList = data;
+        } else if (data && data.data && Array.isArray(data.data)) {
+          productList = data.data;
+        }
+        
+        if (productList.length === 0) {
+          console.log('No featured products found, using fallback data');
+          setProducts(fallbackProducts);
+        } else {
+          const formattedProducts = productList.map(item => {
+            const attributes = item.attributes || item;
+            return {
+              id: item.id || Math.random().toString(),
+              name: attributes.Name || attributes.name || 'Product',
+              price: parseFloat(attributes.mrp || attributes.price) || 0,
+              image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
+              rating: attributes.rating || 4,
+              reviews: attributes.reviews || 10,
+              badge: attributes.type === 'featured' ? 'Featured' : null,
+              originalPrice: attributes.originalPrice || null
+            };
+          });
+          
+          setProducts(formattedProducts);
+        }
       } catch (err) {
         console.error('Failed to fetch featured products', err);
-        setError('Failed to load products. Please try again later.');
+        setError('Failed to load products. Using sample products instead.');
+        setProducts(fallbackProducts);
       } finally {
         setLoading(false);
       }
@@ -56,7 +104,7 @@ const FeaturedProducts = () => {
     loadProducts();
   }, []);
 
-  const handleWishlistToggle = (product: any) => {
+  const handleWishlistToggle = (product) => {
     const productData = {
       id: product.id.toString(),
       name: product.name,
@@ -72,7 +120,7 @@ const FeaturedProducts = () => {
     }
   };
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product) => {
     addToCart({
       id: product.id.toString(),
       name: product.name,
@@ -82,7 +130,7 @@ const FeaturedProducts = () => {
     });
   };
 
-  const renderStars = (rating: number = 0) => {
+  const renderStars = (rating = 0) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
@@ -113,16 +161,6 @@ const FeaturedProducts = () => {
     );
   }
 
-  if (error) {
-    return (
-      <section className="py-16">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-red-500">{error}</p>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
@@ -131,6 +169,7 @@ const FeaturedProducts = () => {
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Discover our handpicked selection of the best products with amazing deals
           </p>
+          {error && <p className="text-amber-500 mt-2 text-sm">{error}</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -141,6 +180,9 @@ const FeaturedProducts = () => {
                   src={product.image}
                   alt={product.name}
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/300x300?text=Product';
+                  }}
                 />
                 {product.badge && (
                   <span className={`absolute top-3 left-3 px-2 py-1 text-xs font-semibold rounded-full ${
@@ -160,7 +202,7 @@ const FeaturedProducts = () => {
               </div>
               
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                <h3 className={`font-semibold text-lg mb-2 group-hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>
                   {product.name}
                 </h3>
                 
@@ -187,7 +229,7 @@ const FeaturedProducts = () => {
                   onClick={() => handleAddToCart(product)}
                 >
                   <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
-                  Add to Cart
+                  <span className={isTamil ? 'tamil-text' : ''}>Add to Cart</span>
                 </Button>
               </CardContent>
             </Card>
@@ -197,7 +239,7 @@ const FeaturedProducts = () => {
         <div className="text-center mt-12">
           <Link to="/products">
             <Button variant="outline" size="lg">
-              View All Products
+              <span className={isTamil ? 'tamil-text' : ''}>View All Products</span>
             </Button>
           </Link>
         </div>

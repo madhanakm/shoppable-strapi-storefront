@@ -1,50 +1,111 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart, TrendingUp } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
-import { getProducts } from '@/services/products';
-import { Product, StrapiData } from '@/types/strapi';
-import { getStrapiMedia } from '@/services/api';
 import { formatPrice } from '@/lib/utils';
+import { Link } from 'react-router-dom';
+import { useTranslation, LANGUAGES } from './TranslationProvider';
+
+// Fallback trending products
+const fallbackProducts = [
+  {
+    id: '4',
+    name: 'Herbal Face Wash',
+    price: 199,
+    image: 'https://via.placeholder.com/300x300?text=Face+Wash',
+    rating: 4.3,
+    reviews: 78,
+    badge: 'Trending',
+    originalPrice: 249
+  },
+  {
+    id: '5',
+    name: 'Ayurvedic Digestive Tablets',
+    price: 349,
+    image: 'https://via.placeholder.com/300x300?text=Tablets',
+    rating: 4.7,
+    reviews: 156,
+    badge: 'Bestseller',
+    originalPrice: null
+  },
+  {
+    id: '6',
+    name: 'Natural Shampoo',
+    price: 249,
+    image: 'https://via.placeholder.com/300x300?text=Shampoo',
+    rating: 4.4,
+    reviews: 92,
+    badge: 'Trending',
+    originalPrice: 299
+  },
+  {
+    id: '7',
+    name: 'Herbal Toothpaste',
+    price: 99,
+    image: 'https://via.placeholder.com/300x300?text=Toothpaste',
+    rating: 4.2,
+    reviews: 64,
+    badge: 'New',
+    originalPrice: null
+  }
+];
 
 const TrendingProducts = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
-  const [products, setProducts] = useState<StrapiData<Product>[]>([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { language } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const response = await getProducts(1, 4, { trending: true });
-        console.log('Trending products:', response);
+        setLoading(true);
+        // Direct API call using type=trending
+        const response = await fetch('https://api.dharaniherbbals.com/api/product-masters?type=trending&limit=4');
         
-        let productList = [];
-        if (Array.isArray(response)) {
-          productList = response;
-        } else if (response.data && Array.isArray(response.data)) {
-          productList = response.data;
-        } else if (response.products && Array.isArray(response.products)) {
-          productList = response.products;
+        if (!response.ok) {
+          throw new Error(`API responded with status: ${response.status}`);
         }
         
-        const formattedProducts = productList.map(item => ({
-          id: item.id,
-          name: item.title || item.name || 'Product',
-          price: parseFloat(item.price) || 0,
-          image: item.image_base64 || item.image || '/placeholder.svg',
-          rating: item.rating || 0,
-          reviews: item.reviews || 0,
-          badge: item.badge || null,
-          originalPrice: item.originalPrice || null
-        }));
+        const data = await response.json();
+        console.log('Trending products API response:', data);
         
-        setProducts(formattedProducts);
-      } catch (error) {
-        console.error('Failed to fetch trending products', error);
+        let productList = [];
+        if (Array.isArray(data)) {
+          productList = data;
+        } else if (data && data.data && Array.isArray(data.data)) {
+          productList = data.data;
+        }
+        
+        if (productList.length === 0) {
+          console.log('No trending products found, using fallback data');
+          setProducts(fallbackProducts);
+        } else {
+          const formattedProducts = productList.map(item => {
+            const attributes = item.attributes || item;
+            return {
+              id: item.id || Math.random().toString(),
+              name: attributes.Name || attributes.name || 'Product',
+              price: parseFloat(attributes.mrp || attributes.price) || 0,
+              image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
+              rating: attributes.rating || 4,
+              reviews: attributes.reviews || 10,
+              badge: attributes.type === 'trending' ? 'Trending' : null,
+              originalPrice: attributes.originalPrice || null
+            };
+          });
+          
+          setProducts(formattedProducts);
+        }
+      } catch (err) {
+        console.error('Failed to fetch trending products', err);
+        setError('Failed to load trending products. Using sample products instead.');
+        setProducts(fallbackProducts);
       } finally {
         setLoading(false);
       }
@@ -53,7 +114,7 @@ const TrendingProducts = () => {
     loadProducts();
   }, []);
 
-  const handleWishlistToggle = (product: any) => {
+  const handleWishlistToggle = (product) => {
     const productData = {
       id: product.id.toString(),
       name: product.name,
@@ -69,7 +130,7 @@ const TrendingProducts = () => {
     }
   };
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product) => {
     addToCart({
       id: product.id.toString(),
       name: product.name,
@@ -79,7 +140,7 @@ const TrendingProducts = () => {
     });
   };
 
-  const renderStars = (rating: number = 0) => {
+  const renderStars = (rating = 0) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
@@ -121,6 +182,7 @@ const TrendingProducts = () => {
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Discover what's popular right now - products that are making waves in the market
           </p>
+          {error && <p className="text-amber-500 mt-2 text-sm">{error}</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -131,6 +193,9 @@ const TrendingProducts = () => {
                   src={product.image} 
                   alt={product.name}
                   className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/300x300?text=Product';
+                  }}
                 />
                 {product.badge && (
                   <span className={`absolute top-3 left-3 px-2 py-1 text-xs font-semibold rounded-full ${
@@ -150,7 +215,9 @@ const TrendingProducts = () => {
               </div>
               
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">{product.name}</h3>
+                <h3 className={`font-semibold text-lg mb-2 group-hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>
+                  {product.name}
+                </h3>
                 
                 <div className="flex items-center space-x-1 mb-3">
                   {renderStars(product.rating)}
@@ -168,7 +235,7 @@ const TrendingProducts = () => {
                 
                 <Button className="w-full group/btn" onClick={() => handleAddToCart(product)}>
                   <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
-                  Add to Cart
+                  <span className={isTamil ? 'tamil-text' : ''}>Add to Cart</span>
                 </Button>
               </CardContent>
             </Card>
@@ -176,9 +243,11 @@ const TrendingProducts = () => {
         </div>
 
         <div className="text-center mt-12">
-          <Button variant="outline" size="lg">
-            View All Trending Products
-          </Button>
+          <Link to="/products">
+            <Button variant="outline" size="lg">
+              <span className={isTamil ? 'tamil-text' : ''}>View All Trending Products</span>
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
