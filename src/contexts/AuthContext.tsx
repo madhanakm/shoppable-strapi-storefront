@@ -1,11 +1,16 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { auth } from '@/services/api';
 import { User } from '@/types/strapi';
+import { createEcomUser, getEcomUserByPhone, getEcomUser, updateEcomUser, EcomUser } from '@/services/ecom-users';
+import { sendOTPViaSMS } from '@/services/backend-sms';
+import { generateOTP } from '@/services/sms';
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (username: string, email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, mobile: string, password: string) => Promise<{ success: boolean; userId?: number }>;
+  verifyOTP: (userId: number, mobile: string, otp: string) => Promise<boolean>;
+  resendOTP: (mobile: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -50,13 +55,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (identifier: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      const response = await auth.login(identifier, password);
       
-      localStorage.setItem('jwt', response.jwt);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      setUser(response.user);
+      // Check if user exists in ecom-users and is verified
+      const userResponse = await getEcomUserByPhone(identifier);
+      if (userResponse.data && userResponse.data.length > 0) {
+        const user = userResponse.data[0];
+        if (user.attributes.password === password && user.attributes.isVerified) {
+          // Store user info for session
+          const userData = {
+            id: user.id,
+            username: user.attributes.name,
+            email: user.attributes.email,
+            phone: user.attributes.phone
+          };
+          
+          localStorage.setItem('user', JSON.stringify(userData));
+          setUser(userData as any);
+          return true;
+        }
+      }
       
-      return true;
+      return false;
     } catch (error) {
       console.error('Login failed', error);
       return false;
@@ -65,23 +84,99 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (username: string, email: string, password: string): Promise<boolean> => {
+  const register = async (name: string, email: string, mobile: string, password: string): Promise<{ success: boolean; userId?: number }> => {
     try {
       setLoading(true);
-      const response = await auth.register(username, email, password);
+      const otp = generateOTP();
       
-      localStorage.setItem('jwt', response.jwt);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      setUser(response.user);
+      // Create user with OTP
+      const otpExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+      const userData: EcomUser = {
+        name,
+        email,
+        phone: mobile, // Store as phone field
+        password,
+        otp,
+        otpExpiresAt,
+        isVerified: false
+      };
       
-      return true;
+      console.log('Creating user with data:', {
+        ...userData,
+        password: '[HIDDEN]'
+      });
+      
+      const userResponse = await createEcomUser(userData);
+      console.log('User created response:', userResponse);
+      
+      // Log OTP for testing
+      console.log('Generated OTP for mobile', mobile, ':', otp);
+      
+      // Send SMS
+      try {
+        await sendOTPViaSMS(mobile, otp);
+      } catch (smsError) {
+        console.warn('SMS sending failed:', smsError);
+      }
+      
+      return { success: true, userId: userResponse.data.id };
     } catch (error) {
       console.error('Registration failed', error);
+      return { success: false };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyOTP = async (userId: number, mobile: string, otp: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      const userResponse = await getEcomUser(userId);
+      const user = userResponse.data.attributes;
+      
+      console.log('OTP Verification:', {
+        enteredOTP: otp,
+        storedOTP: user.otp,
+        expiresAt: user.otpExpiresAt,
+        currentTime: new Date().toISOString(),
+        isExpired: new Date() > new Date(user.otpExpiresAt || '')
+      });
+      
+      if (user.otp === otp && new Date() <= new Date(user.otpExpiresAt || '')) {
+        await updateEcomUser(userId, { isVerified: true });
+        console.log('OTP verification successful');
+        return true;
+      }
+      
+      console.log('OTP verification failed: mismatch or expired');
+      return false;
+    } catch (error) {
+      console.error('OTP verification failed', error);
       return false;
     } finally {
       setLoading(false);
     }
   };
+
+  const resendOTP = async (mobile: string): Promise<boolean> => {
+    try {
+      const otp = generateOTP();
+      const otpExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+      
+      const userResponse = await getEcomUserByPhone(mobile);
+      if (userResponse.data && userResponse.data.length > 0) {
+        const userId = userResponse.data[0].id;
+        await updateEcomUser(userId, { otp, otpExpiresAt });
+        return await sendOTPViaSMS(mobile, otp);
+      }
+      return false;
+    } catch (error) {
+      console.error('Resend OTP failed', error);
+      return false;
+    }
+  };
+
+
 
   const logout = () => {
     localStorage.removeItem('jwt');
@@ -94,6 +189,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       user,
       login,
       register,
+      verifyOTP,
+      resendOTP,
       logout,
       isAuthenticated: !!user,
       loading

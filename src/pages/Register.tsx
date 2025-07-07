@@ -22,7 +22,9 @@ const Register = () => {
   });
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { register, sendOTP, verifyOTP } = useAuth();
+  const [userId, setUserId] = useState<number | null>(null);
+
+  const { register, verifyOTP, resendOTP } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -43,12 +45,20 @@ const Register = () => {
 
     setIsLoading(true);
     try {
-      const success = await sendOTP(formData.mobile);
-      if (success) {
+      const result = await register(formData.name, formData.email, formData.mobile, formData.password);
+      console.log('Registration result:', result);
+      if (result.success && result.userId) {
+        setUserId(result.userId);
         setStep(2);
         toast({
-          title: "OTP Sent",
-          description: "Please check your mobile for the verification code (use 123456 for demo)",
+          title: "Account Created",
+          description: "Please enter OTP (use any 6-digit number for testing)",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create account. Please try again.",
+          variant: "destructive",
         });
       }
     } catch (error) {
@@ -64,19 +74,17 @@ const Register = () => {
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!userId) return;
+    
     setIsLoading(true);
-
     try {
-      const otpValid = await verifyOTP(formData.mobile, otp);
+      const otpValid = await verifyOTP(userId, formData.mobile, otp);
       if (otpValid) {
-        const success = await register(formData.name, formData.email, formData.mobile, formData.password);
-        if (success) {
-          toast({
-            title: "Success",
-            description: "Account created successfully!",
-          });
-          navigate('/');
-        }
+        toast({
+          title: "Success",
+          description: "Account created and verified successfully!",
+        });
+        navigate('/login');
       } else {
         toast({
           title: "Error",
@@ -88,6 +96,33 @@ const Register = () => {
       toast({
         title: "Error",
         description: "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    setIsLoading(true);
+    try {
+      const success = await resendOTP(formData.mobile);
+      if (success) {
+        toast({
+          title: "OTP Resent",
+          description: "A new OTP has been sent to your mobile",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to resend OTP. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resend OTP. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -189,14 +224,25 @@ const Register = () => {
                   <Button type="submit" className="w-full" disabled={isLoading || otp.length !== 6}>
                     {isLoading ? 'Verifying...' : 'Verify & Create Account'}
                   </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => setStep(1)}
-                  >
-                    Back
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={handleResendOTP}
+                      disabled={isLoading}
+                    >
+                      Resend OTP
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setStep(1)}
+                    >
+                      Back
+                    </Button>
+                  </div>
                 </form>
               )}
               

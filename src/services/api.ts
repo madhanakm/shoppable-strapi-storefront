@@ -38,8 +38,14 @@ async function fetchAPI<T>(
   const response = await fetch(`${API_URL}${endpoint}`, mergedOptions);
   
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error?.message || 'An error occurred');
+    let errorMessage = 'An error occurred';
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.error?.message || errorData.message || errorMessage;
+    } catch {
+      errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+    }
+    throw new Error(errorMessage);
   }
   
   return await response.json();
