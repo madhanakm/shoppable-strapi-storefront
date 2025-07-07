@@ -17,14 +17,19 @@ const AllProducts = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
   const [page, setPage] = useState(1);
   const itemsPerPage = 8; // 2 rows x 4 columns
 
-  // Get category from URL if present
+  // Get category and type from URL if present
   useEffect(() => {
     const categoryParam = searchParams.get('category');
+    const typeParam = searchParams.get('type');
     if (categoryParam) {
       setSelectedCategory(categoryParam);
+    }
+    if (typeParam) {
+      setSelectedType(typeParam);
     }
   }, [searchParams]);
 
@@ -153,12 +158,21 @@ const AllProducts = () => {
   const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === 'all' || product.attributes?.category === selectedCategory;
     const matchesBrand = selectedBrand === 'all' || product.attributes?.brand === selectedBrand;
-    return matchesCategory && matchesBrand;
+    const matchesType = selectedType === 'all' || product.attributes?.type?.toLowerCase() === selectedType.toLowerCase();
+    const status = product.attributes?.status === true || product.attributes?.status === 'true';
+    
+    // Debug logging
+    if (selectedType !== 'all') {
+      console.log('Product type:', product.attributes?.type, 'Selected type:', selectedType, 'Matches:', matchesType);
+    }
+    
+    return matchesCategory && matchesBrand && matchesType && status;
   });
   
   // Debug filtering
   console.log('Selected category:', selectedCategory);
   console.log('Selected brand:', selectedBrand);
+  console.log('Selected type:', selectedType);
   console.log('Filtered products count:', filteredProducts.length);
   
   // Calculate pagination
