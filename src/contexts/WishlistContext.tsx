@@ -1,5 +1,7 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useAuth } from './AuthContext';
+import { saveWishlistToAPI, loadWishlistFromAPI } from '@/services/wishlist';
 
 interface WishlistItem {
   id: string;
@@ -15,6 +17,7 @@ interface WishlistContextType {
   removeFromWishlist: (id: string) => void;
   isInWishlist: (id: string) => boolean;
   wishlistCount: number;
+  syncWishlist: () => void;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
@@ -33,6 +36,39 @@ interface WishlistProviderProps {
 
 export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const { user, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      loadUserWishlist();
+    } else {
+      const savedWishlist = localStorage.getItem('wishlist');
+      if (savedWishlist) {
+        setWishlistItems(JSON.parse(savedWishlist));
+      }
+    }
+  }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      saveWishlistToAPI(user.id, wishlistItems);
+    } else {
+      localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
+    }
+  }, [wishlistItems, isAuthenticated, user]);
+
+  const loadUserWishlist = async () => {
+    if (user?.id) {
+      const userWishlist = await loadWishlistFromAPI(user.id);
+      setWishlistItems(userWishlist);
+    }
+  };
+
+  const syncWishlist = () => {
+    if (isAuthenticated && user?.id) {
+      loadUserWishlist();
+    }
+  };
 
   const addToWishlist = (item: WishlistItem) => {
     setWishlistItems(prev => {
@@ -59,7 +95,8 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       addToWishlist,
       removeFromWishlist,
       isInWishlist,
-      wishlistCount
+      wishlistCount,
+      syncWishlist
     }}>
       {children}
     </WishlistContext.Provider>
