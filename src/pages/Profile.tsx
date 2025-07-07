@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +13,21 @@ import { useToast } from '@/hooks/use-toast';
 import { updateProfile, changePassword, addAddress, getAddresses } from '@/services/profile';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+  
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
   const [isLoading, setIsLoading] = useState(false);
   
   // Profile data

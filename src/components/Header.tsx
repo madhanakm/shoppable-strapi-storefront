@@ -92,9 +92,22 @@ const Header = () => {
             </Link>
 
             {/* User */}
-            <Button variant="ghost" size="icon" onClick={handleAuthClick} title={isAuthenticated ? `Logout (${user?.name})` : translate('header.login')} className="hover:bg-primary/10 p-2">
-              <User className="w-4 h-4 md:w-5 md:h-5" />
-            </Button>
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-2">
+                <Link to="/profile">
+                  <Button variant="ghost" size="icon" title={`Profile (${user?.username})`} className="hover:bg-primary/10 p-2">
+                    <User className="w-4 h-4 md:w-5 md:h-5" />
+                  </Button>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={handleAuthClick} className="hover:bg-primary/10 text-xs">
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button variant="ghost" size="icon" onClick={handleAuthClick} title={translate('header.login')} className="hover:bg-primary/10 p-2">
+                <User className="w-4 h-4 md:w-5 md:h-5" />
+              </Button>
+            )}
 
             {/* Mobile Menu Toggle */}
             <Button 
@@ -141,16 +154,25 @@ const Header = () => {
                 {translate('header.contact')}
               </Link>
               {isAuthenticated ? (
-                <Button 
-                  variant="ghost" 
-                  onClick={() => {
-                    logout();
-                    setIsMenuOpen(false);
-                  }}
-                  className="justify-start font-medium text-base p-0 h-auto"
-                >
-                  Logout ({user?.name})
-                </Button>
+                <>
+                  <Link 
+                    to="/profile" 
+                    className="text-foreground hover:text-primary transition-colors font-medium text-base"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Profile ({user?.username})
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                      logout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="justify-start font-medium text-base p-0 h-auto"
+                  >
+                    Logout
+                  </Button>
+                </>
               ) : (
                 <Link 
                   to="/login" 

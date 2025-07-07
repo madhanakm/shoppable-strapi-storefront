@@ -56,8 +56,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setLoading(true);
       
-      // Check if user exists in ecom-users and is verified
-      const userResponse = await getEcomUserByPhone(identifier);
+      // Try to find user by email or phone
+      let userResponse;
+      
+      // Check if identifier is email or phone
+      if (identifier.includes('@')) {
+        // Search by email
+        const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users?filters[email][$eq]=${identifier}`);
+        userResponse = await response.json();
+      } else {
+        // Search by phone
+        userResponse = await getEcomUserByPhone(identifier);
+      }
       if (userResponse.data && userResponse.data.length > 0) {
         const user = userResponse.data[0];
         if (user.attributes.password === password && user.attributes.isVerified) {
@@ -182,6 +192,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('jwt');
     localStorage.removeItem('user');
     setUser(null);
+    // Redirect to home page after logout
+    window.location.href = '/';
   };
 
   return (

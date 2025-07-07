@@ -81,6 +81,11 @@ const Login = () => {
                     className="mt-1"
                   />
                 </div>
+                <div className="flex items-center justify-between mb-4">
+                  <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Logging in...' : 'Login'}
                 </Button>
