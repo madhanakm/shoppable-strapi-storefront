@@ -151,26 +151,26 @@ const Footer = () => {
           <div className="space-y-6">
             <h4 className="font-bold text-xl text-white border-b border-gray-700 pb-3">Quick Links</h4>
             <ul className="space-y-3">
-              <li><Link to="/about" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/products" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                About Us
+                All Products
+              </Link></li>
+              <li><Link to="/products?type=deals" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                Deals of the Day
+              </Link></li>
+              <li><Link to="/products?type=trending" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                Trending Products
               </Link></li>
               <li><Link to="/contact" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Contact
+                Contact Us
               </Link></li>
-              <li><a href="#" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/cart" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                FAQ
-              </a></li>
-              <li><Link to="/shipping" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
-                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Shipping Info
+                Shopping Cart
               </Link></li>
-              <li><a href="#" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
-                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Returns
-              </a></li>
             </ul>
           </div>
 
