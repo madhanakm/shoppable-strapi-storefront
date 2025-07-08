@@ -15,76 +15,54 @@ const PrivacyPolicy = () => {
 
           <div className="prose prose-lg max-w-none space-y-8">
             <section>
-              <h2 className="text-2xl font-semibold mb-4">1. Information We Collect</h2>
-              <p className="text-muted-foreground mb-4">
-                We collect information you provide directly to us, such as when you create an account, 
-                make a purchase, or contact us for support.
+              <p className="text-muted-foreground mb-6">
+                At Dharani Herbbals, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website or use our services.
               </p>
-              <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                <li>Personal information (name, email, phone number, address)</li>
-                <li>Payment information (processed securely through our payment partners)</li>
-                <li>Purchase history and preferences</li>
-                <li>Communication preferences</li>
-              </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">2. How We Use Your Information</h2>
+              <h2 className="text-2xl font-semibold mb-4">Information We Collect</h2>
               <p className="text-muted-foreground mb-4">
-                We use the information we collect to provide, maintain, and improve our services.
+                We collect information you provide directly to us, such as when you create an account, make a purchase, subscribe to our newsletter, or contact us. This may include your name, email address, phone number, shipping address, and payment information.
               </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">How We Use Your Information</h2>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
                 <li>Process and fulfill your orders</li>
-                <li>Send you updates about your orders and account</li>
-                <li>Provide customer support</li>
+                <li>Communicate with you about your orders and account</li>
+                <li>Send you promotional materials and newsletters (with your consent)</li>
                 <li>Improve our products and services</li>
-                <li>Send marketing communications (with your consent)</li>
+                <li>Comply with legal obligations</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">3. Information Sharing</h2>
+              <h2 className="text-2xl font-semibold mb-4">Information Sharing</h2>
               <p className="text-muted-foreground mb-4">
-                We do not sell, trade, or otherwise transfer your personal information to third parties 
-                without your consent, except as described in this policy.
-              </p>
-              <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                <li>Service providers who assist in our operations</li>
-                <li>Payment processors for transaction processing</li>
-                <li>Shipping companies for order delivery</li>
-                <li>Legal compliance when required by law</li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-semibold mb-4">4. Data Security</h2>
-              <p className="text-muted-foreground">
-                We implement appropriate security measures to protect your personal information against 
-                unauthorized access, alteration, disclosure, or destruction. However, no method of 
-                transmission over the internet is 100% secure.
+                We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except as described in this policy. We may share your information with trusted service providers who assist us in operating our website and conducting our business.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">5. Your Rights</h2>
-              <p className="text-muted-foreground mb-4">You have the right to:</p>
-              <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                <li>Access your personal information</li>
-                <li>Correct inaccurate information</li>
-                <li>Delete your account and information</li>
-                <li>Opt-out of marketing communications</li>
-                <li>Data portability</li>
-              </ul>
+              <h2 className="text-2xl font-semibold mb-4">Data Security</h2>
+              <p className="text-muted-foreground mb-4">
+                We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the internet is 100% secure.
+              </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">6. Contact Us</h2>
+              <h2 className="text-2xl font-semibold mb-4">Your Rights</h2>
+              <p className="text-muted-foreground mb-4">
+                You have the right to access, update, or delete your personal information. You may also opt out of receiving promotional communications from us at any time.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
               <p className="text-muted-foreground">
-                If you have any questions about this Privacy Policy, please contact us at:
-                <br />
-                Email: privacy@shophub.com
-                <br />
-                Phone: +1 (555) 123-4567
+                If you have any questions about this Privacy Policy, please contact us at info@dharaniherbbals.in or +91 97881 22001.
               </p>
             </section>
           </div>

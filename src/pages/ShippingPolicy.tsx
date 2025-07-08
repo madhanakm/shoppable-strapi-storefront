@@ -12,9 +12,9 @@ const ShippingPolicy = () => {
       
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-8">Shipping & Delivery Policy</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-8">Shipping Policy</h1>
           <p className="text-muted-foreground mb-12">
-            We're committed to getting your order to you quickly and safely. Here's everything you need to know about our shipping process.
+            At Dharani Herbbals, we are committed to delivering your herbal and wellness products safely and efficiently. Please review our shipping policy for important information about delivery times, costs, and procedures.
           </p>
 
           <div className="grid md:grid-cols-2 gap-8 mb-12">
@@ -27,7 +27,7 @@ const ShippingPolicy = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Enjoy free standard shipping on all orders over $50. No minimum purchase required for express shipping.
+                  Free shipping on orders above ₹500. Standard shipping charges apply for orders below ₹500.
                 </p>
               </CardContent>
             </Card>
@@ -41,7 +41,7 @@ const ShippingPolicy = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Orders placed before 2 PM are processed the same day. Weekend orders are processed on the next business day.
+                  Orders are typically processed within 1-2 business days after payment confirmation.
                 </p>
               </CardContent>
             </Card>
@@ -55,7 +55,7 @@ const ShippingPolicy = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  We ship worldwide! Delivery times and costs vary by location. Check our shipping calculator at checkout.
+                  We deliver across India. Delivery to remote areas may take additional 2-3 days.
                 </p>
               </CardContent>
             </Card>
@@ -69,7 +69,7 @@ const ShippingPolicy = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Track your order in real-time with our tracking system. You'll receive updates via email and SMS.
+                  Track your package status on our website or through the courier partner's tracking system.
                 </p>
               </CardContent>
             </Card>
@@ -89,24 +89,24 @@ const ShippingPolicy = () => {
                   </thead>
                   <tbody>
                     <tr>
-                      <td className="border border-border p-3">Standard Shipping</td>
+                      <td className="border border-border p-3">Standard Delivery</td>
                       <td className="border border-border p-3">5-7 business days</td>
-                      <td className="border border-border p-3">Free on orders $50+, otherwise $5.99</td>
+                      <td className="border border-border p-3">Free on orders ₹500+, otherwise ₹50</td>
                     </tr>
                     <tr>
-                      <td className="border border-border p-3">Express Shipping</td>
+                      <td className="border border-border p-3">Express Delivery</td>
                       <td className="border border-border p-3">2-3 business days</td>
-                      <td className="border border-border p-3">$12.99</td>
+                      <td className="border border-border p-3">₹100 additional</td>
                     </tr>
                     <tr>
-                      <td className="border border-border p-3">Overnight Shipping</td>
-                      <td className="border border-border p-3">1 business day</td>
-                      <td className="border border-border p-3">$24.99</td>
+                      <td className="border border-border p-3">Same Day Delivery</td>
+                      <td className="border border-border p-3">Same day (select cities)</td>
+                      <td className="border border-border p-3">₹150</td>
                     </tr>
                     <tr>
-                      <td className="border border-border p-3">International</td>
-                      <td className="border border-border p-3">7-21 business days</td>
-                      <td className="border border-border p-3">Varies by destination</td>
+                      <td className="border border-border p-3">Cash on Delivery</td>
+                      <td className="border border-border p-3">5-7 business days</td>
+                      <td className="border border-border p-3">₹30 additional COD charges</td>
                     </tr>
                   </tbody>
                 </table>
@@ -116,25 +116,22 @@ const ShippingPolicy = () => {
             <section>
               <h2 className="text-2xl font-semibold mb-4">Order Processing</h2>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                <li>Orders are processed Monday through Friday, excluding holidays</li>
+                <li>Orders are processed Monday through Saturday, excluding holidays</li>
                 <li>Processing time is 1-2 business days for most items</li>
-                <li>Custom or personalized items may require additional processing time</li>
-                <li>You'll receive a confirmation email once your order ships</li>
+                <li>Processing may be longer during peak seasons or festivals</li>
+                <li>You'll receive SMS and email confirmation once your order ships</li>
                 <li>Tracking information will be provided within 24 hours of shipment</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-4">International Shipping</h2>
-              <p className="text-muted-foreground mb-4">
-                We're happy to ship internationally to most countries. Please note:
-              </p>
+              <h2 className="text-2xl font-semibold mb-4">Delivery Guidelines</h2>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                <li>International customers are responsible for customs duties and taxes</li>
-                <li>Delivery times may vary due to customs processing</li>
-                <li>Some items may be restricted in certain countries</li>
-                <li>International orders cannot be expedited</li>
-                <li>We use reliable international carriers including DHL, FedEx, and UPS</li>
+                <li>Please ensure someone is available to receive the package</li>
+                <li>Valid ID proof may be required for delivery</li>
+                <li>Packages will be delivered to the address provided during checkout</li>
+                <li>We are not responsible for delays due to incorrect address or unavailability</li>
+                <li>Our herbal products are carefully packaged to maintain quality and potency</li>
               </ul>
             </section>
 
@@ -155,13 +152,10 @@ const ShippingPolicy = () => {
             <section>
               <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
               <p className="text-muted-foreground">
-                For any shipping-related questions, please contact our customer service team:
-                <br />
-                Email: shipping@shophub.com
-                <br />
-                Phone: +1 (555) 123-4567
-                <br />
-                Live Chat: Available 9 AM - 6 PM EST, Monday - Friday
+                For shipping-related questions or issues, please contact us at:
+                <br />Email: info@dharaniherbbals.in
+                <br />Phone: +91 97881 22001
+                <br />Business Hours: Mon - Sat: 9:00 AM - 7:00 PM
               </p>
             </section>
           </div>

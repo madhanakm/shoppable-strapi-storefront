@@ -202,10 +202,10 @@ const Footer = () => {
           <div className="space-y-6">
             <h4 className="font-bold text-xl text-white border-b border-gray-700 pb-3">Support & Policies</h4>
             <ul className="space-y-3">
-              <li><a href="#" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/profile" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                 My Account
-              </a></li>
+              </Link></li>
               <li><a href="#" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                 Order Tracking
@@ -218,10 +218,14 @@ const Footer = () => {
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                 Terms & Conditions
               </Link></li>
-              <li><a href="#" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/refund-returns" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Support Center
-              </a></li>
+                Refund/Returns
+              </Link></li>
+              <li><Link to="/shipping" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                Shipping
+              </Link></li>
             </ul>
           </div>
         </div>

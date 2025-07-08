@@ -23,6 +23,7 @@ import Wishlist from "./pages/Wishlist";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import RefundReturns from "./pages/RefundReturns";
 import WhatsAppFloat from "./components/WhatsAppFloat";
 
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ const App = () => (
                   <Route path="/wishlist" element={<Wishlist />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/refund-returns" element={<RefundReturns />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
