@@ -31,12 +31,20 @@ export const generateOrderNumber = async (): Promise<string> => {
     const count = Array.isArray(data) ? data.length : (data.data?.length || 0);
     const orderNumber = `DH-ECOM-${String(count + 1).padStart(3, '0')}`;
     
+    console.log('Generated order number:', orderNumber);
+    
     // Store order number in order-entries
-    await fetch('https://api.dharaniherbbals.com/api/order-entries', {
+    const storeResponse = await fetch('https://api.dharaniherbbals.com/api/order-entries', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ data: { orderNumber } })
     });
+    
+    if (!storeResponse.ok) {
+      console.error('Failed to store order number:', await storeResponse.text());
+    } else {
+      console.log('Order number stored in order-entries');
+    }
     
     return orderNumber;
   } catch (error) {
