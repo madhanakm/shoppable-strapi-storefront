@@ -140,31 +140,42 @@ const Checkout = () => {
             customername: formData.fullName,
             phoneNum: formData.phone,
             email: formData.email,
-            communication: formData.email,
+            communication: 'website',
             payment: 'COD',
             shippingAddress: shippingAddr,
             billingAddress: shippingAddr,
-            Name: cartItems.map(item => `${item.name} (Qty: ${item.quantity}, Price: ${formatPrice(item.price)})`).join(' | '),
+            Name: cartItems.map(item => item.name).join(' | '),
+            price: cartItems.map(item => `${item.name}: ${formatPrice(item.price)} x ${item.quantity}`).join(' | '),
             remarks: formData.notes || 'No special notes',
-            quantity: cartItems.reduce((sum, item) => sum + item.quantity, 0)
+            quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0))
           }
         };
 
+        // Validate required fields
+        if (!formData.fullName || !formData.email || !formData.phone || !shippingAddr) {
+          throw new Error('Missing required customer information');
+        }
+        
         console.log('Placing COD order with payload:', JSON.stringify(orderPayload, null, 2));
         
         const response = await fetch('https://api.dharaniherbbals.com/api/orders', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
           body: JSON.stringify(orderPayload)
         });
 
+        const responseText = await response.text();
+        console.log('API Response:', response.status, responseText);
+        
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('COD order error response:', errorText);
-          throw new Error(`Failed to place order: ${response.status} - ${errorText}`);
+          console.error('COD order error response:', responseText);
+          throw new Error(`Failed to place order: ${response.status} - ${responseText}`);
         }
         
-        const result = await response.json();
+        const result = JSON.parse(responseText);
         console.log('COD order placed successfully:', result);
         
         toast({

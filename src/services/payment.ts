@@ -130,13 +130,14 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumb
       customername: orderData.customerInfo.name,
       phoneNum: orderData.customerInfo.phone,
       email: orderData.customerInfo.email,
-      communication: orderData.customerInfo.email,
+      communication: 'website',
       payment: 'Online Payment',
       shippingAddress: shippingAddr,
       billingAddress: shippingAddr,
-      Name: orderData.items.map(item => `${item.name} (Qty: ${item.quantity}, Price: ${item.price})`).join(' | '),
+      Name: orderData.items.map(item => item.name).join(' | '),
+      price: orderData.items.map(item => `${item.name}: ${item.price} x ${item.quantity}`).join(' | '),
       remarks: `Payment ID: ${paymentResponse.razorpay_payment_id}`,
-      quantity: orderData.items.reduce((sum, item) => sum + item.quantity, 0)
+      quantity: String(orderData.items.reduce((sum, item) => sum + item.quantity, 0))
     }
   };
 
