@@ -24,6 +24,29 @@ export interface OrderData {
   };
 }
 
+export const generateInvoiceNumber = async (): Promise<string> => {
+  try {
+    const response = await fetch('https://api.dharaniherbbals.com/api/orders?sort=invoicenum:desc&pagination[limit]=1');
+    const data = await response.json();
+    
+    let nextNumber = 2500; // Starting number
+    if (data.data && data.data.length > 0) {
+      const lastInvoice = data.data[0].attributes?.invoicenum;
+      if (lastInvoice && lastInvoice.startsWith('DH')) {
+        const lastNumber = parseInt(lastInvoice.replace('DH', ''));
+        nextNumber = lastNumber + 1;
+      }
+    }
+    
+    const invoiceNumber = `DH${String(nextNumber).padStart(7, '0')}`;
+    console.log('Generated invoice number:', invoiceNumber);
+    return invoiceNumber;
+  } catch (error) {
+    console.error('Error generating invoice number:', error);
+    return `DH${String(Date.now()).slice(-7)}`;
+  }
+};
+
 export const generateOrderNumber = async (): Promise<string> => {
   try {
     const response = await fetch('https://api.dharaniherbbals.com/api/order-entries');
@@ -53,7 +76,7 @@ export const generateOrderNumber = async (): Promise<string> => {
   }
 };
 
-export const initiatePayment = async (orderData: OrderData, orderNumber: string): Promise<any> => {
+export const initiatePayment = async (orderData: OrderData, orderNumber: string, invoiceNumber: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     if (!window.Razorpay) {
       reject(new Error('Razorpay SDK not loaded'));
@@ -78,7 +101,7 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string)
       handler: async (response: any) => {
         try {
           console.log('Payment successful:', response);
-          await storeOrder(orderData, orderNumber, response);
+          await storeOrder(orderData, orderNumber, invoiceNumber, response);
           resolve(response);
         } catch (error) {
           console.error('Error storing order:', error);
@@ -95,31 +118,29 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string)
   });
 };
 
-const storeOrder = async (orderData: OrderData, orderNumber: string, paymentResponse: any) => {
+const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumber: string, paymentResponse: any) => {
+  const shippingAddr = `${orderData.customerInfo.address}, ${orderData.customerInfo.city}, ${orderData.customerInfo.state} - ${orderData.customerInfo.pincode}`;
+  
   const orderPayload = {
     data: {
-      orderNumber,
-      paymentId: paymentResponse.razorpay_payment_id,
-      amount: orderData.total,
-      status: 'completed',
-      customerName: orderData.customerInfo.name,
-      customerEmail: orderData.customerInfo.email,
-      customerPhone: orderData.customerInfo.phone,
-      shippingAddress: `${orderData.customerInfo.address}, ${orderData.customerInfo.city}, ${orderData.customerInfo.state} - ${orderData.customerInfo.pincode}`,
-      items: orderData.items.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        image: item.image,
-        total: item.price * item.quantity
-      })),
-      paymentMethod: 'razorpay',
-      createdAt: new Date().toISOString()
+      ordernum: orderNumber,
+      invoicenum: invoiceNumber,
+      totalValue: orderData.total,
+      total: orderData.total,
+      customername: orderData.customerInfo.name,
+      phoneNum: orderData.customerInfo.phone,
+      email: orderData.customerInfo.email,
+      communication: orderData.customerInfo.email,
+      payment: 'Online Payment',
+      shippingAddress: shippingAddr,
+      billingAddress: shippingAddr,
+      Name: orderData.items.map(item => `${item.name} (Qty: ${item.quantity}, Price: ${item.price})`).join(' | '),
+      remarks: `Payment ID: ${paymentResponse.razorpay_payment_id}`,
+      quantity: orderData.items.reduce((sum, item) => sum + item.quantity, 0)
     }
   };
 
-  console.log('Storing order:', orderPayload);
+  console.log('Storing Razorpay order with payload:', JSON.stringify(orderPayload, null, 2));
   
   const response = await fetch('https://api.dharaniherbbals.com/api/orders', {
     method: 'POST',
@@ -129,11 +150,11 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, paymentResp
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('Store order error:', errorText);
-    throw new Error(`Failed to store order: ${response.status}`);
+    console.error('Razorpay order storage error response:', errorText);
+    throw new Error(`Failed to store order: ${response.status} - ${errorText}`);
   }
 
   const result = await response.json();
-  console.log('Order stored successfully:', result);
+  console.log('Razorpay order stored successfully:', result);
   return result;
 };

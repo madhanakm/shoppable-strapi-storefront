@@ -12,7 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/lib/utils';
 import { getAddresses } from '@/services/profile';
-import { generateOrderNumber, initiatePayment, OrderData } from '@/services/payment';
+import { generateOrderNumber, generateInvoiceNumber, initiatePayment, OrderData } from '@/services/payment';
 import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package, Plus } from 'lucide-react';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
@@ -84,8 +84,10 @@ const Checkout = () => {
     setIsLoading(true);
 
     try {
-      // Generate order number
+      // Generate order number and invoice number
       const orderNumber = await generateOrderNumber();
+      const invoiceNumber = await generateInvoiceNumber();
+      console.log('Using order number:', orderNumber, 'Invoice:', invoiceNumber);
       
       // Get address info
       let shippingAddr = '';
@@ -121,7 +123,7 @@ const Checkout = () => {
         console.log('Initiating payment with data:', orderData);
         
         // Initiate Razorpay payment
-        await initiatePayment(orderData, orderNumber);
+        await initiatePayment(orderData, orderNumber, invoiceNumber);
         
         toast({
           title: "Payment Successful!",
@@ -131,28 +133,24 @@ const Checkout = () => {
         // COD Order - Store directly
         const orderPayload = {
           data: {
-            orderNumber,
-            amount: total,
-            status: 'pending',
-            customerName: formData.fullName,
-            customerEmail: formData.email,
-            customerPhone: formData.phone,
+            ordernum: orderNumber,
+            invoicenum: invoiceNumber,
+            totalValue: total,
+            total: total,
+            customername: formData.fullName,
+            phoneNum: formData.phone,
+            email: formData.email,
+            communication: formData.email,
+            payment: 'COD',
             shippingAddress: shippingAddr,
-            items: cartItems.map(item => ({
-              id: item.id,
-              name: item.name,
-              price: item.price,
-              quantity: item.quantity,
-              image: item.image,
-              total: item.price * item.quantity
-            })),
-            paymentMethod: 'cod',
-            notes: formData.notes,
-            createdAt: new Date().toISOString()
+            billingAddress: shippingAddr,
+            Name: cartItems.map(item => `${item.name} (Qty: ${item.quantity}, Price: ${formatPrice(item.price)})`).join(' | '),
+            remarks: formData.notes || 'No special notes',
+            quantity: cartItems.reduce((sum, item) => sum + item.quantity, 0)
           }
         };
 
-        console.log('Placing COD order:', orderPayload);
+        console.log('Placing COD order with payload:', JSON.stringify(orderPayload, null, 2));
         
         const response = await fetch('https://api.dharaniherbbals.com/api/orders', {
           method: 'POST',
@@ -162,8 +160,8 @@ const Checkout = () => {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('COD order error:', errorText);
-          throw new Error(`Failed to place order: ${response.status}`);
+          console.error('COD order error response:', errorText);
+          throw new Error(`Failed to place order: ${response.status} - ${errorText}`);
         }
         
         const result = await response.json();

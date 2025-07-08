@@ -85,8 +85,9 @@ const Profile = () => {
     if (!user?.email) return;
     setLoadingOrders(true);
     try {
-      const response = await fetch(`https://api.dharaniherbbals.com/api/orders?filters[customerEmail][$eq]=${user.email}&sort=createdAt:desc`);
+      const response = await fetch(`https://api.dharaniherbbals.com/api/orders?filters[email][$eq]=${user.email}&sort=createdAt:desc`);
       const data = await response.json();
+      console.log('Orders loaded:', data);
       setOrders(data.data || []);
     } catch (error) {
       console.error('Error loading orders:', error);
@@ -290,21 +291,19 @@ const Profile = () => {
                             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                               <div className="flex-1">
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-                                  <h3 className="font-bold text-lg text-gray-800">Order #{attrs.orderNumber}</h3>
+                                  <div>
+                                    <h3 className="font-bold text-lg text-gray-800">Order #{attrs.ordernum || 'N/A'}</h3>
+                                    <p className="text-sm text-gray-500">Invoice: {attrs.invoicenum || 'N/A'}</p>
+                                  </div>
                                   <div className="flex items-center gap-2">
-                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                                      attrs.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                      attrs.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                      attrs.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                      'bg-gray-100 text-gray-800'
-                                    }`}>
-                                      {attrs.status}
+                                    <span className="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                      Pending
                                     </span>
                                     <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                                      attrs.paymentMethod === 'razorpay' ? 'bg-blue-100 text-blue-800' :
+                                      attrs.payment === 'Online Payment' ? 'bg-blue-100 text-blue-800' :
                                       'bg-orange-100 text-orange-800'
                                     }`}>
-                                      {attrs.paymentMethod === 'razorpay' ? 'Online' : 'COD'}
+                                      {attrs.payment || 'COD'}
                                     </span>
                                   </div>
                                 </div>
@@ -316,30 +315,24 @@ const Profile = () => {
                                   </div>
                                   <div className="flex items-center gap-2 text-gray-600">
                                     <CreditCard className="w-4 h-4" />
-                                    <span className="text-sm font-semibold">{formatPrice(attrs.amount)}</span>
+                                    <span className="text-sm font-semibold">{formatPrice(attrs.totalValue || attrs.total || 0)}</span>
                                   </div>
                                 </div>
                                 
-                                {attrs.items && attrs.items.length > 0 && (
-                                  <div className="mb-4">
-                                    <h4 className="font-semibold text-gray-700 mb-2">Items ({attrs.items.length}):</h4>
-                                    <div className="space-y-2">
-                                      {attrs.items.slice(0, 3).map((item: any, idx: number) => (
-                                        <div key={idx} className="flex items-center gap-3 text-sm">
-                                          <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                                            <Package className="w-4 h-4 text-gray-500" />
-                                          </div>
-                                          <span className="flex-1">{item.name}</span>
-                                          <span className="text-gray-500">Qty: {item.quantity}</span>
-                                          <span className="font-semibold">{formatPrice(item.total || item.price * item.quantity)}</span>
-                                        </div>
-                                      ))}
-                                      {attrs.items.length > 3 && (
-                                        <p className="text-sm text-gray-500 ml-11">+{attrs.items.length - 3} more items</p>
-                                      )}
+                                <div className="mb-4">
+                                  <h4 className="font-semibold text-gray-700 mb-2">Customer: {attrs.customername}</h4>
+                                  <p className="text-sm text-gray-600">Phone: {attrs.phoneNum}</p>
+                                  <p className="text-sm text-gray-600">Quantity: {attrs.quantity} items</p>
+                                  {attrs.Name && (
+                                    <div className="mt-2">
+                                      <p className="text-sm font-medium text-gray-700">Items:</p>
+                                      <p className="text-sm text-gray-600">{attrs.Name}</p>
                                     </div>
-                                  </div>
-                                )}
+                                  )}
+                                  {attrs.remarks && (
+                                    <p className="text-sm text-gray-600 mt-2">Notes: {attrs.remarks}</p>
+                                  )}
+                                </div>
                                 
                                 {attrs.shippingAddress && (
                                   <div className="flex items-start gap-2 text-sm text-gray-600">
