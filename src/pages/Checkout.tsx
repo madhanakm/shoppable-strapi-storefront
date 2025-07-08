@@ -131,7 +131,7 @@ const Checkout = () => {
         
         toast({
           title: "Payment Successful!",
-          description: `Order #${orderNumber} placed successfully. You will receive a confirmation email shortly.`,
+          description: `Order #${orderNumber} placed successfully. You will receive a confirmation call shortly.`,
         });
       } else {
         // COD Order - Store directly
