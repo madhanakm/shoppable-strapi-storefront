@@ -337,7 +337,7 @@ const ContactUs = () => {
               <CardContent>
                 <div className="rounded-lg overflow-hidden">
                   <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4151.067048559386!2d77.16405807526331!3d11.358041348196105!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba8e1bdd6179ddb%3A0x82f81936cbaf1a2!2sDharani%20Herbbals!5e1!3m2!1sen!2sin!4v1751917089863!5m2!1sen!2sin" 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1581.2417944166418!2d77.16591604953587!3d11.358297499569865!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba8e1bdd6179ddb%3A0x82f81936cbaf1a2!2sDharani%20Herbbals!5e0!3m2!1sen!2sin!4v1751999573702!5m2!1sen!2sin" 
                     width="100%" 
                     height="400" 
                     style={{border: 0}} 
