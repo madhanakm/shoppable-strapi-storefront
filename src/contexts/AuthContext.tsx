@@ -36,15 +36,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Check for existing token on mount
   useEffect(() => {
-    const token = localStorage.getItem('jwt');
     const storedUser = localStorage.getItem('user');
+    const loginTime = localStorage.getItem('loginTime');
     
-    if (token && storedUser) {
+    console.log('Auth check - storedUser:', !!storedUser, 'loginTime:', loginTime);
+    
+    if (storedUser && loginTime) {
       try {
-        setUser(JSON.parse(storedUser));
+        const loginTimestamp = parseInt(loginTime);
+        const currentTime = Date.now();
+        const fifteenDays = 15 * 24 * 60 * 60 * 1000; // 15 days in milliseconds
+        
+        console.log('Session check - age:', (currentTime - loginTimestamp) / (24 * 60 * 60 * 1000), 'days');
+        
+        if (currentTime - loginTimestamp < fifteenDays) {
+          const userData = JSON.parse(storedUser);
+          console.log('Restoring user session:', userData.username);
+          setUser(userData);
+        } else {
+          console.log('Session expired, clearing data');
+          localStorage.removeItem('user');
+          localStorage.removeItem('loginTime');
+        }
       } catch (error) {
         console.error('Failed to parse stored user data', error);
-        localStorage.removeItem('jwt');
+        localStorage.removeItem('user');
+        localStorage.removeItem('loginTime');
+      }
+    } else if (storedUser) {
+      // Handle old sessions without loginTime
+      try {
+        const userData = JSON.parse(storedUser);
+        console.log('Migrating old session for:', userData.username);
+        localStorage.setItem('loginTime', Date.now().toString());
+        setUser(userData);
+      } catch (error) {
         localStorage.removeItem('user');
       }
     }
@@ -79,7 +105,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             phone: user.attributes.phone
           };
           
-          localStorage.setItem('user', JSON.stringify(userData));
+          const loginData = {
+            user: JSON.stringify(userData),
+            loginTime: Date.now().toString()
+          };
+          
+          localStorage.setItem('user', loginData.user);
+          localStorage.setItem('loginTime', loginData.loginTime);
+          console.log('User logged in:', userData.username, 'at', new Date());
           setUser(userData as any);
           return true;
         }
@@ -189,11 +222,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 
   const logout = () => {
+    console.log('User logged out manually');
     localStorage.removeItem('jwt');
     localStorage.removeItem('user');
+    localStorage.removeItem('loginTime');
     setUser(null);
-    // Redirect to home page after logout
-    window.location.href = '/';
   };
 
   return (

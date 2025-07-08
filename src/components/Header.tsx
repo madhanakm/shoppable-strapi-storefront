@@ -1,202 +1,302 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, ShoppingCart, User, Heart, Menu, X } from 'lucide-react';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { Menu, X, Search, ShoppingCart, Heart, User, Leaf, Globe, Phone, Mail } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTranslation } from '@/components/TranslationProvider';
-import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslation, LANGUAGES } from './TranslationProvider';
 
 const Header = () => {
-  const { wishlistCount } = useWishlist();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { cartCount } = useCart();
-  const { user, isAuthenticated, logout } = useAuth();
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { wishlistCount } = useWishlist();
+  const { user, logout, isAuthenticated } = useAuth();
+  const { translate, language, setLanguage } = useTranslation();
   const navigate = useNavigate();
-  const { translate } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
 
-  const handleAuthClick = () => {
-    if (isAuthenticated) {
-      logout();
-    } else {
-      navigate('/login');
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery('');
+      setIsMenuOpen(false);
     }
   };
 
+  const toggleLanguage = () => {
+    setLanguage(language === LANGUAGES.ENGLISH ? LANGUAGES.TAMIL : LANGUAGES.ENGLISH);
+  };
+
   return (
-    <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-14 md:h-16 lg:h-20">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 md:space-x-3">
-            <img 
-              src="/lovable-uploads/6416e97f-9561-4de9-a193-d5af27824b56.png" 
-              alt="Dharani Herbals"
-              className="h-6 md:h-8 lg:h-12 w-auto"
-            />
-          </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-            <Link to="/" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">{translate('header.home')}</Link>
-            <Link to="/products" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">{translate('header.products')}</Link>
-            <Link to="/about" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">{translate('header.about')}</Link>
-            <Link to="/contact" className="text-foreground hover:text-primary transition-colors font-medium text-sm lg:text-base">{translate('header.contact')}</Link>
-          </nav>
-
-          {/* Search Bar - Desktop */}
-          <div className="hidden md:flex items-center flex-1 max-w-sm lg:max-w-md mx-4 lg:mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder={translate('header.search') + '...'}
-                className="pl-10 w-full border-primary/20 focus:border-primary text-sm"
-              />
+    <>
+      {/* Top Bar */}
+      <div className="bg-gradient-to-r from-primary/90 to-green-600 text-white py-2 hidden md:block">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <Phone className="w-4 h-4" />
+                <span>+91 97881 22001</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Mail className="w-4 h-4" />
+                <span>info@dharaniherbbals.in</span>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleLanguage}
+                className="text-white hover:bg-white/20 h-8 px-3"
+              >
+                <Globe className="w-4 h-4 mr-1" />
+                {language === LANGUAGES.ENGLISH ? 'தமிழ்' : 'English'}
+              </Button>
             </div>
           </div>
-
-          {/* Actions */}
-          <div className="flex items-center space-x-1 md:space-x-2 lg:space-x-4">
-            {/* Language Switcher */}
-            <LanguageSwitcher />
-            
-            {/* Search - Mobile */}
-            <Button variant="ghost" size="icon" className="md:hidden p-2">
-              <Search className="w-4 h-4 md:w-5 md:h-5" />
-            </Button>
-
-            {/* Wishlist */}
-            <Link to="/wishlist">
-              <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 p-2">
-                <Heart className="w-4 h-4 md:w-5 md:h-5" />
-                {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Button>
-            </Link>
-
-            {/* Cart */}
-            <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 p-2">
-                <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center text-xs">
-                    {cartCount}
-                  </span>
-                )}
-              </Button>
-            </Link>
-
-            {/* User */}
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-2">
-                <Link to="/profile">
-                  <Button variant="ghost" size="icon" title={`Profile (${user?.username})`} className="hover:bg-primary/10 p-2">
-                    <User className="w-4 h-4 md:w-5 md:h-5" />
-                  </Button>
-                </Link>
-                <Button variant="ghost" size="sm" onClick={handleAuthClick} className="hover:bg-primary/10 text-xs">
-                  Logout
-                </Button>
-              </div>
-            ) : (
-              <Button variant="ghost" size="icon" onClick={handleAuthClick} title={translate('header.login')} className="hover:bg-primary/10 p-2">
-                <User className="w-4 h-4 md:w-5 md:h-5" />
-              </Button>
-            )}
-
-            {/* Mobile Menu Toggle */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="lg:hidden p-2"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="w-4 h-4 md:w-5 md:h-5" /> : <Menu className="w-4 h-4 md:w-5 md:h-5" />}
-            </Button>
-          </div>
         </div>
+      </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="lg:hidden border-t border-border py-4">
-            <nav className="flex flex-col space-y-4">
+      {/* Main Header */}
+      <header className="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            {/* Logo */}
+            <Link to="/" className="flex items-center">
+              <img 
+                src="https://api.dharaniherbbals.com/uploads/logo_12f2d3e78e.png" 
+                alt="Dharani Herbals" 
+                className="h-10 md:h-12 w-auto object-contain"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-primary to-primary/80 rounded-full items-center justify-center shadow-lg" style={{display: 'none'}}>
+                <Leaf className="w-6 h-6 md:w-8 md:h-8 text-white" />
+              </div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-8">
               <Link 
                 to="/" 
-                className="text-foreground hover:text-primary transition-colors font-medium text-base"
-                onClick={() => setIsMenuOpen(false)}
+                className={`font-medium transition-colors hover:text-primary ${isTamil ? 'tamil-text' : ''}`}
               >
                 {translate('header.home')}
               </Link>
               <Link 
                 to="/products" 
-                className="text-foreground hover:text-primary transition-colors font-medium text-base"
-                onClick={() => setIsMenuOpen(false)}
+                className={`font-medium transition-colors hover:text-primary ${isTamil ? 'tamil-text' : ''}`}
               >
                 {translate('header.products')}
               </Link>
               <Link 
                 to="/about" 
-                className="text-foreground hover:text-primary transition-colors font-medium text-base"
-                onClick={() => setIsMenuOpen(false)}
+                className={`font-medium transition-colors hover:text-primary ${isTamil ? 'tamil-text' : ''}`}
               >
                 {translate('header.about')}
               </Link>
               <Link 
                 to="/contact" 
-                className="text-foreground hover:text-primary transition-colors font-medium text-base"
-                onClick={() => setIsMenuOpen(false)}
+                className={`font-medium transition-colors hover:text-primary ${isTamil ? 'tamil-text' : ''}`}
               >
                 {translate('header.contact')}
               </Link>
+            </nav>
+
+            {/* Search Bar - Desktop */}
+            <div className="hidden md:flex flex-1 max-w-xs mx-4">
+              <form onSubmit={handleSearch} className="relative w-full">
+                <Input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 h-9 border-gray-300 focus:border-primary rounded-full bg-gray-50 focus:bg-white transition-all text-sm"
+                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 px-2 rounded-full bg-primary hover:bg-primary/90"
+                >
+                  <Search className="w-3 h-3" />
+                </Button>
+              </form>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-2 md:space-x-4">
+              {/* Mobile Language Toggle */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleLanguage}
+                className="md:hidden p-2"
+              >
+                <Globe className="w-5 h-5" />
+              </Button>
+
+              {/* Wishlist */}
+              <Link to="/wishlist">
+                <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 p-2">
+                  <Heart className="w-4 h-4 md:w-5 md:h-5" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+
+              {/* Cart */}
+              <Link to="/cart">
+                <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 p-2">
+                  <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                      {cartCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+
+              {/* User Menu */}
               {isAuthenticated ? (
-                <>
-                  <Link 
-                    to="/profile" 
-                    className="text-foreground hover:text-primary transition-colors font-medium text-base"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Profile ({user?.username})
+                <div className="hidden md:flex items-center space-x-2">
+                  <Link to="/profile">
+                    <Button variant="ghost" size="icon" title={`Profile (${user?.username})`} className="hover:bg-primary/10 p-2">
+                      <User className="w-4 h-4 md:w-5 md:h-5" />
+                    </Button>
                   </Link>
-                  <Button 
-                    variant="ghost" 
-                    onClick={() => {
-                      logout();
-                      setIsMenuOpen(false);
-                    }}
-                    className="justify-start font-medium text-base p-0 h-auto"
-                  >
+                  <Button variant="ghost" size="sm" onClick={handleLogout} className="hover:bg-primary/10 text-xs px-3">
                     Logout
                   </Button>
-                </>
+                </div>
               ) : (
-                <Link 
-                  to="/login" 
-                  className="text-foreground hover:text-primary transition-colors font-medium text-base"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {translate('header.login')}
+                <Link to="/login" className="hidden md:block">
+                  <Button variant="ghost" size="icon" title={translate('header.login')} className="hover:bg-primary/10 p-2">
+                    <User className="w-4 h-4 md:w-5 md:h-5" />
+                  </Button>
                 </Link>
               )}
-              {/* Mobile Search */}
-              <div className="pt-4 border-t border-border">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
-                    placeholder={translate('header.search') + '...'}
-                    className="pl-10 w-full border-primary/20 focus:border-primary"
-                  />
+
+              {/* Mobile Menu Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="lg:hidden p-2"
+              >
+                {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile Search */}
+          <div className="md:hidden pb-4">
+            <form onSubmit={handleSearch} className="relative">
+              <Input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-16 h-9 border-gray-300 focus:border-primary rounded-full bg-gray-50 focus:bg-white text-sm"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Button
+                type="submit"
+                size="sm"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 px-2 rounded-full"
+              >
+                <Search className="w-3 h-3" />
+              </Button>
+            </form>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="lg:hidden bg-white border-t border-gray-200 shadow-lg">
+            <div className="container mx-auto px-4 py-4">
+              <nav className="flex flex-col space-y-4">
+                <Link 
+                  to="/" 
+                  className={`text-foreground hover:text-primary transition-colors font-medium text-base ${isTamil ? 'tamil-text' : ''}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {translate('header.home')}
+                </Link>
+                <Link 
+                  to="/products" 
+                  className={`text-foreground hover:text-primary transition-colors font-medium text-base ${isTamil ? 'tamil-text' : ''}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {translate('header.products')}
+                </Link>
+                <Link 
+                  to="/about" 
+                  className={`text-foreground hover:text-primary transition-colors font-medium text-base ${isTamil ? 'tamil-text' : ''}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {translate('header.about')}
+                </Link>
+                <Link 
+                  to="/contact" 
+                  className={`text-foreground hover:text-primary transition-colors font-medium text-base ${isTamil ? 'tamil-text' : ''}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {translate('header.contact')}
+                </Link>
+                
+                <div className="border-t pt-4 mt-4">
+                  {isAuthenticated ? (
+                    <>
+                      <Link 
+                        to="/profile" 
+                        className={`text-foreground hover:text-primary transition-colors font-medium text-base block mb-3 ${isTamil ? 'tamil-text' : ''}`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Profile ({user?.username})
+                      </Link>
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => {
+                          handleLogout();
+                          setIsMenuOpen(false);
+                        }}
+                        className="justify-start font-medium text-base p-0 h-auto"
+                      >
+                        Logout
+                      </Button>
+                    </>
+                  ) : (
+                    <Link 
+                      to="/login" 
+                      className={`text-foreground hover:text-primary transition-colors font-medium text-base ${isTamil ? 'tamil-text' : ''}`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {translate('header.login')}
+                    </Link>
+                  )}
                 </div>
-              </div>
-            </nav>
+              </nav>
+            </div>
           </div>
         )}
-      </div>
-    </header>
+      </header>
+    </>
   );
 };
 

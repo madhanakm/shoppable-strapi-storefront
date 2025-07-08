@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Facebook, Instagram, Youtube, Leaf } from 'lucide-react';
+import { Facebook, Instagram, Youtube, Leaf, Phone, Mail, MapPin, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 const Footer = () => {
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState('');
   
   useEffect(() => {
     // Fetch brands from API
@@ -16,12 +19,9 @@ const Footer = () => {
       .then(data => {
         let brandNames = [];
         
-        // Try different ways to extract brand names based on API structure
         if (Array.isArray(data)) {
-          // Direct array of brands
           brandNames = data.map(brand => brand.name || brand.Name || brand.title || brand).filter(Boolean);
         } else if (data && data.data && Array.isArray(data.data)) {
-          // Strapi format with data wrapper
           brandNames = data.data.map(brand => {
             if (brand.attributes) {
               return brand.attributes.name || brand.attributes.Name || brand.attributes.title;
@@ -30,7 +30,6 @@ const Footer = () => {
           }).filter(Boolean);
         }
         
-        // If still empty, fallback to hardcoded brands
         if (brandNames.length === 0) {
           brandNames = ['Dharani', 'Ayush', 'Patanjali', 'Himalaya', 'Dabur'];
         }
@@ -40,88 +39,209 @@ const Footer = () => {
       })
       .catch(error => {
         console.error('Error fetching brands:', error);
-        // Fallback to hardcoded brands
         setBrands(['Dharani', 'Ayush', 'Patanjali', 'Himalaya', 'Dabur']);
         setLoading(false);
       });
   }, []);
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle newsletter subscription
+    console.log('Newsletter subscription:', email);
+    setEmail('');
+  };
   
   return (
-    <footer className="bg-primary/5 border-t border-primary/20">
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+    <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+      {/* Newsletter Section */}
+      <div className="bg-gradient-to-r from-primary to-green-600 py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h3 className="text-2xl md:text-3xl font-bold mb-4">Stay Updated with Natural Wellness</h3>
+            <p className="text-lg mb-8 opacity-90">
+              Get the latest updates on herbal products, health tips, and exclusive offers
+            </p>
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <Input
+                type="email"
+                placeholder="Enter your email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1 h-12 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:bg-white/30"
+              />
+              <Button 
+                type="submit" 
+                className="bg-white text-primary hover:bg-gray-100 h-12 px-6 font-semibold"
+              >
+                Subscribe
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Footer Content */}
+      <div className="container mx-auto px-4 py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
           {/* Company Info */}
-          <div className="space-y-4 col-span-1 md:col-span-2 lg:col-span-1">
-            <div className="flex items-center space-x-2">
-              <Leaf className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-              <h3 className="text-xl md:text-2xl font-bold text-primary">Dharani Herbals</h3>
+          <div className="space-y-6 lg:col-span-1">
+            <div className="flex items-center">
+              <img 
+                src="https://api.dharaniherbbals.com/uploads/logo_12f2d3e78e.png" 
+                alt="Dharani Herbals" 
+                className="h-16 w-auto object-contain"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+              <div className="w-16 h-16 bg-gradient-to-r from-primary to-primary/80 rounded-full items-center justify-center" style={{display: 'none'}}>
+                <Leaf className="w-8 h-8 text-white" />
+              </div>
             </div>
-            <p className={`text-sm md:text-base text-muted-foreground ${isTamil ? 'tamil-text' : ''}`}>
+            <p className={`text-gray-300 leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
               Your trusted partner in natural wellness. Bringing you authentic herbal products 
               and traditional remedies for a healthier lifestyle.
             </p>
+            
+            {/* Contact Info */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <Phone className="w-5 h-5 text-primary" />
+                <span className="text-gray-300">+91 97881 22001</span>
+              </div>
+              <div className="flex items-start space-x-3">
+                <Mail className="w-5 h-5 text-primary mt-1" />
+                <div className="text-gray-300">
+                  <div>info@dharaniherbbals.in</div>
+                  <div>salesdharani@gmail.com</div>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <MapPin className="w-5 h-5 text-primary mt-1" />
+                <span className="text-gray-300">
+                  7/470-1, Chemparuthi Street,<br />
+                  West Nehru Nagar Punjai Puliampatti<br />
+                  Sathyamangalam(TALUK), Erode - 638 459, TN, India
+                </span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Clock className="w-5 h-5 text-primary" />
+                <span className="text-gray-300">Mon - Sat: 9:00 AM - 7:00 PM</span>
+              </div>
+            </div>
+
+            {/* Social Media */}
             <div className="flex space-x-4">
-              <Facebook className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
-              <Instagram className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
-              <Youtube className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
+              <a href="#" className="w-10 h-10 bg-gray-700 hover:bg-primary rounded-full flex items-center justify-center transition-colors">
+                <Facebook className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 bg-gray-700 hover:bg-primary rounded-full flex items-center justify-center transition-colors">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="#" className="w-10 h-10 bg-gray-700 hover:bg-primary rounded-full flex items-center justify-center transition-colors">
+                <Youtube className="w-5 h-5" />
+              </a>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-primary text-base md:text-lg">Quick Links</h4>
-            <ul className="space-y-2">
-              <li><Link to="/about" className={`text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>About Us</Link></li>
-              <li><Link to="/contact" className={`text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>Contact</Link></li>
-              <li><a href="#" className={`text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>FAQ</a></li>
-              <li><Link to="/shipping" className={`text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>Shipping Info</Link></li>
-              <li><a href="#" className={`text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>Returns</a></li>
+          <div className="space-y-6">
+            <h4 className="font-bold text-xl text-white border-b border-gray-700 pb-3">Quick Links</h4>
+            <ul className="space-y-3">
+              <li><Link to="/about" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                About Us
+              </Link></li>
+              <li><Link to="/contact" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                Contact
+              </Link></li>
+              <li><a href="#" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                FAQ
+              </a></li>
+              <li><Link to="/shipping" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                Shipping Info
+              </Link></li>
+              <li><a href="#" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                Returns
+              </a></li>
             </ul>
           </div>
 
-          {/* Brands - Dynamic from API */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-primary text-base md:text-lg">Brands</h4>
-            <ul className="space-y-2">
+          {/* Brands */}
+          <div className="space-y-6">
+            <h4 className="font-bold text-xl text-white border-b border-gray-700 pb-3">Our Brands</h4>
+            <ul className="space-y-3">
               {loading ? (
-                <li className={`text-sm text-muted-foreground ${isTamil ? 'tamil-text' : ''}`}>Loading brands...</li>
+                <li className={`text-gray-300 ${isTamil ? 'tamil-text' : ''}`}>Loading brands...</li>
               ) : brands.length > 0 ? (
-                brands.map((brand, index) => (
+                brands.slice(0, 6).map((brand, index) => (
                   <li key={index}>
                     <Link 
                       to={`/products?brand=${encodeURIComponent(brand)}`} 
-                      className={`text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}
+                      className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}
                     >
+                      <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                       {brand}
                     </Link>
                   </li>
                 ))
               ) : (
-                <li className={`text-sm text-muted-foreground ${isTamil ? 'tamil-text' : ''}`}>No brands found</li>
+                <li className={`text-gray-300 ${isTamil ? 'tamil-text' : ''}`}>No brands found</li>
               )}
             </ul>
           </div>
 
-          {/* Legal & Policies */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-primary text-base md:text-lg">Support & Policies</h4>
-            <ul className="space-y-2">
-              <li><a href="#" className={`text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>My Account</a></li>
-              <li><a href="#" className={`text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>Order Tracking</a></li>
-              <li><Link to="/privacy" className={`text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>Privacy Policy</Link></li>
-              <li><Link to="/terms" className={`text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>Terms & Conditions</Link></li>
-              <li><a href="#" className={`text-sm md:text-base text-muted-foreground hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>Support Center</a></li>
+          {/* Support & Policies */}
+          <div className="space-y-6">
+            <h4 className="font-bold text-xl text-white border-b border-gray-700 pb-3">Support & Policies</h4>
+            <ul className="space-y-3">
+              <li><a href="#" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                My Account
+              </a></li>
+              <li><a href="#" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                Order Tracking
+              </a></li>
+              <li><Link to="/privacy" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                Privacy Policy
+              </Link></li>
+              <li><Link to="/terms" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                Terms & Conditions
+              </Link></li>
+              <li><a href="#" className={`text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                Support Center
+              </a></li>
             </ul>
           </div>
         </div>
+      </div>
 
-        <div className="border-t border-primary/20 mt-6 md:mt-8 pt-6 md:pt-8 text-center text-muted-foreground">
-          <p className={`text-xs md:text-sm ${isTamil ? 'tamil-text' : ''}`}>
-            &copy; {new Date().getFullYear()} Dharani Herbals. All rights reserved.
-          </p>
-          <p className="text-xs mt-2">
-            Developed by <a href="https://www.thinkaside.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ThinkAside</a>
-          </p>
+      {/* Bottom Bar */}
+      <div className="border-t border-gray-700 bg-gray-900/50">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="text-center md:text-left">
+              <p className={`text-sm text-gray-400 ${isTamil ? 'tamil-text' : ''}`}>
+                &copy; {new Date().getFullYear()} Dharani Herbals. All rights reserved.
+              </p>
+            </div>
+            <div className="text-center md:text-right">
+              <p className="text-sm text-gray-400">
+                Developed by <a href="https://www.thinkaside.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-green-400 transition-colors font-medium">ThinkAside</a>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
