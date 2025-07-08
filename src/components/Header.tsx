@@ -123,9 +123,20 @@ const Header = () => {
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 h-9 border-gray-300 focus:border-primary rounded-full bg-gray-50 focus:bg-white transition-all text-sm"
+                  className="pl-10 pr-16 h-9 border-gray-300 focus:border-primary rounded-full bg-gray-50 focus:bg-white transition-all text-sm"
                 />
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                {searchQuery && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-8 top-1/2 transform -translate-y-1/2 h-7 px-1 rounded-full hover:bg-gray-200"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                )}
                 <Button
                   type="submit"
                   size="sm"
@@ -212,9 +223,20 @@ const Header = () => {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-16 h-9 border-gray-300 focus:border-primary rounded-full bg-gray-50 focus:bg-white text-sm"
+                className="pl-10 pr-20 h-9 border-gray-300 focus:border-primary rounded-full bg-gray-50 focus:bg-white text-sm"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              {searchQuery && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-10 top-1/2 transform -translate-y-1/2 h-7 px-1 rounded-full hover:bg-gray-200"
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              )}
               <Button
                 type="submit"
                 size="sm"

@@ -23,6 +23,7 @@ import Wishlist from "./pages/Wishlist";
 import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import WhatsAppFloat from "./components/WhatsAppFloat";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
             <TooltipProvider>
               <Toaster />
               <Sonner />
+              <WhatsAppFloat />
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />

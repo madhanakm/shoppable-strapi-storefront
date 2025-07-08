@@ -57,19 +57,24 @@ const ImageSlider = () => {
   }
 
   return (
-    <div className="relative w-full h-[300px] sm:h-[450px] md:h-[650px] overflow-hidden">
+    <div className="relative w-full h-[300px] sm:h-[450px] md:h-[650px] overflow-hidden rounded-none md:rounded-2xl shadow-2xl">
+      {/* Background overlay for better contrast */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10"></div>
+      
       {slides.map((slide, index) => (
         <div
           key={slide.id || index}
-          className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 ${
-            index === currentSlide ? 'opacity-100' : 'opacity-0'
+          className={`absolute top-0 left-0 w-full h-full transition-all duration-1000 ease-in-out ${
+            index === currentSlide 
+              ? 'opacity-100 scale-100' 
+              : 'opacity-0 scale-105'
           }`}
         >
           {slide.image && (
             <img
               src={slide.image}
               alt={slide.title || `Slide ${index + 1}`}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
               onError={(e) => {
                 console.error(`Error loading image for slide ${index}:`, slide.image);
                 e.target.src = 'https://via.placeholder.com/1200x400?text=Image+Not+Available';
@@ -77,22 +82,32 @@ const ImageSlider = () => {
             />
           )}
           {(slide.title || slide.description) && (
-            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 sm:p-3 md:p-4">
-              {slide.title && <h3 className="text-sm sm:text-lg md:text-xl font-bold">{slide.title}</h3>}
-              {slide.description && <p className="text-xs sm:text-sm md:text-base hidden sm:block">{slide.description}</p>}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white p-4 sm:p-6 md:p-8 z-20">
+              {slide.title && (
+                <h3 className="text-lg sm:text-2xl md:text-3xl font-bold mb-2 md:mb-3 animate-fade-in-up">
+                  {slide.title}
+                </h3>
+              )}
+              {slide.description && (
+                <p className="text-sm sm:text-base md:text-lg text-gray-200 max-w-2xl leading-relaxed animate-fade-in-up">
+                  {slide.description}
+                </p>
+              )}
             </div>
           )}
         </div>
       ))}
       
       {/* Navigation dots */}
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-1 sm:space-x-2">
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center space-x-2 sm:space-x-3 z-30">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${
-              index === currentSlide ? 'bg-white' : 'bg-white bg-opacity-50'
+            className={`transition-all duration-300 rounded-full border-2 ${
+              index === currentSlide 
+                ? 'w-4 h-4 sm:w-5 sm:h-5 bg-white border-white shadow-lg scale-110' 
+                : 'w-3 h-3 sm:w-4 sm:h-4 bg-white/50 border-white/70 hover:bg-white/70 hover:scale-105'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
@@ -101,20 +116,20 @@ const ImageSlider = () => {
       
       {/* Previous/Next buttons */}
       <button
-        className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-primary p-1 sm:p-2 md:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        className="absolute left-4 sm:left-6 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white text-primary p-2 sm:p-3 md:p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-white/20 z-30 group"
         onClick={() => setCurrentSlide((currentSlide - 1 + slides.length) % slides.length)}
         aria-label="Previous slide"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 md:w-6 md:h-6">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6 md:w-7 md:h-7 group-hover:-translate-x-1 transition-transform">
           <path d="M15 18l-6-6 6-6" />
         </svg>
       </button>
       <button
-        className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-primary p-1 sm:p-2 md:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+        className="absolute right-4 sm:right-6 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white text-primary p-2 sm:p-3 md:p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-white/20 z-30 group"
         onClick={() => setCurrentSlide((currentSlide + 1) % slides.length)}
         aria-label="Next slide"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 md:w-6 md:h-6">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6 md:w-7 md:h-7 group-hover:translate-x-1 transition-transform">
           <path d="M9 18l6-6-6-6" />
         </svg>
       </button>

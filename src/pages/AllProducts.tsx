@@ -148,7 +148,17 @@ const AllProducts = () => {
     setSelectedCategory('all');
     setSelectedBrand('all');
     setSelectedType('all');
+    setSearchQuery('');
     setPage(1);
+    // Clear URL search params
+    window.history.replaceState({}, '', '/products');
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setPage(1);
+    // Clear URL search params
+    window.history.replaceState({}, '', '/products');
   };
 
   if (loading) {
@@ -178,11 +188,21 @@ const AllProducts = () => {
         {/* Page Header */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent mb-4">
-            All Products
+            {searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
           </h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Discover our complete range of natural and herbal products for your wellness journey
+            {searchQuery ? `Found ${filteredProducts.length} products matching your search` : 'Discover our complete range of natural and herbal products for your wellness journey'}
           </p>
+          {searchQuery && (
+            <Button 
+              onClick={clearSearch} 
+              variant="outline" 
+              className="mt-4 border-primary text-primary hover:bg-primary/10"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Clear Search
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -427,7 +447,7 @@ const AllProducts = () => {
                       
                       <CardContent className="p-6 bg-gradient-to-b from-white to-gray-50">
                         <Link to={`/product/${product.id}`}>
-                          <h3 className={`font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2 ${isTamil ? 'tamil-text' : ''}`}>
+                          <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 ${isTamil ? 'tamil-text' : ''}`}>
                             {attrs.Name || attrs.name || 'Product'}
                           </h3>
                         </Link>
@@ -438,11 +458,11 @@ const AllProducts = () => {
                               <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                             ))}
                           </div>
-                          <span className="text-sm text-gray-500 ml-2">(4.5)</span>
+                          <span className="text-xs text-gray-500 ml-2">(4.5)</span>
                         </div>
                         
-                        <div className="flex items-center justify-between mb-4">
-                          <span className="text-2xl font-bold text-primary">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-lg font-bold text-primary">
                             {formatPrice(parseFloat(attrs.mrp) || 0)}
                           </span>
                         </div>
@@ -458,7 +478,7 @@ const AllProducts = () => {
                           })}
                         >
                           <ShoppingCart className="w-4 h-4 mr-2" />
-                          <span className={isTamil ? 'tamil-text' : ''}>Add to Cart</span>
+                          <span className={`text-sm ${isTamil ? 'tamil-text' : ''}`}>Add to Cart</span>
                         </Button>
                       </CardContent>
                     </Card>

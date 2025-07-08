@@ -101,10 +101,10 @@ const Footer = () => {
                 <Leaf className="w-8 h-8 text-white" />
               </div>
             </div>
-            <p className={`text-gray-300 leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
+            {/* <p className={`text-gray-300 leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
               Your trusted partner in natural wellness. Bringing you authentic herbal products 
               and traditional remedies for a healthier lifestyle.
-            </p>
+            </p> */}
             
             {/* Contact Info */}
             <div className="space-y-3">

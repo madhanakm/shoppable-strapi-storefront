@@ -202,22 +202,22 @@ const FeaturedProducts = () => {
               </div>
               
               <CardContent className="p-6">
-                <h3 className={`font-semibold text-lg mb-2 group-hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>
+                <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>
                   {product.name}
                 </h3>
                 
                 <div className="flex items-center space-x-1 mb-3">
                   {renderStars(product.rating)}
-                  <span className="text-sm text-muted-foreground ml-2">
+                  <span className="text-xs text-muted-foreground ml-2">
                     ({product.reviews || 0})
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
-                    <span className="text-2xl font-bold text-primary">{formatPrice(product.price)}</span>
+                    <span className="text-lg font-bold text-primary">{formatPrice(product.price)}</span>
                     {product.originalPrice && (
-                      <span className="text-lg text-muted-foreground line-through">
+                      <span className="text-xs text-muted-foreground line-through">
                         {formatPrice(product.originalPrice)}
                       </span>
                     )}
@@ -229,7 +229,7 @@ const FeaturedProducts = () => {
                   onClick={() => handleAddToCart(product)}
                 >
                   <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
-                  <span className={isTamil ? 'tamil-text' : ''}>Add to Cart</span>
+                  <span className={`text-sm ${isTamil ? 'tamil-text' : ''}`}>Add to Cart</span>
                 </Button>
               </CardContent>
             </Card>

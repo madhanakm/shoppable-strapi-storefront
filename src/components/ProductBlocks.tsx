@@ -126,22 +126,22 @@ const ProductCard = ({ product }) => {
       </div>
       
       <CardContent className="p-6 bg-gradient-to-b from-white to-gray-50">
-        <h3 className={`font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2 ${isTamil ? 'tamil-text' : ''}`}>
+        <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 ${isTamil ? 'tamil-text' : ''}`}>
           {product.name}
         </h3>
         
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-1">
             {renderStars(product.rating)}
-            <span className="text-sm text-muted-foreground ml-1">({product.reviews || 0})</span>
+            <span className="text-xs text-muted-foreground ml-1">({product.reviews || 0})</span>
           </div>
         </div>
         
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-primary">{formatPrice(product.price)}</span>
+            <span className="text-lg font-bold text-primary">{formatPrice(product.price)}</span>
             {product.originalPrice && (
-              <span className="text-sm text-muted-foreground line-through">
+              <span className="text-xs text-muted-foreground line-through">
                 {formatPrice(product.originalPrice)}
               </span>
             )}
@@ -153,7 +153,7 @@ const ProductCard = ({ product }) => {
           onClick={handleAddToCart}
         >
           <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-bounce" />
-          <span className={isTamil ? 'tamil-text' : ''}>Add to Cart</span>
+          <span className={`text-sm ${isTamil ? 'tamil-text' : ''}`}>Add to Cart</span>
         </Button>
         </CardContent>
       </Card>

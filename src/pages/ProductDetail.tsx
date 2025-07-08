@@ -159,90 +159,185 @@ const ProductDetail = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
       <Header />
       <div className="container mx-auto px-4 py-8 md:py-16">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar with Categories and Brands */}
-          <div className="md:w-64 flex-shrink-0 order-last md:order-first">
-            <div className="bg-gray-50 p-4 rounded-lg shadow mb-6">
-              <h2 className="font-bold text-lg mb-4">Categories</h2>
-              <ul className="space-y-2">
-                <li>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Enhanced Sidebar */}
+          <div className="lg:w-80 flex-shrink-0 order-last lg:order-first">
+            <div className="sticky top-24 space-y-4">
+              {/* Categories Card */}
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-primary to-green-600 p-4 text-white">
+                  <h2 className="font-bold text-lg flex items-center gap-2">
+                    <div className="w-5 h-5 bg-white/20 rounded-lg flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-sm"></div>
+                    </div>
+                    Categories
+                  </h2>
+                </div>
+                <div className="p-4">
+                  <ul className="space-y-2">
+                    <li>
+                      <a 
+                        href="/products"
+                        className="flex items-center px-3 py-2 rounded-xl hover:bg-primary/5 hover:text-primary transition-all duration-300 group"
+                      >
+                        <div className="w-2 h-2 bg-gray-300 rounded-full mr-2 group-hover:bg-primary transition-colors"></div>
+                        <span className="font-medium text-sm">All Categories</span>
+                      </a>
+                    </li>
+                    {categories.map(category => (
+                      <li key={category}>
+                        <a 
+                          href={`/products?category=${encodeURIComponent(category)}`}
+                          className={`flex items-center px-3 py-2 rounded-xl transition-all duration-300 group ${
+                            product.category === category 
+                              ? 'bg-primary/10 text-primary font-semibold' 
+                              : 'hover:bg-primary/5 hover:text-primary'
+                          }`}
+                        >
+                          <div className={`w-2 h-2 rounded-full mr-2 transition-colors ${
+                            product.category === category ? 'bg-primary' : 'bg-gray-300 group-hover:bg-primary'
+                          }`}></div>
+                          <span className="font-medium text-sm">{category}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              
+              {/* Brands Card */}
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
+                  <h2 className="font-bold text-lg flex items-center gap-2">
+                    <div className="w-5 h-5 bg-white/20 rounded-lg flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+                    Brands
+                  </h2>
+                </div>
+                <div className="p-4">
+                  <ul className="space-y-2">
+                    <li>
+                      <a 
+                        href="/products"
+                        className="flex items-center px-3 py-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 group"
+                      >
+                        <div className="w-2 h-2 bg-gray-300 rounded-full mr-2 group-hover:bg-blue-500 transition-colors"></div>
+                        <span className="font-medium text-sm">All Brands</span>
+                      </a>
+                    </li>
+                    {brands.map(brand => (
+                      <li key={brand}>
+                        <a 
+                          href={`/products?brand=${encodeURIComponent(brand)}`}
+                          className={`flex items-center px-3 py-2 rounded-xl transition-all duration-300 group ${
+                            product.brand === brand 
+                              ? 'bg-blue-50 text-blue-600 font-semibold' 
+                              : 'hover:bg-blue-50 hover:text-blue-600'
+                          }`}
+                        >
+                          <div className={`w-2 h-2 rounded-full mr-2 transition-colors ${
+                            product.brand === brand ? 'bg-blue-500' : 'bg-gray-300 group-hover:bg-blue-500'
+                          }`}></div>
+                          <span className="font-medium text-sm">{brand}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              
+              {/* Quick Actions Card */}
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-green-500 to-teal-600 p-4 text-white">
+                  <h2 className="font-bold text-lg flex items-center gap-2">
+                    <div className="w-5 h-5 bg-white/20 rounded-lg flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-lg"></div>
+                    </div>
+                    Quick Actions
+                  </h2>
+                </div>
+                <div className="p-4 space-y-3">
                   <a 
-                    href="/products"
-                    className="block px-2 py-1 rounded hover:bg-gray-200"
+                    href="/products" 
+                    className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:from-green-50 hover:to-green-100 hover:text-green-600 transition-all duration-300 group"
                   >
-                    All Categories
+                    <span className="font-medium text-sm">Browse All Products</span>
+                    <div className="w-5 h-5 bg-white rounded-lg flex items-center justify-center group-hover:bg-green-100 transition-colors text-xs">
+                      →
+                    </div>
                   </a>
-                </li>
-                {categories.map(category => (
-                  <li key={category}>
-                    <a 
-                      href={`/products?category=${encodeURIComponent(category)}`}
-                      className={`block px-2 py-1 rounded hover:bg-gray-200 ${product.category === category ? 'font-bold text-primary' : ''}`}
-                    >
-                      {category}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <div className="bg-gray-50 p-4 rounded-lg shadow mb-6">
-              <h2 className="font-bold text-lg mb-4">Brands</h2>
-              <ul className="space-y-2">
-                <li>
                   <a 
-                    href="/products"
-                    className="block px-2 py-1 rounded hover:bg-gray-200"
+                    href="/cart" 
+                    className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:from-green-50 hover:to-green-100 hover:text-green-600 transition-all duration-300 group"
                   >
-                    All Brands
+                    <span className="font-medium text-sm">View Cart</span>
+                    <div className="w-5 h-5 bg-white rounded-lg flex items-center justify-center group-hover:bg-green-100 transition-colors text-xs">
+                      🛒
+                    </div>
                   </a>
-                </li>
-                {brands.map(brand => (
-                  <li key={brand}>
-                    <a 
-                      href={`/products?brand=${encodeURIComponent(brand)}`}
-                      className={`block px-2 py-1 rounded hover:bg-gray-200 ${product.brand === brand ? 'font-bold text-primary' : ''}`}
-                    >
-                      {brand}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+                </div>
+              </div>
             </div>
           </div>
           
-          {/* Product Image with Zoom */}
-          <div className="md:w-1/3">
-            <div 
-              ref={imageContainerRef}
-              className="bg-gray-100 rounded-lg overflow-hidden relative group max-w-md mx-auto"
-              onMouseMove={handleMouseMove}
-              onMouseEnter={() => zoomedImageRef.current?.classList.add('scale-150')}
-              onMouseLeave={() => zoomedImageRef.current?.classList.remove('scale-150')}
-              onClick={() => setZoomActive(true)}
-            >
-              {product.photo ? (
-                <>
-                  <img 
-                    ref={zoomedImageRef}
-                    src={product.photo} 
-                    alt={product.Name || product.name || product.title || 'Product'} 
-                    className="w-full h-auto max-h-[400px] object-contain cursor-zoom-in transition-transform duration-200"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300">
-                    <span className="text-white opacity-0 group-hover:opacity-100 bg-black bg-opacity-50 px-3 py-1 rounded-full text-sm">
-                      Click for fullscreen
-                    </span>
+          {/* Enhanced Product Image */}
+          <div className="lg:w-1/2">
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
+              <div 
+                ref={imageContainerRef}
+                className="relative group bg-gradient-to-br from-gray-50 to-white p-8"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={() => zoomedImageRef.current?.classList.add('scale-110')}
+                onMouseLeave={() => zoomedImageRef.current?.classList.remove('scale-110')}
+                onClick={() => setZoomActive(true)}
+              >
+                {product.photo ? (
+                  <>
+                    <img 
+                      ref={zoomedImageRef}
+                      src={product.photo} 
+                      alt={product.Name || product.name || product.title || 'Product'} 
+                      className="w-full h-auto max-h-[500px] object-contain cursor-zoom-in transition-all duration-500 rounded-2xl"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-2xl">
+                      <div className="opacity-0 group-hover:opacity-100 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full text-gray-800 font-medium shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                        🔍 Click to zoom
+                      </div>
+                    </div>
+                    {/* Decorative elements */}
+                    <div className="absolute top-4 right-4 w-12 h-12 bg-primary/10 rounded-full blur-xl"></div>
+                    <div className="absolute bottom-4 left-4 w-8 h-8 bg-green-200/30 rounded-full blur-lg"></div>
+                  </>
+                ) : (
+                  <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        📷
+                      </div>
+                      <span className="text-gray-500 text-lg font-medium">No image available</span>
+                    </div>
                   </div>
-                </>
-              ) : (
-                <div className="w-full aspect-square flex items-center justify-center bg-gray-200">
-                  <span className="text-gray-400 text-2xl">No image available</span>
+                )}
+              </div>
+              
+              {/* Product Description under image */}
+              <div className="p-6 border-t border-gray-100">
+                <h3 className="text-lg font-bold mb-3 text-gray-800 flex items-center gap-2">
+                  <div className="w-5 h-5 bg-primary/10 rounded-lg flex items-center justify-center text-xs">
+                    📝
+                  </div>
+                  Description
+                </h3>
+                <div className="prose prose-gray max-w-none">
+                  <p className="text-gray-700 leading-relaxed text-sm">
+                    {product.description || product.desc || 'No description available for this product.'}
+                  </p>
                 </div>
-              )}
+              </div>
             </div>
             
             {/* Zoom Modal */}
@@ -269,136 +364,179 @@ const ProductDetail = () => {
             )}
           </div>
           
-          {/* Product Info */}
-          <div className="md:w-1/3">
-            <h1 className="text-3xl font-bold mb-2">{product.Name || product.name || product.title || 'Product'}</h1>
-            
-            <div className="flex items-center mb-4">
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star 
-                    key={star} 
-                    className={`h-5 w-5 ${star <= (product.rating || 4) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
-                  />
-                ))}
+          {/* Enhanced Product Info */}
+          <div className="lg:w-1/2">
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 md:p-10">
+              <div className="mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight">
+                  {product.Name || product.name || product.title || 'Product'}
+                </h1>
+                
+                <div className="flex items-center mb-6">
+                  <div className="flex mr-3">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star 
+                        key={star} 
+                        className={`h-5 w-5 ${star <= (product.rating || 4) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full font-medium">
+                    {product.reviews || 0} reviews
+                  </span>
+                </div>
               </div>
-              <span className="text-sm text-gray-500 ml-2">{product.reviews || 0} reviews</span>
-            </div>
-            
-            <div className="mb-6">
-              <span className="text-3xl font-bold text-primary">{formatPrice(product.mrp || product.price || 0)}</span>
-              {product.originalPrice && (
-                <span className="text-lg text-gray-500 line-through ml-2">
-                  {formatPrice(product.originalPrice)}
-                </span>
-              )}
-            </div>
+              
+              <div className="mb-8 p-6 bg-gradient-to-r from-primary/5 to-green-50 rounded-2xl border border-primary/10">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-4xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
+                    {formatPrice(product.mrp || product.price || 0)}
+                  </span>
+                  {product.originalPrice && (
+                    <span className="text-xl text-gray-500 line-through">
+                      {formatPrice(product.originalPrice)}
+                    </span>
+                  )}
+                </div>
+                {product.originalPrice && (
+                  <div className="mt-2">
+                    <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
+                      Save {Math.round(((product.originalPrice - (product.mrp || product.price)) / product.originalPrice) * 100)}%
+                    </span>
+                  </div>
+                )}
+              </div>
             
             {/* Description moved to bottom */}
             
-            {/* Quantity Selector */}
-            <div className="flex items-center mb-6">
-              <span className="mr-4">Quantity:</span>
-              <div className="flex items-center border rounded">
-                <button 
-                  className="px-3 py-1 border-r"
-                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                >
-                  -
-                </button>
-                <span className="px-4 py-1">{quantity}</span>
-                <button 
-                  className="px-3 py-1 border-l"
-                  onClick={() => setQuantity(q => q + 1)}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button 
-                className="flex-1"
-                onClick={handleAddToCart}
-              >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Cart
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="flex-1"
-                onClick={handleWishlistToggle}
-              >
-                <Heart className={`mr-2 h-5 w-5 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                {isInWishlist(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
-              </Button>
-            </div>
-            
-            {/* Product Details */}
-            <div className="mt-8">
-              <h2 className="text-xl font-bold mb-4">Product Details</h2>
-              <div className="grid grid-cols-2 gap-4">
-                {product.brand && (
-                  <div>
-                    <span className="font-semibold">Brand:</span> {product.brand}
-                  </div>
-                )}
-                {product.category && (
-                  <div>
-                    <span className="font-semibold">Category:</span> {product.category}
-                  </div>
-                )}
-                {product.skuid && (
-                  <div>
-                    <span className="font-semibold">SKU:</span> {product.skuid}
-                  </div>
-                )}
-                {product.hsn && (
-                  <div>
-                    <span className="font-semibold">HSN:</span> {product.hsn}
-                  </div>
-                )}
+              {/* Enhanced Quantity Selector */}
+              <div className="mb-8">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Quantity</label>
+                <div className="flex items-center bg-gray-50 rounded-2xl p-2 w-fit">
+                  <button 
+                    className="w-10 h-10 rounded-xl bg-white shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center font-bold text-gray-600 hover:text-primary"
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  >
+                    −
+                  </button>
+                  <span className="px-6 py-2 font-bold text-lg min-w-[60px] text-center">{quantity}</span>
+                  <button 
+                    className="w-10 h-10 rounded-xl bg-white shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center font-bold text-gray-600 hover:text-primary"
+                    onClick={() => setQuantity(q => q + 1)}
+                  >
+                    +
+                  </button>
+                </div>
               </div>
               
-              {/* Product Description */}
-              <div className="mt-6 border-t pt-6">
-                <h3 className="text-lg font-semibold mb-3">Product Description</h3>
-                <p className="text-gray-700">{product.description || product.desc || 'No description available.'}</p>
+              {/* Enhanced Action Buttons */}
+              <div className="space-y-4 mb-8">
+                <Button 
+                  className="w-full bg-gradient-to-r from-primary to-green-600 hover:from-primary/90 hover:to-green-500 text-white shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 py-4 text-lg font-semibold rounded-2xl"
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingCart className="mr-3 h-6 w-6" />
+                  Add to Cart
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 py-4 text-lg font-semibold rounded-2xl"
+                  onClick={handleWishlistToggle}
+                >
+                  <Heart className={`mr-3 h-6 w-6 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                  {isInWishlist(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                </Button>
+              </div>
+            
+              {/* Enhanced Product Details */}
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6">
+                  <h2 className="text-xl font-bold mb-4 text-gray-800">Product Details</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {product.brand && (
+                      <div className="flex items-center p-3 bg-white rounded-xl shadow-sm">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                        <div>
+                          <span className="text-xs text-gray-500 uppercase tracking-wide">Brand</span>
+                          <div className="font-semibold text-gray-800">{product.brand}</div>
+                        </div>
+                      </div>
+                    )}
+                    {product.category && (
+                      <div className="flex items-center p-3 bg-white rounded-xl shadow-sm">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                        <div>
+                          <span className="text-xs text-gray-500 uppercase tracking-wide">Category</span>
+                          <div className="font-semibold text-gray-800">{product.category}</div>
+                        </div>
+                      </div>
+                    )}
+                    {product.skuid && (
+                      <div className="flex items-center p-3 bg-white rounded-xl shadow-sm">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+                        <div>
+                          <span className="text-xs text-gray-500 uppercase tracking-wide">SKU</span>
+                          <div className="font-semibold text-gray-800">{product.skuid}</div>
+                        </div>
+                      </div>
+                    )}
+                    {product.hsn && (
+                      <div className="flex items-center p-3 bg-white rounded-xl shadow-sm">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                        <div>
+                          <span className="text-xs text-gray-500 uppercase tracking-wide">HSN</span>
+                          <div className="font-semibold text-gray-800">{product.hsn}</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
         
-        {/* Related Products */}
+        {/* Enhanced Related Products */}
         {relatedProducts.length > 0 && (
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="mt-20">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4">
+                You Might Also Like
+              </h2>
+              <div className="w-24 h-1 bg-gradient-to-r from-primary to-green-600 mx-auto rounded-full"></div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((relatedProduct) => (
                 <a 
                   href={`/product/${relatedProduct.id}`} 
                   key={relatedProduct.id}
                   className="block group"
                 >
-                  <div className="bg-gray-100 rounded-lg overflow-hidden aspect-square mb-3">
-                    {relatedProduct.attributes?.photo ? (
-                      <img 
-                        src={relatedProduct.attributes.photo} 
-                        alt={relatedProduct.attributes?.Name || 'Product'} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-gray-400">No image</span>
-                      </div>
-                    )}
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                    <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-white p-4">
+                      {relatedProduct.attributes?.photo ? (
+                        <img 
+                          src={relatedProduct.attributes.photo} 
+                          alt={relatedProduct.attributes?.Name || 'Product'} 
+                          className="w-full h-48 object-contain group-hover:scale-105 transition-transform duration-500 rounded-xl"
+                        />
+                      ) : (
+                        <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl">
+                          <span className="text-gray-400 text-sm">No image</span>
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 w-8 h-8 bg-primary/10 rounded-full blur-lg"></div>
+                    </div>
+                    <div className="p-6">
+                      <h3 className="font-semibold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                        {relatedProduct.attributes?.Name || 'Product'}
+                      </h3>
+                      <p className="text-lg font-bold text-primary">
+                        {formatPrice(relatedProduct.attributes?.mrp || 0)}
+                      </p>
+                    </div>
                   </div>
-                  <h3 className="font-medium group-hover:text-primary transition-colors">
-                    {relatedProduct.attributes?.Name || 'Product'}
-                  </h3>
-                  <p className="font-bold mt-1">{formatPrice(relatedProduct.attributes?.mrp || 0)}</p>
                 </a>
               ))}
             </div>
