@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/lib/utils';
 import { getAddresses } from '@/services/profile';
+import { generateOrderNumber, initiatePayment, OrderData } from '@/services/payment';
 import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package, Plus } from 'lucide-react';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
@@ -83,20 +84,104 @@ const Checkout = () => {
     setIsLoading(true);
 
     try {
-      // Simulate order processing
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Generate order number
+      const orderNumber = await generateOrderNumber();
       
-      toast({
-        title: "Order Placed Successfully!",
-        description: "You will receive a confirmation email shortly.",
-      });
+      // Get address info
+      let shippingAddr = '';
+      if (selectedShippingAddress && !useManualAddress) {
+        const attrs = selectedShippingAddress.attributes || selectedShippingAddress;
+        shippingAddr = `${attrs.address}, ${attrs.city}, ${attrs.state} - ${attrs.pincode}`;
+      } else {
+        shippingAddr = `${formData.shippingAddress}, ${formData.shippingCity}, ${formData.shippingState} - ${formData.shippingPincode}`;
+      }
+
+      if (formData.paymentMethod === 'online') {
+        // Prepare order data for Razorpay
+        const orderData: OrderData = {
+          items: cartItems.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image
+          })),
+          total: total,
+          customerInfo: {
+            name: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            address: formData.shippingAddress || selectedShippingAddress?.attributes?.address || selectedShippingAddress?.address || '',
+            city: formData.shippingCity || selectedShippingAddress?.attributes?.city || selectedShippingAddress?.city || '',
+            state: formData.shippingState || selectedShippingAddress?.attributes?.state || selectedShippingAddress?.state || '',
+            pincode: formData.shippingPincode || selectedShippingAddress?.attributes?.pincode || selectedShippingAddress?.pincode || ''
+          }
+        };
+
+        console.log('Initiating payment with data:', orderData);
+        
+        // Initiate Razorpay payment
+        await initiatePayment(orderData, orderNumber);
+        
+        toast({
+          title: "Payment Successful!",
+          description: `Order #${orderNumber} placed successfully. You will receive a confirmation email shortly.`,
+        });
+      } else {
+        // COD Order - Store directly
+        const orderPayload = {
+          data: {
+            orderNumber,
+            amount: total,
+            status: 'pending',
+            customerName: formData.fullName,
+            customerEmail: formData.email,
+            customerPhone: formData.phone,
+            shippingAddress: shippingAddr,
+            items: cartItems.map(item => ({
+              id: item.id,
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              image: item.image,
+              total: item.price * item.quantity
+            })),
+            paymentMethod: 'cod',
+            notes: formData.notes,
+            createdAt: new Date().toISOString()
+          }
+        };
+
+        console.log('Placing COD order:', orderPayload);
+        
+        const response = await fetch('https://api.dharaniherbbals.com/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderPayload)
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('COD order error:', errorText);
+          throw new Error(`Failed to place order: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('COD order placed successfully:', result);
+        
+        toast({
+          title: "Order Placed Successfully!",
+          description: `Order #${orderNumber} placed. You will receive a confirmation call shortly.`,
+        });
+      }
       
       clearCart();
-      navigate('/');
+      navigate('/order-success');
     } catch (error) {
+      console.error('Order error:', error);
       toast({
         title: "Order Failed",
-        description: "Please try again or contact support.",
+        description: error.message || "Please try again or contact support.",
         variant: "destructive",
       });
     } finally {
@@ -457,18 +542,19 @@ const Checkout = () => {
                         </label>
                       </div>
                       
-                      <div className="flex items-center space-x-3 p-4 border-2 border-gray-200 rounded-lg opacity-50">
+                      <div className="flex items-center space-x-3 p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
                         <input
                           type="radio"
                           id="online"
                           name="paymentMethod"
                           value="online"
-                          disabled
-                          className="w-4 h-4"
+                          checked={formData.paymentMethod === 'online'}
+                          onChange={handleInputChange}
+                          className="w-4 h-4 text-blue-600"
                         />
-                        <label htmlFor="online" className="flex-1">
-                          <div className="font-semibold text-gray-600">Online Payment</div>
-                          <div className="text-sm text-gray-500">Coming soon - UPI, Cards, Net Banking</div>
+                        <label htmlFor="online" className="flex-1 cursor-pointer">
+                          <div className="font-semibold text-blue-800">Online Payment</div>
+                          <div className="text-sm text-blue-600">UPI, Cards, Net Banking via Razorpay</div>
                         </label>
                       </div>
                     </div>

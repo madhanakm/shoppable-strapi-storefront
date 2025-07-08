@@ -145,6 +145,15 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Ensure pages start at top */
+body {
+  overflow-x: hidden;
+}
+
+.page-container {
+  min-height: 100vh;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

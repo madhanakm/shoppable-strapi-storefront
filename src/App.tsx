@@ -24,7 +24,9 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import RefundReturns from "./pages/RefundReturns";
+import OrderSuccess from "./pages/OrderSuccess";
 import WhatsAppFloat from "./components/WhatsAppFloat";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,7 @@ const App = () => (
               <Sonner />
               <WhatsAppFloat />
               <BrowserRouter>
+                <ScrollToTop />
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/products" element={<AllProducts />} />
@@ -56,6 +59,7 @@ const App = () => (
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/refund-returns" element={<RefundReturns />} />
+                  <Route path="/order-success" element={<OrderSuccess />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

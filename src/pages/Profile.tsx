@@ -12,7 +12,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { useToast } from '@/hooks/use-toast';
 import { updateProfile, changePassword, addAddress, getAddresses, updateAddress, deleteAddress } from '@/services/profile';
-import { User, Lock, MapPin, Edit, Trash2, Plus, RefreshCw } from 'lucide-react';
+import { User, Lock, MapPin, Edit, Trash2, Plus, RefreshCw, Package, Calendar, CreditCard, Truck } from 'lucide-react';
+import { formatPrice } from '@/lib/utils';
 
 const Profile = () => {
   const { user, isAuthenticated } = useAuth();
@@ -48,6 +49,10 @@ const Profile = () => {
     confirmPassword: ''
   });
 
+  // Orders data
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  
   // Address data
   const [addresses, setAddresses] = useState<any[]>([]);
   const [editingAddress, setEditingAddress] = useState<any>(null);
@@ -65,6 +70,7 @@ const Profile = () => {
   useEffect(() => {
     if (user?.id) {
       loadAddresses();
+      loadOrders();
     }
   }, [user]);
 
@@ -72,6 +78,20 @@ const Profile = () => {
     if (user?.id) {
       const userAddresses = await getAddresses(user.id);
       setAddresses(userAddresses);
+    }
+  };
+  
+  const loadOrders = async () => {
+    if (!user?.email) return;
+    setLoadingOrders(true);
+    try {
+      const response = await fetch(`https://api.dharaniherbbals.com/api/orders?filters[customerEmail][$eq]=${user.email}&sort=createdAt:desc`);
+      const data = await response.json();
+      setOrders(data.data || []);
+    } catch (error) {
+      console.error('Error loading orders:', error);
+    } finally {
+      setLoadingOrders(false);
     }
   };
   
@@ -209,8 +229,12 @@ const Profile = () => {
             <p className="text-gray-600 text-lg">Welcome back, {user?.username}!</p>
           </div>
           
-          <Tabs defaultValue="profile" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-3 bg-white shadow-lg rounded-xl p-2 border">
+          <Tabs defaultValue="orders" className="space-y-8">
+            <TabsList className="grid w-full grid-cols-4 bg-white shadow-lg rounded-xl p-2 border">
+              <TabsTrigger value="orders" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all">
+                <Package className="w-4 h-4" />
+                <span className="hidden sm:inline">Orders</span>
+              </TabsTrigger>
               <TabsTrigger value="profile" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all">
                 <User className="w-4 h-4" />
                 <span className="hidden sm:inline">Profile</span>
@@ -224,6 +248,118 @@ const Profile = () => {
                 <span className="hidden sm:inline">Addresses</span>
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="orders">
+              <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+                <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-t-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <CardTitle className="flex items-center gap-2 text-xl">
+                      <Package className="w-5 h-5" />
+                      My Orders ({orders.length})
+                    </CardTitle>
+                    <Button variant="outline" size="sm" onClick={loadOrders} disabled={loadingOrders} className="w-full sm:w-auto">
+                      <RefreshCw className={`w-4 h-4 mr-2 ${loadingOrders ? 'animate-spin' : ''}`} />
+                      Refresh
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6 md:p-8">
+                  {loadingOrders ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-gray-500">Loading orders...</p>
+                    </div>
+                  ) : orders.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500 text-lg">No orders found</p>
+                      <p className="text-gray-400 text-sm">Your order history will appear here</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {orders.map((order) => {
+                        const attrs = order.attributes || order;
+                        const orderDate = new Date(attrs.createdAt).toLocaleDateString('en-IN', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        });
+                        
+                        return (
+                          <div key={order.id} className="bg-gradient-to-r from-gray-50 to-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
+                            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+                              <div className="flex-1">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+                                  <h3 className="font-bold text-lg text-gray-800">Order #{attrs.orderNumber}</h3>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                                      attrs.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                      attrs.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                      attrs.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {attrs.status}
+                                    </span>
+                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                                      attrs.paymentMethod === 'razorpay' ? 'bg-blue-100 text-blue-800' :
+                                      'bg-orange-100 text-orange-800'
+                                    }`}>
+                                      {attrs.paymentMethod === 'razorpay' ? 'Online' : 'COD'}
+                                    </span>
+                                  </div>
+                                </div>
+                                
+                                <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                                  <div className="flex items-center gap-2 text-gray-600">
+                                    <Calendar className="w-4 h-4" />
+                                    <span className="text-sm">{orderDate}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-gray-600">
+                                    <CreditCard className="w-4 h-4" />
+                                    <span className="text-sm font-semibold">{formatPrice(attrs.amount)}</span>
+                                  </div>
+                                </div>
+                                
+                                {attrs.items && attrs.items.length > 0 && (
+                                  <div className="mb-4">
+                                    <h4 className="font-semibold text-gray-700 mb-2">Items ({attrs.items.length}):</h4>
+                                    <div className="space-y-2">
+                                      {attrs.items.slice(0, 3).map((item: any, idx: number) => (
+                                        <div key={idx} className="flex items-center gap-3 text-sm">
+                                          <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                                            <Package className="w-4 h-4 text-gray-500" />
+                                          </div>
+                                          <span className="flex-1">{item.name}</span>
+                                          <span className="text-gray-500">Qty: {item.quantity}</span>
+                                          <span className="font-semibold">{formatPrice(item.total || item.price * item.quantity)}</span>
+                                        </div>
+                                      ))}
+                                      {attrs.items.length > 3 && (
+                                        <p className="text-sm text-gray-500 ml-11">+{attrs.items.length - 3} more items</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {attrs.shippingAddress && (
+                                  <div className="flex items-start gap-2 text-sm text-gray-600">
+                                    <Truck className="w-4 h-4 mt-1" />
+                                    <div>
+                                      <span className="font-medium">Delivery Address:</span>
+                                      <p className="mt-1">{attrs.shippingAddress}</p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             <TabsContent value="profile">
               <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
