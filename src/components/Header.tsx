@@ -53,6 +53,38 @@ const Header = () => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Search Bar in Top Header */}
+              <div className="flex flex-1 max-w-xs mx-4">
+                <form onSubmit={handleSearch} className="relative w-full">
+                  <Input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-16 h-8 border-white/50 focus:border-white rounded-full bg-white focus:bg-white transition-all text-sm text-gray-700 placeholder-gray-500"
+                  />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  {searchQuery && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-8 top-1/2 transform -translate-y-1/2 h-6 px-1 rounded-full hover:bg-gray-100 text-gray-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  )}
+                  <Button
+                    type="submit"
+                    size="sm"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 px-2 rounded-full bg-primary hover:bg-primary/90 text-white border-0"
+                  >
+                    <Search className="w-3 h-3" />
+                  </Button>
+                </form>
+              </div>
+              
               <Button
                 variant="ghost"
                 size="sm"
@@ -68,7 +100,7 @@ const Header = () => {
       </div>
 
       {/* Main Header */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <header className="bg-white/95 backdrop-blur-md border-b-2 border-primary sticky top-0 z-50 shadow-lg">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
@@ -87,8 +119,8 @@ const Header = () => {
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-8">
+            {/* Desktop Navigation - Centered */}
+            <nav className="hidden lg:flex items-center justify-center flex-1 space-x-8">
               <Link 
                 to="/" 
                 className={`font-medium transition-colors hover:text-primary ${isTamil ? 'tamil-text' : ''}`}
@@ -115,37 +147,7 @@ const Header = () => {
               </Link>
             </nav>
 
-            {/* Search Bar - Desktop */}
-            <div className="hidden md:flex flex-1 max-w-xs mx-4">
-              <form onSubmit={handleSearch} className="relative w-full">
-                <Input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-16 h-9 border-gray-300 focus:border-primary rounded-full bg-gray-50 focus:bg-white transition-all text-sm"
-                />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                {searchQuery && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-8 top-1/2 transform -translate-y-1/2 h-7 px-1 rounded-full hover:bg-gray-200"
-                  >
-                    <X className="w-3 h-3" />
-                  </Button>
-                )}
-                <Button
-                  type="submit"
-                  size="sm"
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 px-2 rounded-full bg-primary hover:bg-primary/90"
-                >
-                  <Search className="w-3 h-3" />
-                </Button>
-              </form>
-            </div>
+
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-2 md:space-x-4">

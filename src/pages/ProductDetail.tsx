@@ -7,11 +7,14 @@ import { ShoppingCart, Heart, Star } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { formatPrice } from '@/lib/utils';
+import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { translate, language } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -173,7 +176,7 @@ const ProductDetail = () => {
                     <div className="w-5 h-5 bg-white/20 rounded-lg flex items-center justify-center">
                       <div className="w-2 h-2 bg-white rounded-sm"></div>
                     </div>
-                    Categories
+                    {translate('sidebar.categories')}
                   </h2>
                 </div>
                 <div className="p-4">
@@ -184,7 +187,9 @@ const ProductDetail = () => {
                         className="flex items-center px-3 py-2 rounded-xl hover:bg-primary/5 hover:text-primary transition-all duration-300 group"
                       >
                         <div className="w-2 h-2 bg-gray-300 rounded-full mr-2 group-hover:bg-primary transition-colors"></div>
-                        <span className="font-medium text-sm">All Categories</span>
+                        <span className={`font-medium text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                          {translate('sidebar.allCategories')}
+                        </span>
                       </a>
                     </li>
                     {categories.map(category => (
@@ -215,7 +220,7 @@ const ProductDetail = () => {
                     <div className="w-5 h-5 bg-white/20 rounded-lg flex items-center justify-center">
                       <div className="w-2 h-2 bg-white rounded-full"></div>
                     </div>
-                    Brands
+                    {translate('sidebar.brands')}
                   </h2>
                 </div>
                 <div className="p-4">
@@ -257,7 +262,7 @@ const ProductDetail = () => {
                     <div className="w-5 h-5 bg-white/20 rounded-lg flex items-center justify-center">
                       <div className="w-2 h-2 bg-white rounded-lg"></div>
                     </div>
-                    Quick Actions
+                    {translate('sidebar.quickActions')}
                   </h2>
                 </div>
                 <div className="p-4 space-y-3">

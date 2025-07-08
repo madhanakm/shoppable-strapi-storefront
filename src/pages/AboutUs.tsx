@@ -17,45 +17,45 @@ import {
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const AboutUs = () => {
-  const { language } = useTranslation();
+  const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
 
   const values = [
     {
       icon: Heart,
-      title: 'Quality First',
-      description: 'We prioritize quality in every product we create, ensuring the highest standards of herbal wellness.',
+      titleKey: 'about.qualityFirst',
+      descKey: 'about.qualityFirstDesc',
       color: 'text-red-500',
       bgColor: 'bg-red-50'
     },
     {
       icon: Shield,
-      title: 'Natural & Safe',
-      description: 'All our products are made from natural ingredients, tested for safety and efficacy.',
+      titleKey: 'about.naturalSafe',
+      descKey: 'about.naturalSafeDesc',
       color: 'text-green-500',
       bgColor: 'bg-green-50'
     },
     {
       icon: Award,
-      title: 'Certified Excellence',
-      description: 'Our products meet international quality standards and certifications.',
+      titleKey: 'about.certifiedExcellence',
+      descKey: 'about.certifiedExcellenceDesc',
       color: 'text-blue-500',
       bgColor: 'bg-blue-50'
     },
     {
       icon: Users,
-      title: 'Customer Focused',
-      description: 'We listen to our customers and continuously improve our products based on feedback.',
+      titleKey: 'about.customerFocused',
+      descKey: 'about.customerFocusedDesc',
       color: 'text-purple-500',
       bgColor: 'bg-purple-50'
     }
   ];
 
   const stats = [
-    { number: '10+', label: 'Years Experience' },
-    { number: '1000+', label: 'Happy Customers' },
-    { number: '50+', label: 'Products' },
-    { number: '100%', label: 'Natural' }
+    { number: '10+', labelKey: 'about.yearsExperience' },
+    { number: '1000+', labelKey: 'about.happyCustomers' },
+    { number: '50+', labelKey: 'about.products' },
+    { number: '100%', labelKey: 'about.natural' }
   ];
 
   return (
@@ -66,9 +66,11 @@ const AboutUs = () => {
       <section className="bg-gradient-to-r from-primary to-green-600 text-white py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">About Dharani Herbals</h1>
-            <p className="text-xl md:text-2xl opacity-90 leading-relaxed">
-              Your trusted partner in natural wellness and herbal healthcare solutions
+            <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('about.title')}
+            </h1>
+            <p className={`text-xl md:text-2xl opacity-90 leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('about.subtitle')}
             </p>
           </div>
         </div>
@@ -79,23 +81,18 @@ const AboutUs = () => {
         <section className="mb-16">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-6">Our Story</h2>
+              <h2 className={`text-3xl font-bold text-gray-800 mb-6 ${isTamil ? 'tamil-text' : ''}`}>
+                {translate('about.ourStory')}
+              </h2>
               <div className="space-y-4 text-gray-600 leading-relaxed">
-                <p>
-                  Dharani Herbals was founded with a simple yet powerful vision: to bring the ancient wisdom of 
-                  Ayurveda and herbal medicine to modern wellness seekers. Our journey began with a deep respect 
-                  for nature's healing power and a commitment to providing authentic, high-quality herbal products.
+                <p className={isTamil ? 'tamil-text' : ''}>
+                  {translate('about.storyPara1')}
                 </p>
-                <p>
-                  Located in the heart of Tamil Nadu, we have been serving communities with traditional herbal 
-                  remedies and wellness products for over a decade. Our expertise lies in combining time-tested 
-                  Ayurvedic formulations with modern quality standards to create products that truly make a difference 
-                  in people's lives.
+                <p className={isTamil ? 'tamil-text' : ''}>
+                  {translate('about.storyPara2')}
                 </p>
-                <p>
-                  Every product we create is a testament to our dedication to natural wellness, sustainable practices, 
-                  and the well-being of our customers. We believe that nature has provided us with everything we need 
-                  to maintain optimal health, and our mission is to make these natural solutions accessible to everyone.
+                <p className={isTamil ? 'tamil-text' : ''}>
+                  {translate('about.storyPara3')}
                 </p>
               </div>
             </div>
@@ -119,11 +116,11 @@ const AboutUs = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-primary to-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Target className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">Our Mission</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  To provide authentic, high-quality herbal products that promote natural wellness and healthy living. 
-                  We are committed to preserving traditional knowledge while embracing modern quality standards to 
-                  deliver effective, safe, and natural healthcare solutions.
+                <h3 className={`text-2xl font-bold text-gray-800 mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+                  {translate('about.ourMission')}
+                </h3>
+                <p className={`text-gray-600 leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
+                  {translate('about.missionText')}
                 </p>
               </CardContent>
             </Card>
@@ -133,11 +130,11 @@ const AboutUs = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Eye className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">Our Vision</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  To become a leading provider of natural herbal products, making traditional wellness accessible 
-                  to people worldwide. We envision a healthier world where natural remedies are the first choice 
-                  for maintaining optimal health and well-being.
+                <h3 className={`text-2xl font-bold text-gray-800 mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+                  {translate('about.ourVision')}
+                </h3>
+                <p className={`text-gray-600 leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
+                  {translate('about.visionText')}
                 </p>
               </CardContent>
             </Card>
@@ -147,9 +144,11 @@ const AboutUs = () => {
         {/* Values */}
         <section className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Our Core Values</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              These values guide everything we do and shape our commitment to natural wellness
+            <h2 className={`text-3xl font-bold text-gray-800 mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('about.coreValues')}
+            </h2>
+            <p className={`text-gray-600 max-w-2xl mx-auto ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('about.coreValuesDesc')}
             </p>
           </div>
           
@@ -160,8 +159,12 @@ const AboutUs = () => {
                   <div className={`w-16 h-16 ${value.bgColor} rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
                     <value.icon className={`w-8 h-8 ${value.color}`} />
                   </div>
-                  <h3 className="font-bold text-lg mb-3 text-gray-800">{value.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{value.description}</p>
+                  <h3 className={`font-bold text-lg mb-3 text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>
+                    {translate(value.titleKey)}
+                  </h3>
+                  <p className={`text-gray-600 text-sm leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
+                    {translate(value.descKey)}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -176,7 +179,9 @@ const AboutUs = () => {
                 {stats.map((stat, index) => (
                   <div key={index}>
                     <div className="text-3xl md:text-4xl font-bold mb-2">{stat.number}</div>
-                    <div className="text-sm md:text-base opacity-90">{stat.label}</div>
+                    <div className={`text-sm md:text-base opacity-90 ${isTamil ? 'tamil-text' : ''}`}>
+                      {translate(stat.labelKey)}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -187,9 +192,11 @@ const AboutUs = () => {
         {/* What Makes Us Different */}
         <section className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">What Makes Us Different</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Our commitment to excellence sets us apart in the herbal wellness industry
+            <h2 className={`text-3xl font-bold text-gray-800 mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('about.whatMakesUsDifferent')}
+            </h2>
+            <p className={`text-gray-600 max-w-2xl mx-auto ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('about.differentDesc')}
             </p>
           </div>
 
@@ -201,9 +208,11 @@ const AboutUs = () => {
                     <Leaf className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg mb-2 text-gray-800">100% Natural Ingredients</h3>
-                    <p className="text-gray-600 text-sm">
-                      We source only the finest natural herbs and ingredients, ensuring purity and potency in every product.
+                    <h3 className={`font-bold text-lg mb-2 text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>
+                      {translate('about.naturalIngredients')}
+                    </h3>
+                    <p className={`text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                      {translate('about.naturalIngredientsDesc')}
                     </p>
                   </div>
                 </div>
@@ -217,9 +226,11 @@ const AboutUs = () => {
                     <Shield className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg mb-2 text-gray-800">Quality Assurance</h3>
-                    <p className="text-gray-600 text-sm">
-                      Every product undergoes rigorous testing and quality checks to meet the highest safety standards.
+                    <h3 className={`font-bold text-lg mb-2 text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>
+                      {translate('about.qualityAssurance')}
+                    </h3>
+                    <p className={`text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                      {translate('about.qualityAssuranceDesc')}
                     </p>
                   </div>
                 </div>
@@ -233,9 +244,11 @@ const AboutUs = () => {
                     <Award className="w-6 h-6 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg mb-2 text-gray-800">Traditional Wisdom</h3>
-                    <p className="text-gray-600 text-sm">
-                      Our formulations are based on ancient Ayurvedic principles, refined through generations of knowledge.
+                    <h3 className={`font-bold text-lg mb-2 text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>
+                      {translate('about.traditionalWisdom')}
+                    </h3>
+                    <p className={`text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                      {translate('about.traditionalWisdomDesc')}
                     </p>
                   </div>
                 </div>

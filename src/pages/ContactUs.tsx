@@ -33,7 +33,7 @@ const ContactUs = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { language } = useTranslation();
+  const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -52,8 +52,8 @@ const ContactUs = () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       toast({
-        title: "Message Sent Successfully!",
-        description: "We'll get back to you within 24 hours.",
+        title: translate('contact.messageSent'),
+        description: translate('contact.messageResponse'),
       });
       
       // Reset form
@@ -66,8 +66,8 @@ const ContactUs = () => {
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
+        title: translate('contact.error'),
+        description: translate('contact.errorMessage'),
         variant: "destructive",
       });
     } finally {
@@ -131,9 +131,11 @@ const ContactUs = () => {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary to-green-600 text-white py-16 md:py-24">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Get In Touch</h1>
-          <p className="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed">
-            Have questions about our herbal products? We're here to help you on your wellness journey.
+          <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${isTamil ? 'tamil-text' : ''}`}>
+            {translate('contact.title')}
+          </h1>
+          <p className={`text-xl md:text-2xl opacity-90 max-w-3xl mx-auto leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
+            {translate('contact.subtitle')}
           </p>
         </div>
       </section>
@@ -147,7 +149,9 @@ const ContactUs = () => {
                 <div className={`w-16 h-16 ${info.bgColor} rounded-full flex items-center justify-center mx-auto mb-4`}>
                   <info.icon className={`w-8 h-8 ${info.color}`} />
                 </div>
-                <h3 className="font-bold text-lg mb-3 text-gray-800">{info.title}</h3>
+                <h3 className={`font-bold text-lg mb-3 text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>
+                  {translate(`contact.${info.title.toLowerCase().replace(/\s+/g, '')}`) || info.title}
+                </h3>
                 <div className="space-y-1">
                   {info.details.map((detail, idx) => (
                     <p key={idx} className="text-gray-600">{detail}</p>
