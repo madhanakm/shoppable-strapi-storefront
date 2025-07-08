@@ -100,9 +100,11 @@ const Wishlist = () => {
                 </div>
                 
                 <CardContent className="p-6 bg-gradient-to-b from-white to-gray-50">
-                  <h3 className={`font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2 ${isTamil ? 'tamil-text' : ''}`}>
-                    {item.name}
-                  </h3>
+                  <Link to={`/product/${item.id}`}>
+                    <h3 className={`font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2 cursor-pointer ${isTamil ? 'tamil-text' : ''}`}>
+                      {item.name}
+                    </h3>
+                  </Link>
                   
                   <p className="text-sm text-gray-500 mb-3">{item.category}</p>
                   

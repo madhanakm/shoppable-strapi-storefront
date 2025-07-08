@@ -448,7 +448,7 @@ const AllProducts = () => {
                       <CardContent className="p-6 bg-gradient-to-b from-white to-gray-50">
                         <Link to={`/product/${product.id}`}>
                           <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 ${isTamil ? 'tamil-text' : ''}`}>
-                            {attrs.Name || attrs.name || 'Product'}
+                            {isTamil && attrs.tamil ? attrs.tamil : (attrs.Name || attrs.name || 'Product')}
                           </h3>
                         </Link>
                         

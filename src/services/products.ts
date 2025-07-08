@@ -44,3 +44,30 @@ export const getFeaturedProducts = async (limit = 6) => {
     'populate': '*'
   });
 };
+
+export const getProductTamilName = async (productId) => {
+  try {
+    const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[productId][$eq]=${productId}`);
+    const data = await response.json();
+    if (data.data && data.data.length > 0) {
+      return data.data[0].attributes?.tamil || null;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching Tamil name:', error);
+    return null;
+  }
+};
+
+export const getProductsWithTamil = async (products) => {
+  const productsWithTamil = await Promise.all(
+    products.map(async (product) => {
+      const tamilName = await getProductTamilName(product.id);
+      return {
+        ...product,
+        tamilName
+      };
+    })
+  );
+  return productsWithTamil;
+};

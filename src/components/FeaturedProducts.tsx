@@ -7,6 +7,7 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
+import { getProductsWithTamil } from '@/services/products';
 
 // Fallback products in case API fails
 const fallbackProducts = [
@@ -81,6 +82,7 @@ const FeaturedProducts = () => {
             return {
               id: item.id || Math.random().toString(),
               name: attributes.Name || attributes.name || 'Product',
+              tamilName: attributes.tamil || null,
               price: parseFloat(attributes.mrp || attributes.price) || 0,
               image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
               rating: attributes.rating || 4,
@@ -203,7 +205,7 @@ const FeaturedProducts = () => {
               
               <CardContent className="p-6">
                 <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>
-                  {product.name}
+                  {isTamil && product.tamilName ? product.tamilName : product.name}
                 </h3>
                 
                 <div className="flex items-center space-x-1 mb-3">

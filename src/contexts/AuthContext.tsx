@@ -127,9 +127,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (name: string, email: string, mobile: string, password: string): Promise<{ success: boolean; userId?: number }> => {
+  const register = async (name: string, email: string, mobile: string, password: string): Promise<{ success: boolean; userId?: number; message?: string }> => {
     try {
       setLoading(true);
+      
+      // Check if email already exists
+      const emailResponse = await fetch(`https://api.dharaniherbbals.com/api/ecom-users?filters[email][$eq]=${email}`);
+      const emailData = await emailResponse.json();
+      if (emailData.data && emailData.data.length > 0) {
+        return { success: false, message: 'Email address already exists' };
+      }
+      
+      // Check if phone already exists
+      const phoneResponse = await getEcomUserByPhone(mobile);
+      if (phoneResponse.data && phoneResponse.data.length > 0) {
+        return { success: false, message: 'Mobile number already exists' };
+      }
+      
       const otp = generateOTP();
       
       // Create user with OTP
@@ -165,7 +179,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return { success: true, userId: userResponse.data.id };
     } catch (error) {
       console.error('Registration failed', error);
-      return { success: false };
+      return { success: false, message: 'Registration failed. Please try again.' };
     } finally {
       setLoading(false);
     }

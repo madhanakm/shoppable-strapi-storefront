@@ -76,7 +76,7 @@ const Register = () => {
       } else {
         toast({
           title: "Registration Failed",
-          description: "Please try again or contact support.",
+          description: result.message || "Please try again or contact support.",
           variant: "destructive",
         });
       }

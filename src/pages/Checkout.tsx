@@ -57,10 +57,14 @@ const Checkout = () => {
   });
   
   useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login?redirect=checkout');
+      return;
+    }
     if (user?.id) {
       loadAddresses();
     }
-  }, [user]);
+  }, [user, isAuthenticated, navigate]);
   
   const loadAddresses = async () => {
     if (user?.id) {
@@ -198,6 +202,10 @@ const Checkout = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return null;
+  }
+  
   if (cartItems.length === 0) {
     navigate('/cart');
     return null;

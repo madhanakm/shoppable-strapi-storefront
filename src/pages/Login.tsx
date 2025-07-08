@@ -45,7 +45,11 @@ const Login = () => {
           title: "Success",
           description: "Logged in successfully!",
         });
-        navigate('/');
+        
+        // Check for redirect parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
+        navigate(redirect === 'checkout' ? '/checkout' : '/');
       } else {
         toast({
           title: "Error",
