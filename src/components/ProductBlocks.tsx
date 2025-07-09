@@ -35,7 +35,9 @@ const ProductCard = ({ product }) => {
       id: product.id.toString(),
       name: product.name,
       price: product.price,
-      image: product.image
+      image: product.image,
+      category: product.category,
+      skuid: product.skuid || product.id.toString()
     });
   };
 
@@ -210,7 +212,9 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
             rating: attributes.rating || 4,
             reviews: attributes.reviews || 10,
             badge: attributes.type || type,
-            originalPrice: attributes.originalPrice || null
+            originalPrice: attributes.originalPrice || null,
+            category: attributes.category,
+            skuid: attributes.skuid || attributes.SKUID
           };
         });
         

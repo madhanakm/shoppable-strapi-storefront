@@ -474,7 +474,8 @@ const AllProducts = () => {
                             name: attrs.Name || attrs.name,
                             price: parseFloat(attrs.mrp) || 0,
                             image: attrs.photo || attrs.image,
-                            category: attrs.category
+                            category: attrs.category,
+                            skuid: attrs.skuid || attrs.SKUID || product.id.toString()
                           })}
                         >
                           <ShoppingCart className="w-4 h-4 mr-2" />

@@ -10,6 +10,7 @@ interface CartItem {
   image: string;
   category: string;
   quantity: number;
+  skuid?: string;
 }
 
 interface CartContextType {

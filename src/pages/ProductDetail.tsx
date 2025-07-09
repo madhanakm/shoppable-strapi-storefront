@@ -114,7 +114,8 @@ const ProductDetail = () => {
         name: product.Name || product.name || product.title,
         price: product.mrp || product.price,
         image: product.photo || product.image,
-        quantity
+        category: product.category,
+        skuid: product.skuid || product.SKUID || product.id.toString()
       });
     }
   };

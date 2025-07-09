@@ -22,7 +22,8 @@ const Wishlist = () => {
       name: item.name,
       price: item.price,
       image: item.image,
-      category: item.category
+      category: item.category,
+      skuid: item.skuid || item.id
     });
   };
 

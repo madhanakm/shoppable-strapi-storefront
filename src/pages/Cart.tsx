@@ -14,30 +14,7 @@ const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
-  const [taxRate, setTaxRate] = useState(0.1); // Default 10%
-  
-  useEffect(() => {
-    // Get tax rate from first product in cart
-    if (cartItems.length > 0) {
-      fetchTaxRate(cartItems[0].id);
-    }
-  }, [cartItems]);
-  
-  const fetchTaxRate = async (productId) => {
-    try {
-      const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters/${productId}`);
-      if (response.ok) {
-        const data = await response.json();
-        const product = data.data;
-        const attrs = product.attributes || product;
-        if (attrs.tax) {
-          setTaxRate(parseFloat(attrs.tax) / 100); // Convert percentage to decimal
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch tax rate:', error);
-    }
-  };
+
 
   if (cartCount === 0) {
     return (
@@ -188,13 +165,13 @@ const Cart = () => {
                       <span className="font-semibold text-green-600">Free</span>
                     </div>
                     <div className="flex justify-between text-lg">
-                      <span className="text-gray-600">Tax ({Math.round(taxRate * 100)}%)</span>
-                      <span className="font-semibold">{formatPrice(cartTotal * taxRate)}</span>
+                      <span className="text-gray-600">Tax</span>
+                      <span className="font-semibold text-gray-500">Inclusive</span>
                     </div>
                     <div className="border-t pt-4">
                       <div className="flex justify-between text-xl font-bold">
                         <span>Total</span>
-                        <span className="text-primary">{formatPrice(cartTotal * (1 + taxRate))}</span>
+                        <span className="text-primary">{formatPrice(cartTotal)}</span>
                       </div>
                     </div>
                   </div>
