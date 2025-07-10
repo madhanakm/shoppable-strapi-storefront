@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/lib/utils';
 import { getAddresses } from '@/services/profile';
 import { generateOrderNumber, generateInvoiceNumber, initiatePayment, OrderData } from '@/services/payment';
+import { sendOrderConfirmationSMS } from '@/services/order-sms';
 import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package, Plus } from 'lucide-react';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
@@ -184,9 +185,17 @@ const Checkout = () => {
         const result = JSON.parse(responseText);
         console.log('COD order placed successfully:', result);
         
+        // Send order confirmation SMS
+        try {
+          await sendOrderConfirmationSMS(formData.phone, orderNumber, total);
+          console.log('Order confirmation SMS sent');
+        } catch (smsError) {
+          console.warn('Failed to send order confirmation SMS:', smsError);
+        }
+        
         toast({
           title: "Order Placed Successfully!",
-          description: `Order #${orderNumber} placed. You will receive a confirmation call shortly.`,
+          description: `Order #${orderNumber} placed. You will receive a confirmation SMS shortly.`,
         });
       }
       
