@@ -351,8 +351,8 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
       <Header />
-      <main className="container mx-auto px-4 py-8 md:py-16">
-        <div className="max-w-7xl mx-auto">
+      <main className="container mx-auto px-2 sm:px-4 py-4 md:py-8">
+        <div className="max-w-7xl mx-auto overflow-hidden">
           {/* Header */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-4">
@@ -367,9 +367,9 @@ const Checkout = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid lg:grid-cols-3 gap-2 sm:gap-4 md:gap-8">
               {/* Checkout Form */}
-              <div className="lg:col-span-2 space-y-8">
+              <div className="lg:col-span-2 space-y-4 md:space-y-8">
                 {/* Customer Information */}
                 <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                   <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-t-lg">
@@ -378,8 +378,8 @@ const Checkout = () => {
                       Customer Information
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6 md:p-8">
-                    <div className="grid md:grid-cols-2 gap-6">
+                  <CardContent className="p-4 md:p-6 lg:p-8">
+                    <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                       <div>
                         <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">Full Name</Label>
                         <Input
@@ -747,8 +747,8 @@ const Checkout = () => {
               </div>
 
               {/* Order Summary */}
-              <div>
-                <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm sticky top-8">
+              <div className="order-first lg:order-last">
+                <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm lg:sticky lg:top-8">
                   <CardHeader className="bg-gradient-to-r from-gray-100 to-gray-50 rounded-t-lg">
                     <CardTitle className="text-xl">Order Summary</CardTitle>
                   </CardHeader>
@@ -756,22 +756,22 @@ const Checkout = () => {
                     {/* Order Items */}
                     <div className="space-y-4 mb-6">
                       {cartItems.map((item) => (
-                        <div key={item.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                        <div key={item.id} className="flex items-center gap-3 p-2 md:p-3 bg-gray-50 rounded-lg">
                           <img
                             src={item.image}
                             alt={item.name}
-                            className="w-12 h-12 object-contain bg-white rounded"
+                            className="w-10 h-10 md:w-12 md:h-12 object-contain bg-white rounded"
                             onError={(e) => {
                               e.target.src = 'https://via.placeholder.com/50x50?text=Product';
                             }}
                           />
                           <div className="flex-1 min-w-0">
-                            <h4 className={`font-semibold text-sm truncate ${isTamil ? 'tamil-text' : ''}`}>
+                            <h4 className={`font-semibold text-xs md:text-sm truncate ${isTamil ? 'tamil-text' : ''}`}>
                               {item.name}
                             </h4>
                             <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                           </div>
-                          <span className="font-semibold text-sm">
+                          <span className="font-semibold text-xs md:text-sm">
                             {formatPrice(item.price * item.quantity)}
                           </span>
                         </div>
@@ -805,7 +805,7 @@ const Checkout = () => {
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg py-3 text-lg font-semibold"
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg py-2 md:py-3 text-base md:text-lg font-semibold"
                       >
                         {isLoading ? (
                           <>
