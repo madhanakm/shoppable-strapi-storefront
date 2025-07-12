@@ -7,7 +7,7 @@ import { generateOTP } from '@/services/sms';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean | { requirePasswordReset: boolean; userId: number; phone: string }>;
   register: (name: string, email: string, mobile: string, password: string) => Promise<{ success: boolean; userId?: number }>;
   verifyOTP: (userId: number, mobile: string, otp: string) => Promise<boolean>;
   resendOTP: (mobile: string) => Promise<boolean>;
@@ -103,7 +103,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     validateUser();
   }, []);
 
-  const login = async (identifier: string, password: string): Promise<boolean> => {
+  const login = async (identifier: string, password: string): Promise<boolean | { requirePasswordReset: boolean; userId: number; phone: string }> => {
     try {
       setLoading(true);
       
@@ -119,8 +119,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Search by phone
         userResponse = await getEcomUserByPhone(identifier);
       }
+      
       if (userResponse.data && userResponse.data.length > 0) {
         const user = userResponse.data[0];
+        
+        // Check if this is a migrated user with empty password
+        if (user.attributes.password === '' || user.attributes.password === null) {
+          // Return special response for migrated users that need password reset
+          return { 
+            requirePasswordReset: true, 
+            userId: user.id, 
+            phone: user.attributes.phone 
+          };
+        }
+        
+        // Normal login flow for users with passwords
         if (user.attributes.password === password && user.attributes.isVerified) {
           // Store user info for session
           const userData = {
@@ -137,7 +150,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           
           localStorage.setItem('user', loginData.user);
           localStorage.setItem('loginTime', loginData.loginTime);
-          console.log('User logged in:', userData.username, 'at', new Date());
           setUser(userData as any);
           return true;
         }
@@ -145,7 +157,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       return false;
     } catch (error) {
-      console.error('Login failed', error);
+      // Error handling
       return false;
     } finally {
       setLoading(false);
