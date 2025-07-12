@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/lib/utils';
 import { getAddresses } from '@/services/profile';
@@ -18,8 +19,16 @@ import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const Checkout = () => {
-  const { cartItems, cartTotal, clearCart } = useCart();
-  const { user, isAuthenticated } = useAuth();
+  const { cartItems: regularCartItems, cartTotal: regularCartTotal, clearCart } = useCart();
+  const { quickCheckoutItem, clearQuickCheckout } = useQuickCheckout();
+  const { user, isAuthenticated, loading } = useAuth();
+  
+  // Determine if we're in quick checkout mode or regular cart checkout
+  const isQuickCheckout = !!quickCheckoutItem;
+  const cartItems = isQuickCheckout ? [quickCheckoutItem] : regularCartItems;
+  const cartTotal = isQuickCheckout 
+    ? quickCheckoutItem.price * quickCheckoutItem.quantity 
+    : regularCartTotal;
   const { toast } = useToast();
   const navigate = useNavigate();
   const { language } = useTranslation();
@@ -58,14 +67,14 @@ const Checkout = () => {
   });
   
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!loading && !isAuthenticated) {
       navigate('/login?redirect=checkout');
       return;
     }
     if (user?.id) {
       loadAddresses();
     }
-  }, [user, isAuthenticated, navigate]);
+  }, [user, isAuthenticated, navigate, loading]);
   
   const loadAddresses = async () => {
     if (user?.id) {
@@ -199,7 +208,11 @@ const Checkout = () => {
         });
       }
       
-      clearCart();
+      if (isQuickCheckout) {
+        clearQuickCheckout();
+      } else {
+        clearCart();
+      }
       navigate('/order-success');
     } catch (error) {
       console.error('Order error:', error);
@@ -213,6 +226,14 @@ const Checkout = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
   if (!isAuthenticated) {
     return null;
   }

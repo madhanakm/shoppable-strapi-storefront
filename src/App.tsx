@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { QuickCheckoutProvider } from "@/contexts/QuickCheckoutContext";
 import { TranslationProvider } from "@/components/TranslationProvider";
 import Index from "./pages/Index";
 import AllProducts from "./pages/AllProducts.tsx";
@@ -34,8 +35,9 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TranslationProvider>
       <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
+        <QuickCheckoutProvider>
+          <CartProvider>
+            <WishlistProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -65,8 +67,9 @@ const App = () => (
                 </Routes>
               </BrowserRouter>
             </TooltipProvider>
-          </WishlistProvider>
-        </CartProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </QuickCheckoutProvider>
       </AuthProvider>
     </TranslationProvider>
   </QueryClientProvider>

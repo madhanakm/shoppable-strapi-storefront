@@ -25,7 +25,9 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirect = urlParams.get('redirect');
+      navigate(redirect === 'checkout' ? '/checkout' : '/');
     }
   }, [isAuthenticated, navigate]);
   

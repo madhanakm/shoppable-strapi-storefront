@@ -36,46 +36,71 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Check for existing token on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const loginTime = localStorage.getItem('loginTime');
-    
-    console.log('Auth check - storedUser:', !!storedUser, 'loginTime:', loginTime);
-    
-    if (storedUser && loginTime) {
-      try {
-        const loginTimestamp = parseInt(loginTime);
-        const currentTime = Date.now();
-        const fifteenDays = 15 * 24 * 60 * 60 * 1000; // 15 days in milliseconds
-        
-        console.log('Session check - age:', (currentTime - loginTimestamp) / (24 * 60 * 60 * 1000), 'days');
-        
-        if (currentTime - loginTimestamp < fifteenDays) {
-          const userData = JSON.parse(storedUser);
-          console.log('Restoring user session:', userData.username);
-          setUser(userData);
-        } else {
-          console.log('Session expired, clearing data');
+    const validateUser = async () => {
+      const storedUser = localStorage.getItem('user');
+      const loginTime = localStorage.getItem('loginTime');
+      
+      console.log('Auth check - storedUser:', !!storedUser, 'loginTime:', loginTime);
+      
+      if (storedUser && loginTime) {
+        try {
+          const loginTimestamp = parseInt(loginTime);
+          const currentTime = Date.now();
+          const fifteenDays = 15 * 24 * 60 * 60 * 1000; // 15 days in milliseconds
+          
+          console.log('Session check - age:', (currentTime - loginTimestamp) / (24 * 60 * 60 * 1000), 'days');
+          
+          if (currentTime - loginTimestamp < fifteenDays) {
+            const userData = JSON.parse(storedUser);
+            
+            // Validate user still exists in API
+            try {
+              const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
+              if (response.ok) {
+                const result = await response.json();
+                if (result.data) {
+                  console.log('User validated, restoring session:', userData.username);
+                  setUser(userData);
+                } else {
+                  console.log('User not found in API, clearing session');
+                  localStorage.removeItem('user');
+                  localStorage.removeItem('loginTime');
+                }
+              } else {
+                console.log('User validation failed, clearing session');
+                localStorage.removeItem('user');
+                localStorage.removeItem('loginTime');
+              }
+            } catch (apiError) {
+              console.warn('User validation error, keeping session:', apiError);
+              setUser(userData);
+            }
+          } else {
+            console.log('Session expired, clearing data');
+            localStorage.removeItem('user');
+            localStorage.removeItem('loginTime');
+          }
+        } catch (error) {
+          console.error('Failed to parse stored user data', error);
           localStorage.removeItem('user');
           localStorage.removeItem('loginTime');
         }
-      } catch (error) {
-        console.error('Failed to parse stored user data', error);
-        localStorage.removeItem('user');
-        localStorage.removeItem('loginTime');
+      } else if (storedUser) {
+        // Handle old sessions without loginTime
+        try {
+          const userData = JSON.parse(storedUser);
+          console.log('Migrating old session for:', userData.username);
+          localStorage.setItem('loginTime', Date.now().toString());
+          setUser(userData);
+        } catch (error) {
+          localStorage.removeItem('user');
+        }
       }
-    } else if (storedUser) {
-      // Handle old sessions without loginTime
-      try {
-        const userData = JSON.parse(storedUser);
-        console.log('Migrating old session for:', userData.username);
-        localStorage.setItem('loginTime', Date.now().toString());
-        setUser(userData);
-      } catch (error) {
-        localStorage.removeItem('user');
-      }
-    }
+      
+      setLoading(false);
+    };
     
-    setLoading(false);
+    validateUser();
   }, []);
 
   const login = async (identifier: string, password: string): Promise<boolean> => {

@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart, TrendingUp, Flame, Zap, Tag, ArrowRight, Eye } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
+import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
+import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
@@ -12,6 +14,8 @@ import { useTranslation, LANGUAGES } from './TranslationProvider';
 const ProductCard = ({ product }) => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const { setQuickCheckoutItem } = useQuickCheckout();
+  const navigate = useNavigate();
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
 
@@ -39,6 +43,19 @@ const ProductCard = ({ product }) => {
       category: product.category,
       skuid: product.skuid || product.id.toString()
     });
+  };
+  
+  const handleBuyNow = () => {
+    setQuickCheckoutItem({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category,
+      skuid: product.skuid || product.id.toString(),
+      quantity: 1
+    });
+    navigate('/checkout');
   };
 
   const renderStars = (rating = 0) => {
@@ -154,17 +171,30 @@ const ProductCard = ({ product }) => {
           )}
         </div>
         
-        <Button 
-          className="w-full group/btn bg-gradient-to-r from-primary via-primary to-emerald-500 hover:from-primary/90 hover:via-primary/90 hover:to-emerald-600 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl py-3 font-bold text-white" 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleAddToCart();
-          }}
-        >
-          <ShoppingCart className="w-5 h-5 mr-2 group-hover/btn:animate-bounce" />
-          <span className={`${isTamil ? 'tamil-text' : ''}`}>Add to Cart</span>
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleAddToCart();
+            }}
+          >
+            <ShoppingCart className="w-3 h-3 mr-1" />
+            <span className={`${isTamil ? 'tamil-text' : ''}`}>Cart</span>
+          </Button>
+          
+          <Button 
+            className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleBuyNow();
+            }}
+          >
+            <span className={`${isTamil ? 'tamil-text' : ''}`}>Buy Now</span>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

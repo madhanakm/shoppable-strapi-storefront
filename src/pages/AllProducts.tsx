@@ -6,13 +6,16 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, Filter, Grid, List, Star, Heart, Search, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { formatPrice } from '@/lib/utils';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const AllProducts = () => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { setQuickCheckoutItem } = useQuickCheckout();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -467,20 +470,40 @@ const AllProducts = () => {
                           </span>
                         </div>
                         
-                        <Button 
-                          className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg" 
-                          onClick={() => addToCart({
-                            id: product.id.toString(),
-                            name: attrs.Name || attrs.name,
-                            price: parseFloat(attrs.mrp) || 0,
-                            image: attrs.photo || attrs.image,
-                            category: attrs.category,
-                            skuid: attrs.skuid || attrs.SKUID || product.id.toString()
-                          })}
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          <span className={`text-sm ${isTamil ? 'tamil-text' : ''}`}>Add to Cart</span>
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
+                            onClick={() => addToCart({
+                              id: product.id.toString(),
+                              name: attrs.Name || attrs.name,
+                              price: parseFloat(attrs.mrp) || 0,
+                              image: attrs.photo || attrs.image,
+                              category: attrs.category,
+                              skuid: attrs.skuid || attrs.SKUID || product.id.toString()
+                            })}
+                          >
+                            <ShoppingCart className="w-3 h-3 mr-1" />
+                            <span className={`${isTamil ? 'tamil-text' : ''}`}>Cart</span>
+                          </Button>
+                          
+                          <Button 
+                            className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
+                            onClick={() => {
+                              setQuickCheckoutItem({
+                                id: product.id.toString(),
+                                name: attrs.Name || attrs.name,
+                                price: parseFloat(attrs.mrp) || 0,
+                                image: attrs.photo || attrs.image,
+                                category: attrs.category,
+                                skuid: attrs.skuid || attrs.SKUID || product.id.toString(),
+                                quantity: 1
+                              });
+                              navigate('/checkout');
+                            }}
+                          >
+                            <span className={`${isTamil ? 'tamil-text' : ''}`}>Buy Now</span>
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   );
