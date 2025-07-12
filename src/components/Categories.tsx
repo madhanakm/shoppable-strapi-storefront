@@ -21,7 +21,7 @@ const Categories = () => {
     // Fetch product categories with images
     getProductCategories()
       .then(categoryData => {
-        console.log('Product categories data:', categoryData);
+        // Process category data
         
         let formattedCategories = [];
         
@@ -74,13 +74,13 @@ const Categories = () => {
             setLoading(false);
           })
           .catch(error => {
-            console.error('Error fetching products:', error);
+            // Handle product fetch error
             setCategories(formattedCategories);
             setLoading(false);
           });
       })
       .catch(error => {
-        console.error('Error fetching product categories:', error);
+        // Handle category fetch error
         setLoading(false);
       });
   }, []);
@@ -132,7 +132,7 @@ const Categories = () => {
                               alt={category.name}
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                console.log(`Image load error for ${category.name}`);
+                                // Handle image load error
                                 e.target.style.display = 'none';
                                 e.target.parentNode.innerHTML = `<span class="text-2xl text-white">${category.name.charAt(0).toUpperCase()}</span>`;
                               }}

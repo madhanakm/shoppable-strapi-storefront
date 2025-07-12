@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               if (response.ok) {
                 const result = await response.json();
                 if (result.data) {
-                  console.log('User validated, restoring session:', userData.username);
+                  // User validated, restoring session
                   setUser(userData);
                 } else {
                   console.log('User not found in API, clearing session');

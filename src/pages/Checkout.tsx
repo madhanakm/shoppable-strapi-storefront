@@ -15,6 +15,7 @@ import { formatPrice } from '@/lib/utils';
 import { getAddresses } from '@/services/profile';
 import { generateOrderNumber, generateInvoiceNumber, initiatePayment, OrderData } from '@/services/payment';
 import { sendOrderConfirmationSMS } from '@/services/order-sms';
+import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-settings';
 import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package, Plus } from 'lucide-react';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
@@ -40,6 +41,8 @@ const Checkout = () => {
   const [selectedBillingAddress, setSelectedBillingAddress] = useState(null);
   const [differentBillingAddress, setDifferentBillingAddress] = useState(false);
   const [useManualAddress, setUseManualAddress] = useState(false);
+  const [ecomSettings, setEcomSettings] = useState<EcommerceSettings>({ cod: true, onlinePay: true });
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   
   const [formData, setFormData] = useState({
     // Billing Info
@@ -60,7 +63,7 @@ const Checkout = () => {
     billingPincode: '',
     
     // Payment
-    paymentMethod: 'cod',
+    paymentMethod: 'online',
     
     // Additional
     notes: ''
@@ -75,6 +78,33 @@ const Checkout = () => {
       loadAddresses();
     }
   }, [user, isAuthenticated, navigate, loading]);
+  
+  // Fetch ecommerce settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      setIsLoadingSettings(true);
+      try {
+        const settings = await getEcommerceSettings();
+
+        setEcomSettings(settings);
+        
+        // Set default payment method based on available options
+        if (!settings.cod && settings.onlinePay) {
+          setFormData(prev => ({ ...prev, paymentMethod: 'online' }));
+        } else if (settings.cod && !settings.onlinePay) {
+          setFormData(prev => ({ ...prev, paymentMethod: 'cod' }));
+        } else if (!settings.cod && !settings.onlinePay) {
+          // Both payment methods are disabled
+        }
+      } catch (error) {
+        // Error handling
+      } finally {
+        setIsLoadingSettings(false);
+      }
+    };
+    
+    fetchSettings();
+  }, []);
   
   const loadAddresses = async () => {
     if (user?.id) {
@@ -96,12 +126,33 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // Validate payment method is available
+    if (formData.paymentMethod === 'cod' && !ecomSettings.cod) {
+      toast({
+        title: "Payment Method Unavailable",
+        description: "Cash on Delivery is currently unavailable. Please choose another payment method.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    if (formData.paymentMethod === 'online' && !ecomSettings.onlinePay) {
+      toast({
+        title: "Payment Method Unavailable",
+        description: "Online Payment is currently unavailable. Please choose another payment method.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
 
     try {
       // Generate order number and invoice number
       const orderNumber = await generateOrderNumber();
       const invoiceNumber = await generateInvoiceNumber();
-      console.log('Using order number:', orderNumber, 'Invoice:', invoiceNumber);
+      // Order and invoice numbers generated
       
       // Get address info
       let shippingAddr = '';
@@ -134,7 +185,7 @@ const Checkout = () => {
           }
         };
 
-        console.log('Initiating payment with data:', orderData);
+        // Initiating payment
         
         // Initiate Razorpay payment
         await initiatePayment(orderData, orderNumber, invoiceNumber);
@@ -172,7 +223,7 @@ const Checkout = () => {
           throw new Error('Missing required customer information');
         }
         
-        console.log('Placing COD order with payload:', JSON.stringify(orderPayload, null, 2));
+        // Placing COD order
         
         const response = await fetch('https://api.dharaniherbbals.com/api/orders', {
           method: 'POST',
@@ -184,22 +235,20 @@ const Checkout = () => {
         });
 
         const responseText = await response.text();
-        console.log('API Response:', response.status, responseText);
         
         if (!response.ok) {
-          console.error('COD order error response:', responseText);
+          // Error handling
           throw new Error(`Failed to place order: ${response.status} - ${responseText}`);
         }
         
         const result = JSON.parse(responseText);
-        console.log('COD order placed successfully:', result);
         
         // Send order confirmation SMS
         try {
           await sendOrderConfirmationSMS(formData.phone, orderNumber, total);
-          console.log('Order confirmation SMS sent');
+          // SMS sent
         } catch (smsError) {
-          console.warn('Failed to send order confirmation SMS:', smsError);
+          // SMS error handling
         }
         
         toast({
@@ -215,7 +264,7 @@ const Checkout = () => {
       }
       navigate('/order-success');
     } catch (error) {
-      console.error('Order error:', error);
+      // Order error handling
       toast({
         title: "Order Failed",
         description: error.message || "Please try again or contact support.",
@@ -253,14 +302,22 @@ const Checkout = () => {
       state = formData.shippingState || '';
     }
     
-    // Check if state is Tamil Nadu (case insensitive)
-    const isTamilNadu = state.toLowerCase().includes('tamil nadu') || 
-                       state.toLowerCase().includes('tn') ||
-                       state.toLowerCase() === 'tamil nadu';
+    // Normalize state name for flexible matching
+    const normalizedState = state.toLowerCase().replace(/\s+/g, '');
     
-    return isTamilNadu ? 50 : 150;
+    // Check if state is Tamil Nadu with flexible matching
+    const isTamilNadu = normalizedState.includes('tamilnadu') || 
+                       normalizedState === 'tn' ||
+                       normalizedState.includes('tamil') && normalizedState.includes('nadu');
+    
+    // Use shipping prices from ecommerce settings
+    const tamilNaduShipping = parseInt(ecomSettings.tamilNaduShipping || '50');
+    const otherStateShipping = parseInt(ecomSettings.otherStateShipping || '150');
+    
+    return isTamilNadu ? tamilNaduShipping : otherStateShipping;
   };
 
+  // Recalculate shipping charges when state or ecomSettings change
   const shippingCharges = getShippingCharges();
   const total = cartTotal + shippingCharges;
 
@@ -592,39 +649,56 @@ const Checkout = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6 md:p-8">
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-3 p-4 border-2 border-green-200 rounded-lg bg-green-50">
-                        <input
-                          type="radio"
-                          id="cod"
-                          name="paymentMethod"
-                          value="cod"
-                          checked={formData.paymentMethod === 'cod'}
-                          onChange={handleInputChange}
-                          className="w-4 h-4 text-green-600"
-                        />
-                        <label htmlFor="cod" className="flex-1 cursor-pointer">
-                          <div className="font-semibold text-green-800">Cash on Delivery</div>
-                          <div className="text-sm text-green-600">Pay when you receive your order</div>
-                        </label>
+                    {isLoadingSettings ? (
+                      <div className="flex items-center justify-center p-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
+                        <span className="ml-2 text-gray-600">Loading payment options...</span>
                       </div>
-                      
-                      <div className="flex items-center space-x-3 p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
-                        <input
-                          type="radio"
-                          id="online"
-                          name="paymentMethod"
-                          value="online"
-                          checked={formData.paymentMethod === 'online'}
-                          onChange={handleInputChange}
-                          className="w-4 h-4 text-blue-600"
-                        />
-                        <label htmlFor="online" className="flex-1 cursor-pointer">
-                          <div className="font-semibold text-blue-800">Online Payment</div>
-                          <div className="text-sm text-blue-600">UPI, Cards, Net Banking via Razorpay</div>
-                        </label>
+                    ) : (
+                      <div className="space-y-4">
+                        {ecomSettings.onlinePay && (
+                          <div className="flex items-center space-x-3 p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
+                            <input
+                              type="radio"
+                              id="online"
+                              name="paymentMethod"
+                              value="online"
+                              checked={formData.paymentMethod === 'online'}
+                              onChange={handleInputChange}
+                              className="w-4 h-4 text-blue-600"
+                            />
+                            <label htmlFor="online" className="flex-1 cursor-pointer">
+                              <div className="font-semibold text-blue-800">Online Payment</div>
+                              <div className="text-sm text-blue-600">UPI, Cards, Net Banking via Razorpay</div>
+                            </label>
+                          </div>
+                        )}
+                        
+                        {ecomSettings.cod && (
+                          <div className="flex items-center space-x-3 p-4 border-2 border-green-200 rounded-lg bg-green-50">
+                            <input
+                              type="radio"
+                              id="cod"
+                              name="paymentMethod"
+                              value="cod"
+                              checked={formData.paymentMethod === 'cod'}
+                              onChange={handleInputChange}
+                              className="w-4 h-4 text-green-600"
+                            />
+                            <label htmlFor="cod" className="flex-1 cursor-pointer">
+                              <div className="font-semibold text-green-800">Cash on Delivery</div>
+                              <div className="text-sm text-green-600">Pay when you receive your order</div>
+                            </label>
+                          </div>
+                        )}
+                        
+                        {!ecomSettings.cod && !ecomSettings.onlinePay && (
+                          <div className="p-4 border-2 border-red-200 rounded-lg bg-red-50 text-center">
+                            <p className="text-red-600">No payment methods are currently available. Please try again later.</p>
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -699,24 +773,26 @@ const Checkout = () => {
                       </div>
                     </div>
 
-                    {/* Place Order Button */}
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg py-3 text-lg font-semibold"
-                    >
-                      {isLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                          Processing Order...
-                        </>
-                      ) : (
-                        <>
-                          Place Order
-                          <ArrowRight className="w-5 h-5 ml-2" />
-                        </>
-                      )}
-                    </Button>
+                    {/* Place Order Button - Only show if at least one payment method is active */}
+                    {(ecomSettings.cod || ecomSettings.onlinePay) && (
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg py-3 text-lg font-semibold"
+                      >
+                        {isLoading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            Processing Order...
+                          </>
+                        ) : (
+                          <>
+                            Place Order
+                            <ArrowRight className="w-5 h-5 ml-2" />
+                          </>
+                        )}
+                      </Button>
+                    )}
 
                     {/* Security Badge */}
                     <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">

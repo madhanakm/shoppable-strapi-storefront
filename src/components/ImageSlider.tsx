@@ -10,7 +10,7 @@ const ImageSlider = () => {
     fetch('https://api.dharaniherbbals.com/api/sliders')
       .then(response => response.json())
       .then(data => {
-        console.log('Slider data:', data);
+        // Process slider data
         
         let slidesData = [];
         if (Array.isArray(data)) {
@@ -24,12 +24,12 @@ const ImageSlider = () => {
           }));
         }
         
-        console.log('Processed slides:', slidesData);
+        // Set slides data
         setSlides(slidesData);
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error fetching sliders:', error);
+        // Handle slider fetch error
         setLoading(false);
       });
   }, []);
@@ -76,7 +76,7 @@ const ImageSlider = () => {
               alt={slide.title || `Slide ${index + 1}`}
               className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
               onError={(e) => {
-                console.error(`Error loading image for slide ${index}:`, slide.image);
+                // Handle image loading error
                 e.target.src = 'https://via.placeholder.com/1200x400?text=Image+Not+Available';
               }}
             />
