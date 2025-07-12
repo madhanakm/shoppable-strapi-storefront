@@ -41,6 +41,7 @@ const Checkout = () => {
   const [selectedBillingAddress, setSelectedBillingAddress] = useState(null);
   const [differentBillingAddress, setDifferentBillingAddress] = useState(false);
   const [useManualAddress, setUseManualAddress] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const [ecomSettings, setEcomSettings] = useState<EcommerceSettings>({ cod: true, onlinePay: true });
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   
@@ -74,10 +75,19 @@ const Checkout = () => {
       navigate('/login?redirect=checkout');
       return;
     }
+    
     if (user?.id) {
-      loadAddresses();
+      if (currentUserId !== null && user.id !== currentUserId) {
+        console.log('Different user logged in, clearing addresses');
+        setAddresses([]);
+        setSelectedShippingAddress(null);
+        setSelectedBillingAddress(null);
+      }
+      setCurrentUserId(user.id);
     }
-  }, [user, isAuthenticated, navigate, loading]);
+    
+    loadAddresses();
+  }, [user?.id, isAuthenticated, navigate, loading, currentUserId]);
   
   // Fetch ecommerce settings
   useEffect(() => {
@@ -108,11 +118,28 @@ const Checkout = () => {
   
   const loadAddresses = async () => {
     if (user?.id) {
-      const userAddresses = await getAddresses(user.id);
-      setAddresses(userAddresses);
-      if (userAddresses.length > 0) {
-        setSelectedShippingAddress(userAddresses[0]);
+      try {
+        console.log('Loading addresses for user:', user.id);
+        const userAddresses = await getAddresses(user.id);
+        console.log('Loaded addresses:', userAddresses);
+        setAddresses(userAddresses || []);
+        if (userAddresses && userAddresses.length > 0) {
+          setSelectedShippingAddress(userAddresses[0]);
+        } else {
+          setSelectedShippingAddress(null);
+        }
+        setSelectedBillingAddress(null);
+      } catch (error) {
+        console.error('Error loading addresses:', error);
+        setAddresses([]);
+        setSelectedShippingAddress(null);
+        setSelectedBillingAddress(null);
       }
+    } else {
+      console.log('No user, clearing addresses');
+      setAddresses([]);
+      setSelectedShippingAddress(null);
+      setSelectedBillingAddress(null);
     }
   };
 

@@ -277,6 +277,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('jwt');
     localStorage.removeItem('user');
     localStorage.removeItem('loginTime');
+    // Clear guest data as well
+    localStorage.removeItem('cart');
+    localStorage.removeItem('wishlist');
     setUser(null);
   };
 

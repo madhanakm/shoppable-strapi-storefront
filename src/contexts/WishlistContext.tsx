@@ -18,6 +18,7 @@ interface WishlistContextType {
   isInWishlist: (id: string) => boolean;
   wishlistCount: number;
   syncWishlist: () => void;
+  clearWishlist: () => void;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
@@ -36,31 +37,47 @@ interface WishlistProviderProps {
 
 export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) => {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated && user?.id) {
+      if (currentUserId !== null && user.id !== currentUserId) {
+        console.log('Different user logged in, clearing wishlist data');
+        setWishlistItems([]);
+        setHasLoadedWishlist(false);
+      }
+      setCurrentUserId(user.id);
       loadUserWishlist();
-    } else {
+    } else if (!isAuthenticated) {
+      console.log('User logged out, clearing wishlist');
+      setCurrentUserId(null);
+      setWishlistItems([]);
+      setHasLoadedWishlist(false);
       const savedWishlist = localStorage.getItem('wishlist');
       if (savedWishlist) {
         setWishlistItems(JSON.parse(savedWishlist));
       }
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user?.id]);
 
+  const [hasLoadedWishlist, setHasLoadedWishlist] = useState(false);
+  
   useEffect(() => {
-    if (isAuthenticated && user?.id) {
+    if (isAuthenticated && user?.id && hasLoadedWishlist) {
       saveWishlistToAPI(user.id, wishlistItems);
-    } else {
+    } else if (!isAuthenticated) {
       localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
     }
-  }, [wishlistItems, isAuthenticated, user]);
+  }, [wishlistItems, isAuthenticated, user?.id, hasLoadedWishlist]);
 
   const loadUserWishlist = async () => {
     if (user?.id) {
+      console.log('Loading wishlist for user:', user.id);
       const userWishlist = await loadWishlistFromAPI(user.id);
-      setWishlistItems(userWishlist);
+      console.log('Received wishlist data:', userWishlist);
+      setWishlistItems(userWishlist || []);
+      setHasLoadedWishlist(true);
     }
   };
 
@@ -87,6 +104,10 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     return wishlistItems.some(item => item.id === id);
   };
 
+  const clearWishlist = () => {
+    setWishlistItems([]);
+  };
+
   const wishlistCount = wishlistItems.length;
 
   return (
@@ -96,7 +117,8 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       removeFromWishlist,
       isInWishlist,
       wishlistCount,
-      syncWishlist
+      syncWishlist,
+      clearWishlist
     }}>
       {children}
     </WishlistContext.Provider>

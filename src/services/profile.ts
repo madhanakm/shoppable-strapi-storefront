@@ -88,11 +88,20 @@ export const addAddress = async (userId: number, addressData: any): Promise<bool
 
 export const getAddresses = async (userId: number): Promise<any[]> => {
   try {
-    const response = await fetch(`https://api.dharaniherbbals.com/api/addresses?user=${userId}`);
+    console.log('Fetching addresses for user ID:', userId);
+    const response = await fetch(`https://api.dharaniherbbals.com/api/addresses?filters[user][id][$eq]=${userId}&populate=*`);
     
     if (response.ok) {
       const data = await response.json();
-      return data.data || [];
+      console.log('Raw address data:', data);
+      const addresses = data.data || [];
+      // Double-check filtering on client side
+      const filteredAddresses = addresses.filter(addr => {
+        const userAttr = addr.attributes?.user?.data?.id || addr.attributes?.user || addr.attributes?.userId;
+        return userAttr == userId;
+      });
+      console.log('Filtered addresses for user', userId, ':', filteredAddresses);
+      return filteredAddresses;
     }
     
     return [];

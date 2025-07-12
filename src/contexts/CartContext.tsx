@@ -40,34 +40,46 @@ interface CartProviderProps {
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const { user, isAuthenticated } = useAuth();
 
   // Load cart when user logs in
   useEffect(() => {
     if (isAuthenticated && user?.id) {
+      if (currentUserId !== null && user.id !== currentUserId) {
+        setCartItems([]);
+        setHasLoadedCart(false);
+      }
+      setCurrentUserId(user.id);
       loadUserCart();
-    } else {
-      // Load from localStorage for guest users
+    } else if (!isAuthenticated) {
+      setCurrentUserId(null);
+      setCartItems([]);
+      setHasLoadedCart(false);
       const savedCart = localStorage.getItem('cart');
       if (savedCart) {
         setCartItems(JSON.parse(savedCart));
       }
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user?.id]);
 
-  // Save cart whenever it changes
+  // Save cart whenever it changes (but not during initial load)
+  const [hasLoadedCart, setHasLoadedCart] = useState(false);
+  
   useEffect(() => {
-    if (isAuthenticated && user?.id) {
+    if (isAuthenticated && user?.id && hasLoadedCart) {
+      // Only save if there are items or if we need to clear the cart
       saveCartToAPI(user.id, cartItems);
-    } else {
+    } else if (!isAuthenticated) {
       localStorage.setItem('cart', JSON.stringify(cartItems));
     }
-  }, [cartItems, isAuthenticated, user]);
+  }, [cartItems, isAuthenticated, user?.id, hasLoadedCart]);
 
   const loadUserCart = async () => {
     if (user?.id) {
       const userCart = await loadCartFromAPI(user.id);
-      setCartItems(userCart);
+      setCartItems(userCart || []);
+      setHasLoadedCart(true);
     }
   };
 
