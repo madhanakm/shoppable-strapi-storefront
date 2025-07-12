@@ -48,26 +48,44 @@ const ContactUs = () => {
     setIsLoading(true);
 
     try {
-      // Simulate form submission
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast({
-        title: translate('contact.messageSent'),
-        description: translate('contact.messageResponse'),
+      const response = await fetch('https://api.dharaniherbbals.com/api/contact-forms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: {
+            name: formData.name,
+            phone: formData.phone,
+            email: formData.email,
+            subject: formData.subject,
+            message: formData.message
+          }
+        })
       });
-      
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
-      });
+
+      if (response.ok) {
+        toast({
+          title: "Message Sent Successfully!",
+          description: "We'll get back to you within 24 hours.",
+        });
+        
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        throw new Error('Failed to submit form');
+      }
     } catch (error) {
+      console.error('Contact form error:', error);
       toast({
-        title: translate('contact.error'),
-        description: translate('contact.errorMessage'),
+        title: "Error",
+        description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -99,8 +117,8 @@ const ContactUs = () => {
     },
     {
       icon: Clock,
-      title: 'Business Hours',
-      details: ['Mon - Sat: 9:00 AM - 7:00 PM', 'Sunday: 10:00 AM - 5:00 PM'],
+      title: isTamil ? 'வணிக நேரம்' : 'Business Hours',
+      details: isTamil ? ['திங்கள் - சனி: காலை 9:00 - மாலை 7:00', 'ஞாயிறு: காலை 10:00 - மாலை 5:00'] : ['Mon - Sat: 9:00 AM - 7:00 PM', 'Sunday: 10:00 AM - 5:00 PM'],
       color: 'text-purple-600',
       bgColor: 'bg-purple-100'
     }
@@ -150,7 +168,7 @@ const ContactUs = () => {
                   <info.icon className={`w-8 h-8 ${info.color}`} />
                 </div>
                 <h3 className={`font-bold text-lg mb-3 text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>
-                  {translate(`contact.${info.title.toLowerCase().replace(/\s+/g, '')}`) || info.title}
+                  {info.title}
                 </h3>
                 <div className="space-y-1">
                   {info.details.map((detail, idx) => (

@@ -52,10 +52,11 @@ const AboutUs = () => {
   ];
 
   const stats = [
-    { number: '10+', labelKey: 'about.yearsExperience' },
-    { number: '1000+', labelKey: 'about.happyCustomers' },
-    { number: '50+', labelKey: 'about.products' },
-    { number: '100%', labelKey: 'about.natural' }
+    { number: '15+', label: isTamil ? 'மகிமையான ஆண்டுகள்' : 'Glorious years' },
+    { number: '30,000+', label: isTamil ? 'மகிழ்ச்சியான வாடிக்கையாளர்கள்' : 'Happy clients' },
+    { number: '325+', label: isTamil ? 'தயாரிப்புகள்' : 'Products' },
+    { number: '24+', label: isTamil ? 'குழு ஆலோசகர்கள்' : 'Team advisor' },
+    { number: '6500+', label: isTamil ? 'மறுவிற்பனையாளர்கள்' : 'Resellers' }
   ];
 
   return (
@@ -86,13 +87,16 @@ const AboutUs = () => {
               </h2>
               <div className="space-y-4 text-gray-600 leading-relaxed">
                 <p className={isTamil ? 'tamil-text' : ''}>
-                  {translate('about.storyPara1')}
+                  {isTamil ? 
+                    'தரணி ஹெர்பல்ஸ் 2004 ஆம் ஆண்டில் சித்தா மற்றும் ஆயுர்வேதத்தில் ஆராய்ச்சி செய்வதற்காக உருவாக்கப்பட்டது. இதன் விளைவாக, தரணி ஹெர்பல்ஸ் 2007 இல் நிறுவப்பட்டது. ராம்கேர் செம்பருத்தி மூலிகை தலைமுடி எண்ணெய், ராம்கேர் மூடகத்ரன் மூலிகை வலி நிவாரண எண்ணெய், ராம்கேர் லக்ஸ்னா மூலிகை தோல் எண்ணெய் - பிராண்ட் காப்புரிமை பெறாத மருந்துகள் உருவாக்கப்பட்டன.' :
+                    'Dharani Herbbals was formed in the year 2004 to do researches in Siddha & Ayurveda. As a result, Dharani herbals was founded in 2007. Ramcare Chemparuthi herbal hair oil, Ramcare Moodakattran herbal pain reliever oil, Ramcare Luxsna herbal skin oil- Brand Non patented medicines were developed.'
+                  }
                 </p>
                 <p className={isTamil ? 'tamil-text' : ''}>
-                  {translate('about.storyPara2')}
-                </p>
-                <p className={isTamil ? 'tamil-text' : ''}>
-                  {translate('about.storyPara3')}
+                  {isTamil ? 
+                    '100% மூலிகை மருந்துகளை அறிமுகப்படுத்துவதன் மூலம் இயற்கை சிகிச்சைக்கான விழிப்புணர்வை ஊக்குவிக்கவும். மூலிகை மருந்துகள் இயற்கையானவை மற்றும் பக்க விளைவுகள் இல்லாமல் தீங்கு விளைவிக்காதவை. எனவே இந்த மருந்துகள் உலகம் முழுவதும் உள்ள மக்களிடையே அன்பான வரவேற்பைப் பெற்றுள்ளன. நாங்கள் மூலிகைகளில் அதிகமான ஆராய்ச்சி செய்து வருகிறோம். நாம் மாசுபட்ட சூழலில் வாழ்ந்து கொண்டிருப்பதால், நமது ஆரோக்கியத்தைப் பாதுகாக்க ஒரே வழி இயற்கை சிகிச்சையை நோக்கி திரும்புவதுதான்.' :
+                    'Promote awareness for nature cure by introducing 100% Herbal Medicines. Herbal medicines are Natural and harmless with no side effects.Hence these medicines have warm welcome among people all over the world. We are doing more and more research in herbs. As we are living in polluted atmosphere, the only way to safe-guard our health is to turn back to nature cure.'
+                  }
                 </p>
               </div>
             </div>
@@ -120,7 +124,10 @@ const AboutUs = () => {
                   {translate('about.ourMission')}
                 </h3>
                 <p className={`text-gray-600 leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
-                  {translate('about.missionText')}
+                  {isTamil ? 
+                    '100% மூலிகை மருந்துகளை அறிமுகப்படுத்துவதன் மூலம் இயற்கை சிகிச்சைக்கான விழிப்புணர்வை ஊக்குவிக்கவும். மூலிகை மருந்துகள் இயற்கையானவை மற்றும் பக்க விளைவுகள் இல்லாமல் தீங்கு விளைவிக்காதவை. எனவே இந்த மருந்துகள் உலகம் முழுவதும் உள்ள மக்களிடையே அன்பான வரவேற்பைப் பெற்றுள்ளன. நாங்கள் மூலிகைகளில் அதிகமான ஆராய்ச்சி செய்து வருகிறோம். நாம் மாசுபட்ட சூழலில் வாழ்ந்து கொண்டிருப்பதால், நமது ஆரோக்கியத்தைப் பாதுகாக்க ஒரே வழி இயற்கை சிகிச்சையை நோக்கி திரும்புவதுதான்.' :
+                    'Promote awareness for nature cure by introducing 100% Herbal Medicines. Herbal medicines are Natural and harmless with no side effects.Hence these medicines have warm welcome among people all over the world. We are doing more and more research in herbs. As we are living in polluted atmosphere, the only way to safe-guard our health is to turn back to nature cure.'
+                  }
                 </p>
               </CardContent>
             </Card>
@@ -131,10 +138,13 @@ const AboutUs = () => {
                   <Eye className="w-8 h-8 text-white" />
                 </div>
                 <h3 className={`text-2xl font-bold text-gray-800 mb-4 ${isTamil ? 'tamil-text' : ''}`}>
-                  {translate('about.ourVision')}
+                  {isTamil ? 'எங்கள் வரலாறு' : 'Our History'}
                 </h3>
                 <p className={`text-gray-600 leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
-                  {translate('about.visionText')}
+                  {isTamil ? 
+                    '100% மூலிகை மருந்துகளை அறிமுகப்படுத்துவதன் மூலம் இயற்கை சிகிச்சைக்கான விழிப்புணர்வை ஊக்குவிக்கவும். மூலிகை மருந்துகள் இயற்கையானவை மற்றும் பக்க விளைவுகள் இல்லாமல் தீங்கு விளைவிக்காதவை. எனவே இந்த மருந்துகள் உலகம் முழுவதும் உள்ள மக்களிடையே அன்பான வரவேற்பைப் பெற்றுள்ளன. நாங்கள் மூலிகைகளில் அதிகமான ஆராய்ச்சி செய்து வருகிறோம். நாம் மாசுபட்ட சூழலில் வாழ்ந்து கொண்டிருப்பதால், நமது ஆரோக்கியத்தைப் பாதுகாக்க ஒரே வழி இயற்கை சிகிச்சையை நோக்கி திரும்புவதுதான்.' :
+                    'Promote awareness for nature cure by introducing 100% Herbal Medicines. Herbal medicines are Natural and harmless with no side effects.Hence these medicines have warm welcome among people all over the world. We are doing more and more research in herbs. As we are living in polluted atmosphere, the only way to safe-guard our health is to turn back to nature cure.'
+                  }
                 </p>
               </CardContent>
             </Card>
@@ -175,12 +185,12 @@ const AboutUs = () => {
         <section className="mb-16">
           <Card className="shadow-2xl border-0 bg-gradient-to-r from-primary to-green-600 text-white">
             <CardContent className="p-8 md:p-12">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
                 {stats.map((stat, index) => (
                   <div key={index}>
                     <div className="text-3xl md:text-4xl font-bold mb-2">{stat.number}</div>
                     <div className={`text-sm md:text-base opacity-90 ${isTamil ? 'tamil-text' : ''}`}>
-                      {translate(stat.labelKey)}
+                      {stat.label}
                     </div>
                   </div>
                 ))}
