@@ -10,10 +10,11 @@ import { useToast } from '@/hooks/use-toast';
 interface ReviewFormProps {
   productId: number;
   skuId?: string;
+  productName?: string;
   onReviewSubmitted?: () => void;
 }
 
-const ReviewForm: React.FC<ReviewFormProps> = ({ productId, skuId, onReviewSubmitted }) => {
+const ReviewForm: React.FC<ReviewFormProps> = ({ productId, skuId, productName, onReviewSubmitted }) => {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,7 +59,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, skuId, onReviewSubmi
         // Add user name for text-based storage
         userName: user.username || user.email || 'Customer',
         // Add product name if available
-        productName: window.productName || ''
+        productName: productName || ''
       });
       
       toast({

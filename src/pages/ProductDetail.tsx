@@ -674,6 +674,7 @@ const ProductDetail = () => {
                 <ReviewForm 
                   productId={product.id} 
                   skuId={product.skuid || product.SKUID || product.id.toString()}
+                  productName={product.Name || product.name || product.title || ''}
                   onReviewSubmitted={() => setReviewsRefreshKey(prev => prev + 1)}
                 />
               </div>

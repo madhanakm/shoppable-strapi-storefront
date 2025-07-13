@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart, TrendingUp, Flame, Zap, Tag, ArrowRight, Eye } from 'lucide-react';
+import StarRating from './StarRating';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
@@ -9,9 +10,10 @@ import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
+import { getBulkProductReviewStats } from '@/services/reviews';
 
 // Product Card Component
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, reviewStats = {} }) => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
@@ -58,26 +60,7 @@ const ProductCard = ({ product }) => {
     navigate('/checkout');
   };
 
-  const renderStars = (rating = 0) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
 
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />);
-    }
-    
-    if (hasHalfStar) {
-      stars.push(<Star key="half" className="w-4 h-4 fill-yellow-400/50 text-yellow-400" />);
-    }
-    
-    const remainingStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < remainingStars; i++) {
-      stars.push(<Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />);
-    }
-    
-    return stars;
-  };
 
   const getBadgeColor = (badge) => {
     switch (badge?.toLowerCase()) {
@@ -151,10 +134,12 @@ const ProductCard = ({ product }) => {
         </Link>
         
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-1">
-            {renderStars(product.rating)}
-          </div>
-          <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600 font-medium">({product.reviews || 0})</span>
+          <StarRating 
+            rating={reviewStats[product.id]?.average || 0} 
+            count={reviewStats[product.id]?.count || 0} 
+            size="sm" 
+            showCount={true} 
+          />
         </div>
         
         <div className="mb-4">
@@ -203,6 +188,7 @@ const ProductCard = ({ product }) => {
 // Product Block Component
 const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) => {
   const [products, setProducts] = useState([]);
+  const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
@@ -249,6 +235,17 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         });
         
         setProducts(formattedProducts.slice(0, 6));
+        
+        // Fetch review stats
+        const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
+        if (productIds.length > 0) {
+          try {
+            const stats = await getBulkProductReviewStats(productIds);
+            setReviewStats(stats);
+          } catch (reviewError) {
+            console.error('Error fetching review stats:', reviewError);
+          }
+        }
       } catch (err) {
         console.error(`Failed to fetch ${type} products`, err);
         setProducts([]);
@@ -314,7 +311,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
               className="animate-fade-in-up"
               style={{ animationDelay: `${index * 150}ms` }}
             >
-              <ProductCard product={product} />
+              <ProductCard product={product} reviewStats={reviewStats} />
             </div>
           ))}
         </div>
