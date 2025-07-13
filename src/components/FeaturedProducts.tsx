@@ -8,6 +8,8 @@ import { useCart } from '@/contexts/CartContext';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
 import { getProductsWithTamil } from '@/services/products';
+import { getBulkProductReviewStats } from '@/services/reviews';
+import StarRating from './StarRating';
 
 // Fallback products in case API fails
 const fallbackProducts = [
@@ -47,6 +49,7 @@ const FeaturedProducts = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
+  const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { language } = useTranslation();
@@ -57,7 +60,7 @@ const FeaturedProducts = () => {
       try {
         setLoading(true);
         // Fetch products with type=featured
-        const response = await fetch('https://api.dharaniherbbals.com/api/product-masters?type=featured&limit=6');
+        const response = await fetch('https://api.dharaniherbbals.com/api/product-masters?type=featured&pagination[limit]=-1');
         
         if (!response.ok) {
           throw new Error(`API responded with status: ${response.status}`);
@@ -85,14 +88,24 @@ const FeaturedProducts = () => {
               tamilName: attributes.tamil || null,
               price: parseFloat(attributes.mrp || attributes.price) || 0,
               image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
-              rating: attributes.rating || 4,
-              reviews: attributes.reviews || 10,
               badge: attributes.type === 'featured' ? 'Featured' : null,
-              originalPrice: attributes.originalPrice || null
+              originalPrice: attributes.originalPrice || null,
+              skuId: attributes.skuid || attributes.SKUID || item.id?.toString()
             };
           });
           
           setProducts(formattedProducts);
+          
+          // Fetch review stats for all products
+          const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
+          if (productIds.length > 0) {
+            try {
+              const stats = await getBulkProductReviewStats(productIds);
+              setReviewStats(stats);
+            } catch (reviewError) {
+              console.error('Error fetching review stats:', reviewError);
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to fetch featured products', err);
@@ -132,26 +145,7 @@ const FeaturedProducts = () => {
     });
   };
 
-  const renderStars = (rating = 0) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
 
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />);
-    }
-    
-    if (hasHalfStar) {
-      stars.push(<Star key="half" className="w-4 h-4 fill-yellow-400/50 text-yellow-400" />);
-    }
-    
-    const remainingStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < remainingStars; i++) {
-      stars.push(<Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />);
-    }
-    
-    return stars;
-  };
 
   if (loading) {
     return (
@@ -208,11 +202,13 @@ const FeaturedProducts = () => {
                   {isTamil && product.tamilName ? product.tamilName : product.name}
                 </h3>
                 
-                <div className="flex items-center space-x-1 mb-3">
-                  {renderStars(product.rating)}
-                  <span className="text-xs text-muted-foreground ml-2">
-                    ({product.reviews || 0})
-                  </span>
+                <div className="flex items-center mb-3">
+                  <StarRating 
+                    rating={reviewStats[product.id]?.average || 0} 
+                    count={reviewStats[product.id]?.count || 0} 
+                    size="sm" 
+                    showCount={true} 
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between mb-4">

@@ -10,6 +10,10 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
+import ReviewForm from '@/components/ReviewForm';
+import ProductReviews from '@/components/ProductReviews';
+import StarRating from '@/components/StarRating';
+import { getProductReviewStats } from '@/services/reviews';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -28,6 +32,8 @@ const ProductDetail = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
+  const [reviewStats, setReviewStats] = useState({ average: 0, count: 0 });
+  const [reviewsRefreshKey, setReviewsRefreshKey] = useState(0);
   
   // Refs for image zoom
   const imageContainerRef = useRef(null);
@@ -41,12 +47,13 @@ const ProductDetail = () => {
         // Reset gallery images and selected image when changing products
         setGalleryImages([]);
         setSelectedImage(null);
+        setReviewStats({ average: 0, count: 0 });
         
         // Scroll to top when changing products
         window.scrollTo(0, 0);
         
-        // Fetch all products
-        const response = await fetch('https://api.dharaniherbbals.com/api/product-masters');
+        // Fetch all products with pagination
+        const response = await fetch('https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1');
         const data = await response.json();
         
         // Process products
@@ -86,21 +93,41 @@ const ProductDetail = () => {
             setGalleryImages([]);
           }
           
-          // Extract categories and brands
-          const uniqueCategories = [...new Set(
-            productArray
-              .map(p => p.attributes?.category)
-              .filter(Boolean)
-          )];
+          // Load categories and brands from separate endpoints
+          const [categoriesRes, brandsRes] = await Promise.all([
+            fetch('https://api.dharaniherbbals.com/api/product-categories?pagination[limit]=-1'),
+            fetch('https://api.dharaniherbbals.com/api/brands?pagination[limit]=-1')
+          ]);
           
-          const uniqueBrands = [...new Set(
-            productArray
-              .map(p => p.attributes?.brand)
-              .filter(Boolean)
-          )];
+          // Process categories
+          if (categoriesRes.ok) {
+            const categoriesData = await categoriesRes.json();
+            let categoryNames = [];
+            if (Array.isArray(categoriesData)) {
+              categoryNames = categoriesData.map(cat => cat.name || cat.Name || cat.title || cat).filter(Boolean);
+            } else if (categoriesData.data) {
+              categoryNames = categoriesData.data.map(cat => {
+                const attrs = cat.attributes || cat;
+                return attrs.name || attrs.Name || attrs.title;
+              }).filter(Boolean);
+            }
+            setCategories(categoryNames);
+          }
           
-          setCategories(uniqueCategories);
-          setBrands(uniqueBrands);
+          // Process brands
+          if (brandsRes.ok) {
+            const brandsData = await brandsRes.json();
+            let brandNames = [];
+            if (Array.isArray(brandsData)) {
+              brandNames = brandsData.map(brand => brand.name || brand.Name || brand.title || brand).filter(Boolean);
+            } else if (brandsData.data) {
+              brandNames = brandsData.data.map(brand => {
+                const attrs = brand.attributes || brand;
+                return attrs.name || attrs.Name || attrs.title;
+              }).filter(Boolean);
+            }
+            setBrands(brandNames);
+          }
           
           // Find related products (same category or brand)
           const currentCategory = foundProduct.attributes?.category;
@@ -115,6 +142,16 @@ const ProductDetail = () => {
             .slice(0, 4); // Limit to 4 related products
           
           setRelatedProducts(related);
+          
+          // Fetch review stats
+          try {
+            const skuId = foundProduct.attributes?.skuid || foundProduct.attributes?.SKUID || foundProduct.id.toString();
+            // Ensure skuId is always a string
+            const stats = await getProductReviewStats(foundProduct.id, skuId.toString());
+            setReviewStats(stats);
+          } catch (reviewError) {
+            console.error('Error fetching review stats:', reviewError);
+          }
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -240,26 +277,26 @@ const ProductDetail = () => {
                     <div className="w-5 h-5 bg-white/20 rounded-lg flex items-center justify-center">
                       <div className="w-2 h-2 bg-white rounded-sm"></div>
                     </div>
-                    {translate('sidebar.categories')}
+                    Categories
                   </h2>
                 </div>
                 <div className="p-4">
                   <ul className="space-y-2">
                     <li>
-                      <a 
-                        href="/products"
+                      <Link 
+                        to="/products"
                         className="flex items-center px-3 py-2 rounded-xl hover:bg-primary/5 hover:text-primary transition-all duration-300 group"
                       >
                         <div className="w-2 h-2 bg-gray-300 rounded-full mr-2 group-hover:bg-primary transition-colors"></div>
                         <span className={`font-medium text-sm ${isTamil ? 'tamil-text' : ''}`}>
-                          {translate('sidebar.allCategories')}
+                          All Categories
                         </span>
-                      </a>
+                      </Link>
                     </li>
                     {categories.map(category => (
                       <li key={category}>
-                        <a 
-                          href={`/products?category=${encodeURIComponent(category)}`}
+                        <Link 
+                          to={`/products?category=${encodeURIComponent(category)}`}
                           className={`flex items-center px-3 py-2 rounded-xl transition-all duration-300 group ${
                             product.category === category 
                               ? 'bg-primary/10 text-primary font-semibold' 
@@ -270,7 +307,7 @@ const ProductDetail = () => {
                             product.category === category ? 'bg-primary' : 'bg-gray-300 group-hover:bg-primary'
                           }`}></div>
                           <span className="font-medium text-sm">{category}</span>
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -284,24 +321,24 @@ const ProductDetail = () => {
                     <div className="w-5 h-5 bg-white/20 rounded-lg flex items-center justify-center">
                       <div className="w-2 h-2 bg-white rounded-full"></div>
                     </div>
-                    {translate('sidebar.brands')}
+                    Brands
                   </h2>
                 </div>
                 <div className="p-4">
                   <ul className="space-y-2">
                     <li>
-                      <a 
-                        href="/products"
+                      <Link 
+                        to="/products"
                         className="flex items-center px-3 py-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 group"
                       >
                         <div className="w-2 h-2 bg-gray-300 rounded-full mr-2 group-hover:bg-blue-500 transition-colors"></div>
                         <span className="font-medium text-sm">All Brands</span>
-                      </a>
+                      </Link>
                     </li>
                     {brands.map(brand => (
                       <li key={brand}>
-                        <a 
-                          href={`/products?brand=${encodeURIComponent(brand)}`}
+                        <Link 
+                          to={`/products?brand=${encodeURIComponent(brand)}`}
                           className={`flex items-center px-3 py-2 rounded-xl transition-all duration-300 group ${
                             product.brand === brand 
                               ? 'bg-blue-50 text-blue-600 font-semibold' 
@@ -312,7 +349,7 @@ const ProductDetail = () => {
                             product.brand === brand ? 'bg-blue-500' : 'bg-gray-300 group-hover:bg-blue-500'
                           }`}></div>
                           <span className="font-medium text-sm">{brand}</span>
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -326,28 +363,28 @@ const ProductDetail = () => {
                     <div className="w-5 h-5 bg-white/20 rounded-lg flex items-center justify-center">
                       <div className="w-2 h-2 bg-white rounded-lg"></div>
                     </div>
-                    {translate('sidebar.quickActions')}
+                    Quick Actions
                   </h2>
                 </div>
                 <div className="p-4 space-y-3">
-                  <a 
-                    href="/products" 
+                  <Link 
+                    to="/products" 
                     className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:from-green-50 hover:to-green-100 hover:text-green-600 transition-all duration-300 group"
                   >
                     <span className="font-medium text-sm">Browse All Products</span>
                     <div className="w-5 h-5 bg-white rounded-lg flex items-center justify-center group-hover:bg-green-100 transition-colors text-xs">
                       →
                     </div>
-                  </a>
-                  <a 
-                    href="/cart" 
+                  </Link>
+                  <Link 
+                    to="/cart" 
                     className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:from-green-50 hover:to-green-100 hover:text-green-600 transition-all duration-300 group"
                   >
                     <span className="font-medium text-sm">View Cart</span>
                     <div className="w-5 h-5 bg-white rounded-lg flex items-center justify-center group-hover:bg-green-100 transition-colors text-xs">
                       🛒
                     </div>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -489,17 +526,12 @@ const ProductDetail = () => {
                 </h1>
                 
                 <div className="flex items-center mb-6">
-                  <div className="flex mr-3">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star 
-                        key={star} 
-                        className={`h-5 w-5 ${star <= (product.rating || 4) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full font-medium">
-                    {product.reviews || 0} reviews
-                  </span>
+                  <StarRating 
+                    rating={reviewStats.average} 
+                    count={reviewStats.count} 
+                    size="md" 
+                    showCount={true} 
+                  />
                 </div>
               </div>
               
@@ -619,6 +651,31 @@ const ProductDetail = () => {
                     )}
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Reviews Section */}
+        <div className="mt-12 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="bg-gradient-to-r from-primary to-green-600 p-4 text-white">
+            <h2 className="text-xl font-bold">Customer Reviews</h2>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <ProductReviews 
+                  productId={product.id} 
+                  skuId={product.skuid || product.SKUID || product.id.toString()} 
+                  key={reviewsRefreshKey}
+                />
+              </div>
+              <div>
+                <ReviewForm 
+                  productId={product.id} 
+                  skuId={product.skuid || product.SKUID || product.id.toString()}
+                  onReviewSubmitted={() => setReviewsRefreshKey(prev => prev + 1)}
+                />
               </div>
             </div>
           </div>

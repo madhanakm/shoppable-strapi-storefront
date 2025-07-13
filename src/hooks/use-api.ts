@@ -15,6 +15,8 @@ export function useApiQuery<T>(
   return useQuery<T, Error>({
     queryKey,
     queryFn: () => get<T>(endpoint, params),
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     ...options
   });
 }

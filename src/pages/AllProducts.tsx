@@ -10,6 +10,8 @@ import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { formatPrice } from '@/lib/utils';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
+import { getBulkProductReviewStats } from '@/services/reviews';
+import StarRating from '@/components/StarRating';
 
 const AllProducts = () => {
   const { addToCart } = useCart();
@@ -20,6 +22,7 @@ const AllProducts = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
@@ -52,9 +55,9 @@ const AllProducts = () => {
     try {
       // Load products, categories, and brands in parallel
       const [productsRes, categoriesRes, brandsRes] = await Promise.all([
-        fetch('https://api.dharaniherbbals.com/api/product-masters'),
-        fetch('https://api.dharaniherbbals.com/api/product-categories'),
-        fetch('https://api.dharaniherbbals.com/api/brands')
+        fetch('https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1'),
+        fetch('https://api.dharaniherbbals.com/api/product-categories?pagination[limit]=-1'),
+        fetch('https://api.dharaniherbbals.com/api/brands?pagination[limit]=-1')
       ]);
 
       // Process products
@@ -62,6 +65,17 @@ const AllProducts = () => {
         const productsData = await productsRes.json();
         const productList = Array.isArray(productsData) ? productsData : productsData.data || [];
         setProducts(productList);
+        
+        // Fetch review stats for all products
+        const productIds = productList.map(p => p.id).filter(id => id && !isNaN(parseInt(id)));
+        if (productIds.length > 0) {
+          try {
+            const stats = await getBulkProductReviewStats(productIds.map(id => parseInt(id)));
+            setReviewStats(stats);
+          } catch (reviewError) {
+            console.error('Error fetching review stats:', reviewError);
+          }
+        }
       }
 
       // Process categories
@@ -456,12 +470,12 @@ const AllProducts = () => {
                         </Link>
                         
                         <div className="flex items-center mb-3">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            ))}
-                          </div>
-                          <span className="text-xs text-gray-500 ml-2">(4.5)</span>
+                          <StarRating 
+                            rating={reviewStats[product.id]?.average || 0} 
+                            count={reviewStats[product.id]?.count || 0} 
+                            size="sm" 
+                            showCount={true} 
+                          />
                         </div>
                         
                         <div className="flex items-center justify-between mb-3">

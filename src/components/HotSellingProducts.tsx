@@ -9,11 +9,14 @@ import { getProducts } from '@/services/products';
 import { Product, StrapiData } from '@/types/strapi';
 import { getStrapiMedia } from '@/services/api';
 import { formatPrice } from '@/lib/utils';
+import { getBulkProductReviewStats } from '@/services/reviews';
+import StarRating from './StarRating';
 
 const HotSellingProducts = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart } = useCart();
   const [products, setProducts] = useState<StrapiData<Product>[]>([]);
+  const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,13 +39,23 @@ const HotSellingProducts = () => {
           name: item.title || item.name || 'Product',
           price: parseFloat(item.price) || 0,
           image: item.image_base64 || item.image || '/placeholder.svg',
-          rating: item.rating || 0,
-          reviews: item.reviews || 0,
           badge: item.badge || null,
-          originalPrice: item.originalPrice || null
+          originalPrice: item.originalPrice || null,
+          skuId: item.skuid || item.SKUID || item.id?.toString()
         }));
         
         setProducts(formattedProducts);
+        
+        // Fetch review stats for all products
+        const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
+        if (productIds.length > 0) {
+          try {
+            const stats = await getBulkProductReviewStats(productIds);
+            setReviewStats(stats);
+          } catch (reviewError) {
+            console.error('Error fetching review stats:', reviewError);
+          }
+        }
       } catch (error) {
         console.error('Failed to fetch hot selling products', error);
       } finally {
@@ -79,26 +92,7 @@ const HotSellingProducts = () => {
     });
   };
 
-  const renderStars = (rating: number = 0) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
 
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />);
-    }
-    
-    if (hasHalfStar) {
-      stars.push(<Star key="half" className="w-4 h-4 fill-yellow-400/50 text-yellow-400" />);
-    }
-    
-    const remainingStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < remainingStars; i++) {
-      stars.push(<Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />);
-    }
-    
-    return stars;
-  };
 
   if (loading) {
     return (
@@ -152,9 +146,13 @@ const HotSellingProducts = () => {
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">{product.name}</h3>
                 
-                <div className="flex items-center space-x-1 mb-3">
-                  {renderStars(product.rating)}
-                  <span className="text-sm text-muted-foreground ml-2">({product.reviews || 0})</span>
+                <div className="flex items-center mb-3">
+                  <StarRating 
+                    rating={reviewStats[product.id]?.average || 0} 
+                    count={reviewStats[product.id]?.count || 0} 
+                    size="sm" 
+                    showCount={true} 
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between mb-4">

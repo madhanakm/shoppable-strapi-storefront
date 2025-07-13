@@ -211,7 +211,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters`);
+        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1`);
         
         if (!response.ok) {
           throw new Error(`API responded with status: ${response.status}`);
