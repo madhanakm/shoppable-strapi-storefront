@@ -144,7 +144,9 @@ const ProductCard = ({ product, reviewStats = {} }) => {
         
         <div className="mb-4">
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-primary">{formatPrice(product.price)}</span>
+            <span className="text-2xl font-black text-primary">
+              {product.priceRange || formatPrice(product.price)}
+            </span>
             {product.originalPrice && (
               <span className="text-sm text-gray-400 line-through font-medium">
                 {formatPrice(product.originalPrice)}
@@ -215,15 +217,36 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         const filteredProducts = productList.filter(item => {
           const attributes = item.attributes || item;
           const status = attributes.status === true || attributes.status === 'true';
-          return attributes.type?.toLowerCase() === type.toLowerCase() && status;
+          const hasType = attributes.type?.toLowerCase() === type.toLowerCase();
+          console.log(`Product ${attributes.Name}: type=${attributes.type}, status=${status}, hasType=${hasType}`);
+          return hasType && status;
         });
         
         const formattedProducts = filteredProducts.map(item => {
           const attributes = item.attributes || item;
+          let price = parseFloat(attributes.mrp || attributes.price) || 0;
+          let priceRange = null;
+          
+          if (attributes.isVariableProduct && attributes.variations) {
+            try {
+              const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
+              const prices = variations.map(v => parseFloat(v.price || v.mrp || 0)).filter(p => p > 0);
+              if (prices.length > 0) {
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                price = minPrice;
+                priceRange = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+              }
+            } catch {
+              // Keep default price
+            }
+          }
+          
           return {
             id: item.id || Math.random().toString(),
             name: attributes.Name || attributes.name || 'Product',
-            price: parseFloat(attributes.mrp || attributes.price) || 0,
+            price: price,
+            priceRange: priceRange,
             image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
             rating: attributes.rating || 4,
             reviews: attributes.reviews || 10,

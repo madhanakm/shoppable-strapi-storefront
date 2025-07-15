@@ -34,6 +34,9 @@ const ProductDetail = () => {
   const [galleryImages, setGalleryImages] = useState([]);
   const [reviewStats, setReviewStats] = useState({ average: 0, count: 0 });
   const [reviewsRefreshKey, setReviewsRefreshKey] = useState(0);
+  const [selectedVariation, setSelectedVariation] = useState(null);
+  const [variations, setVariations] = useState([]);
+  const [currentPrice, setCurrentPrice] = useState(0);
   
   // Refs for image zoom
   const imageContainerRef = useRef(null);
@@ -75,6 +78,30 @@ const ProductDetail = () => {
           };
           
           setProduct(productData);
+          
+          // Handle variable products
+          if (foundProduct.attributes?.isVariableProduct && foundProduct.attributes?.variations) {
+            try {
+              const variationsData = typeof foundProduct.attributes.variations === 'string' 
+                ? JSON.parse(foundProduct.attributes.variations) 
+                : foundProduct.attributes.variations;
+              
+              setVariations(variationsData || []);
+              
+              // Set first variation as default
+              if (variationsData && variationsData.length > 0) {
+                setSelectedVariation(variationsData[0]);
+                setCurrentPrice(parseFloat(variationsData[0].price) || parseFloat(variationsData[0].mrp) || foundProduct.attributes.mrp || 0);
+              } else {
+                setCurrentPrice(foundProduct.attributes.mrp || foundProduct.attributes.price || 0);
+              }
+            } catch (e) {
+              console.error('Failed to parse variations:', e);
+              setCurrentPrice(foundProduct.attributes.mrp || foundProduct.attributes.price || 0);
+            }
+          } else {
+            setCurrentPrice(foundProduct.attributes.mrp || foundProduct.attributes.price || 0);
+          }
           
           // Set gallery images if available
           if (foundProduct.attributes?.gallery && Array.isArray(foundProduct.attributes.gallery)) {
@@ -174,12 +201,24 @@ const ProductDetail = () => {
       // Reset selected image first
       setSelectedImage(null);
       
-      // Then set it to the product's main photo if available
-      if (product.photo) {
+      // For variable products, use variation image if available
+      if (selectedVariation && selectedVariation.image) {
+        setSelectedImage(selectedVariation.image);
+      } else if (product.photo) {
         setSelectedImage(product.photo);
       }
     }
-  }, [product]);
+  }, [product, selectedVariation]);
+  
+  const handleVariationChange = (variation) => {
+    setSelectedVariation(variation);
+    setCurrentPrice(parseFloat(variation.price) || parseFloat(variation.mrp) || product.mrp || 0);
+    
+    // Update selected image if variation has an image
+    if (variation.image) {
+      setSelectedImage(variation.image);
+    }
+  };
 
   // Handle mouse move for zoom effect
   const handleMouseMove = (e) => {
@@ -194,28 +233,50 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (product) {
-      addToCart({
+      const cartItem = {
         id: product.id,
         name: product.Name || product.name || product.title,
-        price: product.mrp || product.price,
-        image: product.photo || product.image,
+        price: currentPrice,
+        image: selectedImage || product.photo || product.image,
         category: product.category,
         skuid: product.skuid || product.SKUID || product.id.toString()
-      });
+      };
+      
+      // Add variation info if it's a variable product
+      if (product.isVariableProduct && selectedVariation) {
+        console.log('Cart - selectedVariation:', selectedVariation);
+        console.log('Cart - attributeValue:', selectedVariation.attributeValue);
+        const variationName = selectedVariation.attributeValue || Object.values(selectedVariation)[0];
+        cartItem.variation = variationName;
+        cartItem.name = `${cartItem.name} - ${variationName}`;
+      }
+      
+      addToCart(cartItem);
     }
   };
   
   const handleBuyNow = () => {
     if (product) {
-      setQuickCheckoutItem({
+      const checkoutItem = {
         id: product.id,
         name: product.Name || product.name || product.title,
-        price: product.mrp || product.price,
-        image: product.photo || product.image,
+        price: currentPrice,
+        image: selectedImage || product.photo || product.image,
         category: product.category,
         skuid: product.skuid || product.SKUID || product.id.toString(),
         quantity: quantity
-      });
+      };
+      
+      // Add variation info if it's a variable product
+      if (product.isVariableProduct && selectedVariation) {
+        console.log('Checkout - selectedVariation:', selectedVariation);
+        console.log('Checkout - attributeValue:', selectedVariation.attributeValue);
+        const variationName = selectedVariation.attributeValue || Object.values(selectedVariation)[0];
+        checkoutItem.variation = variationName;
+        checkoutItem.name = `${checkoutItem.name} - ${variationName}`;
+      }
+      
+      setQuickCheckoutItem(checkoutItem);
       navigate('/checkout');
     }
   };
@@ -538,7 +599,7 @@ const ProductDetail = () => {
               <div className="mb-8 p-6 bg-gradient-to-r from-primary/5 to-green-50 rounded-2xl border border-primary/10">
                 <div className="flex items-baseline gap-3">
                   <span className="text-4xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
-                    {formatPrice(product.mrp || product.price || 0)}
+                    {formatPrice(currentPrice)}
                   </span>
                   {product.originalPrice && (
                     <span className="text-xl text-gray-500 line-through">
@@ -549,11 +610,38 @@ const ProductDetail = () => {
                 {product.originalPrice && (
                   <div className="mt-2">
                     <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
-                      Save {Math.round(((product.originalPrice - (product.mrp || product.price)) / product.originalPrice) * 100)}%
+                      Save {Math.round(((product.originalPrice - currentPrice) / product.originalPrice) * 100)}%
                     </span>
                   </div>
                 )}
               </div>
+              
+              {/* Variable Product Options */}
+              {product.isVariableProduct && variations.length > 0 && (
+                <div className="mb-8">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    {product.attributeName || 'Options'}
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {variations.map((variation, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleVariationChange(variation)}
+                        className={`p-3 rounded-xl border-2 transition-all duration-300 text-left ${
+                          selectedVariation === variation
+                            ? 'border-primary bg-primary/5 text-primary'
+                            : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="font-medium text-sm">{variation.value || variation.name || variation.attributeValue}</div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {formatPrice(variation.price || 0)}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             
             {/* Description moved to bottom */}
             
@@ -772,12 +860,28 @@ const ProductDetail = () => {
                             </h3>
                             <div className="flex items-center justify-between">
                               <p className="text-lg font-bold text-primary group-hover:scale-105 origin-left transition-transform">
-                                {formatPrice(relatedProduct.attributes?.mrp || 0)}
+                                {relatedProduct.attributes?.isVariableProduct && relatedProduct.attributes?.variations ? 
+                                  (() => {
+                                    try {
+                                      const variations = typeof relatedProduct.attributes.variations === 'string' ? JSON.parse(relatedProduct.attributes.variations) : relatedProduct.attributes.variations;
+                                      const prices = variations.map(v => parseFloat(v.price || v.mrp || 0)).filter(p => p > 0);
+                                      if (prices.length === 0) return formatPrice(relatedProduct.attributes?.mrp || 0);
+                                      const minPrice = Math.min(...prices);
+                                      const maxPrice = Math.max(...prices);
+                                      return minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+                                    } catch {
+                                      return formatPrice(relatedProduct.attributes?.mrp || 0);
+                                    }
+                                  })()
+                                  : formatPrice(relatedProduct.attributes?.mrp || 0)
+                                }
                               </p>
-                              <div className="flex items-center bg-yellow-50 px-2 py-1 rounded-full group-hover:bg-yellow-100 transition-colors">
-                                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                <span className="text-xs text-gray-700 ml-1 font-medium">4.5</span>
-                              </div>
+                              <StarRating 
+                                rating={0} 
+                                count={0} 
+                                size="sm" 
+                                showCount={false} 
+                              />
                             </div>
                             
                             {/* Quick view button that appears on hover */}

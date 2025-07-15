@@ -480,7 +480,21 @@ const AllProducts = () => {
                         
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-lg font-bold text-primary">
-                            {formatPrice(parseFloat(attrs.mrp) || 0)}
+                            {attrs.isVariableProduct && attrs.variations ? 
+                              (() => {
+                                try {
+                                  const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+                                  const prices = variations.map(v => parseFloat(v.price || v.mrp || 0)).filter(p => p > 0);
+                                  if (prices.length === 0) return formatPrice(parseFloat(attrs.mrp) || 0);
+                                  const minPrice = Math.min(...prices);
+                                  const maxPrice = Math.max(...prices);
+                                  return minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+                                } catch {
+                                  return formatPrice(parseFloat(attrs.mrp) || 0);
+                                }
+                              })()
+                              : formatPrice(parseFloat(attrs.mrp) || 0)
+                            }
                           </span>
                         </div>
                         

@@ -76,8 +76,26 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       console.log('Loading wishlist for user:', user.id);
       const userWishlist = await loadWishlistFromAPI(user.id);
       console.log('Received wishlist data:', userWishlist);
-      setWishlistItems(userWishlist || []);
+      // Filter out deleted products
+      const validWishlist = await filterValidProducts(userWishlist || []);
+      setWishlistItems(validWishlist);
       setHasLoadedWishlist(true);
+    }
+  };
+  
+  const filterValidProducts = async (items: WishlistItem[]) => {
+    try {
+      const response = await fetch('https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1');
+      const data = await response.json();
+      const activeProducts = data.data || [];
+      const activeProductIds = activeProducts
+        .filter(p => p.attributes?.status === true)
+        .map(p => p.id.toString());
+      
+      return items.filter(item => activeProductIds.includes(item.id));
+    } catch (error) {
+      console.error('Error filtering wishlist products:', error);
+      return items;
     }
   };
 

@@ -78,8 +78,26 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const loadUserCart = async () => {
     if (user?.id) {
       const userCart = await loadCartFromAPI(user.id);
-      setCartItems(userCart || []);
+      // Filter out deleted products
+      const validCart = await filterValidProducts(userCart || []);
+      setCartItems(validCart);
       setHasLoadedCart(true);
+    }
+  };
+  
+  const filterValidProducts = async (items: CartItem[]) => {
+    try {
+      const response = await fetch('https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1');
+      const data = await response.json();
+      const activeProducts = data.data || [];
+      const activeProductIds = activeProducts
+        .filter(p => p.attributes?.status === true)
+        .map(p => p.id.toString());
+      
+      return items.filter(item => activeProductIds.includes(item.id));
+    } catch (error) {
+      console.error('Error filtering cart products:', error);
+      return items;
     }
   };
 
