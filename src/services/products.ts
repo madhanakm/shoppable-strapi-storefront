@@ -59,6 +59,25 @@ export const getProductTamilName = async (productId) => {
   }
 };
 
+// Function to get product details from product master with user type
+export const getProductMasterDetails = async (productId, userType = null) => {
+  try {
+    const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[productId][$eq]=${productId}`);
+    const data = await response.json();
+    if (data.data && data.data.length > 0) {
+      const productData = data.data[0];
+      return {
+        ...productData,
+        userType
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching product master details:', error);
+    return null;
+  }
+};
+
 export const getProductsWithTamil = async (products) => {
   const productsWithTamil = await Promise.all(
     products.map(async (product) => {

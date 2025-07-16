@@ -12,6 +12,8 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { getBulkProductReviewStats } from '@/services/reviews';
 import StarRating from '@/components/StarRating';
+import { useAuth } from '@/contexts/AuthContext';
+import { getPriceByUserType, getVariablePriceRange } from '@/lib/pricing';
 
 const AllProducts = () => {
   const { addToCart } = useCart();
@@ -35,6 +37,42 @@ const AllProducts = () => {
   const itemsPerPage = 12; // Show 12 products per page
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
+  const { user } = useAuth();
+  // Get user type from user object or local storage
+  const [userType, setUserType] = useState(user?.userType || null);
+  
+  // Fetch user type if not available in user object
+  useEffect(() => {
+    const fetchUserType = async () => {
+      if (user?.userType) {
+        setUserType(user.userType);
+        return;
+      }
+      
+      try {
+        // Get user from local storage
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          // Fetch user type from API using user ID
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.attributes) {
+              setUserType(result.data.attributes.userType || 'customer');
+            }
+          }
+        } else {
+          setUserType('customer'); // Default user type
+        }
+      } catch (error) {
+        console.error('Error fetching user type:', error);
+        setUserType('customer'); // Default to customer on error
+      }
+    };
+    
+    fetchUserType();
+  }, [user]);
 
   // Get URL parameters
   useEffect(() => {
@@ -149,7 +187,7 @@ const AllProducts = () => {
     const productData = {
       id: product.id.toString(),
       name: attrs.Name || attrs.name,
-      price: parseFloat(attrs.mrp) || 0,
+      price: getPriceByUserType(attrs, userType),
       image: attrs.photo || attrs.image,
       category: attrs.category
     };
@@ -484,16 +522,16 @@ const AllProducts = () => {
                               (() => {
                                 try {
                                   const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
-                                  const prices = variations.map(v => parseFloat(v.price || v.mrp || 0)).filter(p => p > 0);
-                                  if (prices.length === 0) return formatPrice(parseFloat(attrs.mrp) || 0);
-                                  const minPrice = Math.min(...prices);
-                                  const maxPrice = Math.max(...prices);
-                                  return minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+                                  const priceRange = getVariablePriceRange(variations, userType);
+                                  if (!priceRange) return formatPrice(getPriceByUserType(attrs, userType));
+                                  return priceRange.minPrice === priceRange.maxPrice ? 
+                                    formatPrice(priceRange.minPrice) : 
+                                    `${formatPrice(priceRange.minPrice)} - ${formatPrice(priceRange.maxPrice)}`;
                                 } catch {
-                                  return formatPrice(parseFloat(attrs.mrp) || 0);
+                                  return formatPrice(getPriceByUserType(attrs, userType));
                                 }
                               })()
-                              : formatPrice(parseFloat(attrs.mrp) || 0)
+                              : formatPrice(getPriceByUserType(attrs, userType))
                             }
                           </span>
                         </div>
@@ -504,7 +542,7 @@ const AllProducts = () => {
                             onClick={() => addToCart({
                               id: product.id.toString(),
                               name: attrs.Name || attrs.name,
-                              price: parseFloat(attrs.mrp) || 0,
+                              price: getPriceByUserType(attrs, userType),
                               image: attrs.photo || attrs.image,
                               category: attrs.category,
                               skuid: attrs.skuid || attrs.SKUID || product.id.toString()
@@ -520,7 +558,7 @@ const AllProducts = () => {
                               setQuickCheckoutItem({
                                 id: product.id.toString(),
                                 name: attrs.Name || attrs.name,
-                                price: parseFloat(attrs.mrp) || 0,
+                                price: getPriceByUserType(attrs, userType),
                                 image: attrs.photo || attrs.image,
                                 category: attrs.category,
                                 skuid: attrs.skuid || attrs.SKUID || product.id.toString(),

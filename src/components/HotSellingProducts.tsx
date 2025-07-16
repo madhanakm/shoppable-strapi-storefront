@@ -9,6 +9,7 @@ import { getProducts } from '@/services/products';
 import { Product, StrapiData } from '@/types/strapi';
 import { getStrapiMedia } from '@/services/api';
 import { formatPrice } from '@/lib/utils';
+import { getPriceByUserType } from '@/lib/pricing';
 import { getBulkProductReviewStats } from '@/services/reviews';
 import StarRating from './StarRating';
 
@@ -18,8 +19,40 @@ const HotSellingProducts = () => {
   const [products, setProducts] = useState<StrapiData<Product>[]>([]);
   const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
+  const [userType, setUserType] = useState(null);
+
+  // Fetch user type from local storage
+  useEffect(() => {
+    const fetchUserType = async () => {
+      try {
+        // Get user from local storage
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          // Fetch user type from API using user ID
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.attributes) {
+              setUserType(result.data.attributes.userType || 'customer');
+            }
+          }
+        } else {
+          setUserType('customer'); // Default user type
+        }
+      } catch (error) {
+        console.error('Error fetching user type:', error);
+        setUserType('customer'); // Default to customer on error
+      }
+    };
+    
+    fetchUserType();
+  }, []);
 
   useEffect(() => {
+    // Skip loading products if userType is not set yet
+    if (userType === null) return;
+    
     const loadProducts = async () => {
       try {
         const response = await getProducts(1, 4, { hot_selling: true });
@@ -37,7 +70,7 @@ const HotSellingProducts = () => {
         const formattedProducts = productList.map(item => ({
           id: item.id,
           name: item.title || item.name || 'Product',
-          price: parseFloat(item.price) || 0,
+          price: getPriceByUserType(item, userType),
           image: item.image_base64 || item.image || '/placeholder.svg',
           badge: item.badge || null,
           originalPrice: item.originalPrice || null,
@@ -64,7 +97,7 @@ const HotSellingProducts = () => {
     };
 
     loadProducts();
-  }, []);
+  }, [userType]);
 
   const handleWishlistToggle = (product: any) => {
     const productData = {
@@ -157,7 +190,7 @@ const HotSellingProducts = () => {
                 
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
-                    <span className="text-2xl font-bold text-primary">{formatPrice(product.price)}</span>
+                    <span className="text-2xl font-bold text-primary">{formatPrice(getPriceByUserType(product, userType))}</span>
                     {product.originalPrice && (
                       <span className="text-lg text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
                     )}

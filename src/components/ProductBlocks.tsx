@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '@/lib/utils';
+import { getPriceByUserType } from '@/lib/pricing';
 import { Link } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
 import { getBulkProductReviewStats } from '@/services/reviews';
@@ -192,8 +193,34 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
   const [products, setProducts] = useState([]);
   const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
+  const [userType, setUserType] = useState(null);
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
+
+  // Fetch user type
+  useEffect(() => {
+    const fetchUserType = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.attributes) {
+              setUserType(result.data.attributes.userType || 'customer');
+              return;
+            }
+          }
+        }
+        setUserType('customer');
+      } catch (error) {
+        console.error('Error fetching user type:', error);
+        setUserType('customer');
+      }
+    };
+    fetchUserType();
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -224,13 +251,13 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         
         const formattedProducts = filteredProducts.map(item => {
           const attributes = item.attributes || item;
-          let price = parseFloat(attributes.mrp || attributes.price) || 0;
+          let price = getPriceByUserType(attributes, userType);
           let priceRange = null;
           
           if (attributes.isVariableProduct && attributes.variations) {
             try {
               const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
-              const prices = variations.map(v => parseFloat(v.price || v.mrp || 0)).filter(p => p > 0);
+              const prices = variations.map(v => getPriceByUserType(v, userType)).filter(p => p > 0);
               if (prices.length > 0) {
                 const minPrice = Math.min(...prices);
                 const maxPrice = Math.max(...prices);
@@ -277,8 +304,10 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
       }
     };
 
-    fetchProducts();
-  }, [type]);
+    if (userType !== null) {
+      fetchProducts();
+    }
+  }, [type, userType]);
 
   if (loading) {
     return (

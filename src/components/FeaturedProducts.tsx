@@ -6,6 +6,7 @@ import { Star, ShoppingCart, Heart } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { formatPrice } from '@/lib/utils';
+import { getPriceByUserType } from '@/lib/pricing';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
 import { getProductsWithTamil } from '@/services/products';
 import { getBulkProductReviewStats } from '@/services/reviews';
@@ -52,10 +53,42 @@ const FeaturedProducts = () => {
   const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userType, setUserType] = useState(null);
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
 
+  // Fetch user type from local storage
   useEffect(() => {
+    const fetchUserType = async () => {
+      try {
+        // Get user from local storage
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          // Fetch user type from API using user ID
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.attributes) {
+              setUserType(result.data.attributes.userType || 'customer');
+            }
+          }
+        } else {
+          setUserType('customer'); // Default user type
+        }
+      } catch (error) {
+        console.error('Error fetching user type:', error);
+        setUserType('customer'); // Default to customer on error
+      }
+    };
+    
+    fetchUserType();
+  }, []);
+
+  useEffect(() => {
+    // Skip loading products if userType is not set yet
+    if (userType === null) return;
+    
     const loadProducts = async () => {
       try {
         setLoading(true);
@@ -86,7 +119,7 @@ const FeaturedProducts = () => {
               id: item.id || Math.random().toString(),
               name: attributes.Name || attributes.name || 'Product',
               tamilName: attributes.tamil || null,
-              price: parseFloat(attributes.mrp || attributes.price) || 0,
+              price: getPriceByUserType(attributes, userType),
               image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
               badge: attributes.type === 'featured' ? 'Featured' : null,
               originalPrice: attributes.originalPrice || null,
@@ -117,7 +150,7 @@ const FeaturedProducts = () => {
     };
 
     loadProducts();
-  }, []);
+  }, [userType]);
 
   const handleWishlistToggle = (product) => {
     const productData = {

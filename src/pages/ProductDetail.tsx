@@ -9,6 +9,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { formatPrice } from '@/lib/utils';
+import { getPriceByUserType } from '@/lib/pricing';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import ReviewForm from '@/components/ReviewForm';
 import ProductReviews from '@/components/ProductReviews';
@@ -37,10 +38,39 @@ const ProductDetail = () => {
   const [selectedVariation, setSelectedVariation] = useState(null);
   const [variations, setVariations] = useState([]);
   const [currentPrice, setCurrentPrice] = useState(0);
+  const [userType, setUserType] = useState(null);
   
   // Refs for image zoom
   const imageContainerRef = useRef(null);
   const zoomedImageRef = useRef(null);
+
+  // Fetch user type from local storage or API
+  useEffect(() => {
+    const fetchUserType = async () => {
+      try {
+        // Get user from local storage
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          // Fetch user type from API using user ID
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.attributes) {
+              setUserType(result.data.attributes.userType || 'customer');
+            }
+          }
+        } else {
+          setUserType('customer'); // Default user type
+        }
+      } catch (error) {
+        console.error('Error fetching user type:', error);
+        setUserType('customer'); // Default to customer on error
+      }
+    };
+    
+    fetchUserType();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,16 +121,17 @@ const ProductDetail = () => {
               // Set first variation as default
               if (variationsData && variationsData.length > 0) {
                 setSelectedVariation(variationsData[0]);
-                setCurrentPrice(parseFloat(variationsData[0].price) || parseFloat(variationsData[0].mrp) || foundProduct.attributes.mrp || 0);
+                // Use getPriceByUserType to get the correct price based on user type
+                setCurrentPrice(getPriceByUserType(variationsData[0], userType));
               } else {
-                setCurrentPrice(foundProduct.attributes.mrp || foundProduct.attributes.price || 0);
+                setCurrentPrice(getPriceByUserType(foundProduct.attributes, userType));
               }
             } catch (e) {
               console.error('Failed to parse variations:', e);
               setCurrentPrice(foundProduct.attributes.mrp || foundProduct.attributes.price || 0);
             }
           } else {
-            setCurrentPrice(foundProduct.attributes.mrp || foundProduct.attributes.price || 0);
+            setCurrentPrice(getPriceByUserType(foundProduct.attributes, userType));
           }
           
           // Set gallery images if available
@@ -190,10 +221,10 @@ const ProductDetail = () => {
       }
     };
 
-    if (id) {
+    if (id && userType !== null) {
       fetchData();
     }
-  }, [id]);
+  }, [id, userType]);
   
   useEffect(() => {
     // Reset selected image and set the main product image as the selected image initially
@@ -212,7 +243,8 @@ const ProductDetail = () => {
   
   const handleVariationChange = (variation) => {
     setSelectedVariation(variation);
-    setCurrentPrice(parseFloat(variation.price) || parseFloat(variation.mrp) || product.mrp || 0);
+    // Use getPriceByUserType to get the correct price based on user type
+    setCurrentPrice(getPriceByUserType(variation, userType));
     
     // Update selected image if variation has an image
     if (variation.image) {
@@ -287,7 +319,7 @@ const ProductDetail = () => {
     const productData = {
       id: product.id,
       name: product.Name || product.name || product.title,
-      price: product.mrp || product.price,
+      price: getPriceByUserType(product, userType),
       image: product.photo || product.image
     };
 
@@ -864,16 +896,16 @@ const ProductDetail = () => {
                                   (() => {
                                     try {
                                       const variations = typeof relatedProduct.attributes.variations === 'string' ? JSON.parse(relatedProduct.attributes.variations) : relatedProduct.attributes.variations;
-                                      const prices = variations.map(v => parseFloat(v.price || v.mrp || 0)).filter(p => p > 0);
+                                      const prices = variations.map(v => getPriceByUserType(v, userType)).filter(p => p > 0);
                                       if (prices.length === 0) return formatPrice(relatedProduct.attributes?.mrp || 0);
                                       const minPrice = Math.min(...prices);
                                       const maxPrice = Math.max(...prices);
                                       return minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
                                     } catch {
-                                      return formatPrice(relatedProduct.attributes?.mrp || 0);
+                                      return formatPrice(getPriceByUserType(relatedProduct.attributes, userType));
                                     }
                                   })()
-                                  : formatPrice(relatedProduct.attributes?.mrp || 0)
+                                  : formatPrice(getPriceByUserType(relatedProduct.attributes, userType))
                                 }
                               </p>
                               <StarRating 

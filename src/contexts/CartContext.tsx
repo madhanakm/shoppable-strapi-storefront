@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { saveCartToAPI, loadCartFromAPI } from '@/services/cart';
+import { getPriceByUserType } from '@/lib/pricing';
 
 interface CartItem {
   id: string;
@@ -41,7 +42,41 @@ interface CartProviderProps {
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
   const { user, isAuthenticated } = useAuth();
+  
+  // Fetch user type
+  useEffect(() => {
+    const fetchUserType = async () => {
+      if (user?.userType) {
+        setUserType(user.userType);
+        return;
+      }
+      
+      try {
+        // Get user from local storage
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          // Fetch user type from API using user ID
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.attributes) {
+              setUserType(result.data.attributes.userType || 'customer');
+            }
+          }
+        } else {
+          setUserType('customer'); // Default user type
+        }
+      } catch (error) {
+        console.error('Error fetching user type:', error);
+        setUserType('customer'); // Default to customer on error
+      }
+    };
+    
+    fetchUserType();
+  }, [user]);
 
   // Load cart when user logs in
   useEffect(() => {
@@ -80,7 +115,27 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       const userCart = await loadCartFromAPI(user.id);
       // Filter out deleted products
       const validCart = await filterValidProducts(userCart || []);
-      setCartItems(validCart);
+      
+      // Update prices based on user type
+      const updatedCart = await Promise.all(validCart.map(async (item) => {
+        try {
+          const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[productId][$eq]=${item.id}`);
+          const data = await response.json();
+          if (data.data && data.data.length > 0) {
+            const productData = data.data[0].attributes;
+            return {
+              ...item,
+              price: getPriceByUserType(productData, userType)
+            };
+          }
+          return item;
+        } catch (error) {
+          console.error('Error updating cart item price:', error);
+          return item;
+        }
+      }));
+      
+      setCartItems(updatedCart);
       setHasLoadedCart(true);
     }
   };
@@ -108,16 +163,35 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
-    setCartItems(prev => {
-      const existingItem = prev.find(cartItem => cartItem.id === item.id);
-      if (existingItem) {
-        return prev.map(cartItem =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        );
+    // Fetch the latest price based on user type if available
+    const fetchLatestPrice = async (productId: string) => {
+      try {
+        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[productId][$eq]=${productId}`);
+        const data = await response.json();
+        if (data.data && data.data.length > 0) {
+          const productData = data.data[0].attributes;
+          return getPriceByUserType(productData, userType);
+        }
+        return item.price; // Fallback to provided price
+      } catch (error) {
+        console.error('Error fetching latest price:', error);
+        return item.price; // Fallback to provided price
       }
-      return [...prev, { ...item, quantity: 1 }];
+    };
+    
+    // Update cart with latest price
+    fetchLatestPrice(item.id).then(latestPrice => {
+      setCartItems(prev => {
+        const existingItem = prev.find(cartItem => cartItem.id === item.id);
+        if (existingItem) {
+          return prev.map(cartItem =>
+            cartItem.id === item.id
+              ? { ...cartItem, quantity: cartItem.quantity + 1, price: latestPrice }
+              : cartItem
+          );
+        }
+        return [...prev, { ...item, price: latestPrice, quantity: 1 }];
+      });
     });
   };
 

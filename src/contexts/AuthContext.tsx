@@ -140,7 +140,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             id: user.id,
             username: user.attributes.name,
             email: user.attributes.email,
-            phone: user.attributes.phone
+            phone: user.attributes.phone,
+            userType: user.attributes.userType || 'customer' // Store user type, default to customer
           };
           
           const loginData = {
