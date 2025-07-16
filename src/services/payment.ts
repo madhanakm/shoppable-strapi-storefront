@@ -39,10 +39,10 @@ export const generateInvoiceNumber = async (): Promise<string> => {
     }
     
     const invoiceNumber = `DH${String(nextNumber).padStart(7, '0')}`;
-    console.log('Generated invoice number:', invoiceNumber);
+    
     return invoiceNumber;
   } catch (error) {
-    console.error('Error generating invoice number:', error);
+    
     return `DH${String(Date.now()).slice(-7)}`;
   }
 };
@@ -54,7 +54,7 @@ export const generateOrderNumber = async (): Promise<string> => {
     const count = Array.isArray(data) ? data.length : (data.data?.length || 0);
     const orderNumber = `DH-ECOM-${String(count + 1).padStart(3, '0')}`;
     
-    console.log('Generated order number:', orderNumber);
+    
     
     // Store order number in order-entries
     const storeResponse = await fetch('https://api.dharaniherbbals.com/api/order-entries', {
@@ -64,14 +64,14 @@ export const generateOrderNumber = async (): Promise<string> => {
     });
     
     if (!storeResponse.ok) {
-      console.error('Failed to store order number:', await storeResponse.text());
+      
     } else {
-      console.log('Order number stored in order-entries');
+      
     }
     
     return orderNumber;
   } catch (error) {
-    console.error('Error generating order number:', error);
+    
     return `DH-ECOM-${String(Date.now()).slice(-3)}`;
   }
 };
@@ -100,11 +100,11 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
       },
       handler: async (response: any) => {
         try {
-          console.log('Payment successful:', response);
+          
           await storeOrder(orderData, orderNumber, invoiceNumber, response);
           resolve(response);
         } catch (error) {
-          console.error('Error storing order:', error);
+          
           reject(error);
         }
       },
@@ -141,7 +141,7 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumb
     }
   };
 
-  console.log('Storing Razorpay order with payload:', JSON.stringify(orderPayload, null, 2));
+  
   
   const response = await fetch('https://api.dharaniherbbals.com/api/orders', {
     method: 'POST',
@@ -151,11 +151,11 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumb
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('Razorpay order storage error response:', errorText);
+    
     throw new Error(`Failed to store order: ${response.status} - ${errorText}`);
   }
 
   const result = await response.json();
-  console.log('Razorpay order stored successfully:', result);
+  
   return result;
 };

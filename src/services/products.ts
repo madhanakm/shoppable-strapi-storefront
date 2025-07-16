@@ -54,7 +54,7 @@ export const getProductTamilName = async (productId) => {
     }
     return null;
   } catch (error) {
-    console.error('Error fetching Tamil name:', error);
+    
     return null;
   }
 };
@@ -73,7 +73,7 @@ export const getProductMasterDetails = async (productId, userType = null) => {
     }
     return null;
   } catch (error) {
-    console.error('Error fetching product master details:', error);
+    
     return null;
   }
 };

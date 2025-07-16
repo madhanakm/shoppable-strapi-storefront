@@ -24,7 +24,7 @@ export interface ErrorResponse {
  * Process API errors and categorize them
  */
 export function handleApiError(error: any): ErrorResponse {
-  console.error('API Error:', error);
+  
   
   // Network errors (no connection)
   if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
@@ -113,7 +113,7 @@ export function getUserFriendlyErrorMessage(error: ErrorResponse): string {
  */
 export function logErrorToMonitoring(error: ErrorResponse): void {
   // This would connect to an error monitoring service like Sentry
-  console.error('Error logged to monitoring:', error);
+  
   
   // Example implementation:
   // if (window.Sentry) {

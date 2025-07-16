@@ -36,43 +36,32 @@ export const saveWishlistToAPI = async (userId: number, wishlistItems: any[]): P
       });
     }
   } catch (error) {
-    console.error('Failed to save wishlist:', error);
+    
   }
 };
 
 export const loadWishlistFromAPI = async (userId: number): Promise<any[]> => {
   try {
-
     
-    // Try different query formats
-    const queries = [
-      `https://api.dharaniherbbals.com/api/user-wishlists?filters[user][$eq]=${userId}`,
-      `https://api.dharaniherbbals.com/api/user-wishlists?user=${userId}`,
-      `https://api.dharaniherbbals.com/api/user-wishlists?filters[user][id][$eq]=${userId}`,
-      `https://api.dharaniherbbals.com/api/user-wishlists`
-    ];
     
-    for (const query of queries) {
-
-      const response = await fetch(query);
+    const response = await fetch(`https://api.dharaniherbbals.com/api/user-wishlists?filters[user][id][$eq]=${userId}`);
+    
+    if (response.ok) {
+      const data = await response.json();
       
-      if (response.ok) {
-        const data = await response.json();
-
+      
+      if (data.data && data.data.length > 0) {
+        const wishlistData = data.data[0];
+        const items = JSON.parse(wishlistData.attributes.items || '[]');
         
-        if (data.data && data.data.length > 0) {
-          if (query.includes('filters[user][id][$eq]') && data.data.length > 0) {
-            const items = JSON.parse(data.data[0].attributes.items || '[]');
-            return items;
-          }
-        }
+        return items;
       }
     }
     
-
+    
     return [];
   } catch (error) {
-    console.error('Failed to load wishlist:', error);
+    
     return [];
   }
 };

@@ -77,7 +77,7 @@ const FeaturedProducts = () => {
           setUserType('customer'); // Default user type
         }
       } catch (error) {
-        console.error('Error fetching user type:', error);
+        
         setUserType('customer'); // Default to customer on error
       }
     };
@@ -100,7 +100,7 @@ const FeaturedProducts = () => {
         }
         
         const data = await response.json();
-        console.log('Featured products API response:', data);
+        
         
         let productList = [];
         if (Array.isArray(data)) {
@@ -110,7 +110,7 @@ const FeaturedProducts = () => {
         }
         
         if (productList.length === 0) {
-          console.log('No featured products found, using fallback data');
+          
           setProducts(fallbackProducts);
         } else {
           const formattedProducts = productList.map(item => {
@@ -136,12 +136,12 @@ const FeaturedProducts = () => {
               const stats = await getBulkProductReviewStats(productIds);
               setReviewStats(stats);
             } catch (reviewError) {
-              console.error('Error fetching review stats:', reviewError);
+              
             }
           }
         }
       } catch (err) {
-        console.error('Failed to fetch featured products', err);
+        
         setError('Failed to load products. Using sample products instead.');
         setProducts(fallbackProducts);
       } finally {

@@ -87,10 +87,10 @@ const Profile = () => {
     try {
       const response = await fetch(`https://api.dharaniherbbals.com/api/orders?filters[email][$eq]=${user.email}&sort=createdAt:desc`);
       const data = await response.json();
-      console.log('Orders loaded:', data);
+      
       setOrders(data.data || []);
     } catch (error) {
-      console.error('Error loading orders:', error);
+      
     } finally {
       setLoadingOrders(false);
     }

@@ -38,41 +38,36 @@ const AllProducts = () => {
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const { user } = useAuth();
-  // Get user type from user object or local storage
-  const [userType, setUserType] = useState(user?.userType || null);
+  const [userType, setUserType] = useState('customer');
+  const [priceKey, setPriceKey] = useState(0);
   
-  // Fetch user type if not available in user object
+  // Always fetch fresh user type from API
   useEffect(() => {
     const fetchUserType = async () => {
-      if (user?.userType) {
-        setUserType(user.userType);
-        return;
-      }
-      
       try {
-        // Get user from local storage
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           const userData = JSON.parse(storedUser);
-          // Fetch user type from API using user ID
           const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
           if (response.ok) {
             const result = await response.json();
             if (result.data && result.data.attributes) {
-              setUserType(result.data.attributes.userType || 'customer');
+              const newUserType = result.data.attributes.userType || 'customer';
+              
+              setUserType(newUserType);
+              setPriceKey(prev => prev + 1);
+              return;
             }
           }
-        } else {
-          setUserType('customer'); // Default user type
         }
+        setUserType('customer');
       } catch (error) {
-        console.error('Error fetching user type:', error);
-        setUserType('customer'); // Default to customer on error
+        
+        setUserType('customer');
       }
     };
-    
     fetchUserType();
-  }, [user]);
+  }, []);
 
   // Get URL parameters
   useEffect(() => {
@@ -86,16 +81,19 @@ const AllProducts = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [userType]);
 
   const loadData = async () => {
     setLoading(true);
     try {
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      
       // Load products, categories, and brands in parallel
       const [productsRes, categoriesRes, brandsRes] = await Promise.all([
-        fetch('https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1'),
-        fetch('https://api.dharaniherbbals.com/api/product-categories?pagination[limit]=-1'),
-        fetch('https://api.dharaniherbbals.com/api/brands?pagination[limit]=-1')
+        fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`),
+        fetch(`https://api.dharaniherbbals.com/api/product-categories?pagination[limit]=-1&timestamp=${timestamp}`),
+        fetch(`https://api.dharaniherbbals.com/api/brands?pagination[limit]=-1&timestamp=${timestamp}`)
       ]);
 
       // Process products
@@ -111,7 +109,7 @@ const AllProducts = () => {
             const stats = await getBulkProductReviewStats(productIds.map(id => parseInt(id)));
             setReviewStats(stats);
           } catch (reviewError) {
-            console.error('Error fetching review stats:', reviewError);
+            
           }
         }
       }
@@ -146,7 +144,7 @@ const AllProducts = () => {
         setBrands(brandNames.length > 0 ? brandNames : ['Dharani', 'Ayush', 'Patanjali', 'Himalaya']);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      
     } finally {
       setLoading(false);
     }
@@ -187,7 +185,8 @@ const AllProducts = () => {
     const productData = {
       id: product.id.toString(),
       name: attrs.Name || attrs.name,
-      price: getPriceByUserType(attrs, userType),
+      tamil: attrs.tamil || null,
+      price: getPriceByUserType(attrs, userType || 'customer'),
       image: attrs.photo || attrs.image,
       category: attrs.category
     };
@@ -464,18 +463,21 @@ const AllProducts = () => {
                   : 'grid-cols-1'
               }`}>
                 {displayedProducts.map((product) => {
+                  // Force re-render with priceKey
                   const attrs = product.attributes || product;
                   return (
-                    <Card key={product.id} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-lg hover:-translate-y-2">
+                    <Card key={`${product.id}-${priceKey}`} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-lg hover:-translate-y-2">
                       <div className="relative overflow-hidden">
-                        <img 
-                          src={attrs.photo || attrs.image || '/placeholder.svg'} 
-                          alt={attrs.Name || attrs.name || 'Product'} 
-                          className="w-full h-64 object-contain bg-white group-hover:scale-105 transition-transform duration-500 p-4"
-                          onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/300x300?text=Product';
-                          }}
-                        />
+                        <Link to={`/product/${product.id}`} className="block cursor-pointer">
+                          <img 
+                            src={attrs.photo || attrs.image || '/placeholder.svg'} 
+                            alt={attrs.Name || attrs.name || 'Product'} 
+                            className="w-full h-64 object-contain bg-white group-hover:scale-105 transition-transform duration-500 p-4"
+                            onError={(e) => {
+                              e.target.src = 'https://via.placeholder.com/300x300?text=Product';
+                            }}
+                          />
+                        </Link>
                         
                         {/* Wishlist Button */}
                         <Button 
@@ -518,20 +520,29 @@ const AllProducts = () => {
                         
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-lg font-bold text-primary">
-                            {attrs.isVariableProduct && attrs.variations ? 
-                              (() => {
+                            {(() => {
+                              const currentUserType = userType || 'customer';
+                              
+                              // Product attrs has properties like:
+                              // customerprice, resellerprice, retailprice, distributiorprice, sarvoprice, drug
+                              
+                              if (attrs.isVariableProduct && attrs.variations) {
                                 try {
                                   const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
-                                  const priceRange = getVariablePriceRange(variations, userType);
-                                  if (!priceRange) return formatPrice(getPriceByUserType(attrs, userType));
+                                  const priceRange = getVariablePriceRange(variations, currentUserType);
+                                  if (!priceRange) return formatPrice(getPriceByUserType(attrs, currentUserType));
                                   return priceRange.minPrice === priceRange.maxPrice ? 
                                     formatPrice(priceRange.minPrice) : 
                                     `${formatPrice(priceRange.minPrice)} - ${formatPrice(priceRange.maxPrice)}`;
                                 } catch {
-                                  return formatPrice(getPriceByUserType(attrs, userType));
+                                  return formatPrice(getPriceByUserType(attrs, currentUserType));
                                 }
-                              })()
-                              : formatPrice(getPriceByUserType(attrs, userType))
+                              } else {
+                                const price = getPriceByUserType(attrs, currentUserType);
+                                
+                                return formatPrice(price);
+                              }
+                            })()
                             }
                           </span>
                         </div>
@@ -539,14 +550,41 @@ const AllProducts = () => {
                         <div className="flex gap-2">
                           <Button 
                             className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
-                            onClick={() => addToCart({
-                              id: product.id.toString(),
-                              name: attrs.Name || attrs.name,
-                              price: getPriceByUserType(attrs, userType),
-                              image: attrs.photo || attrs.image,
-                              category: attrs.category,
-                              skuid: attrs.skuid || attrs.SKUID || product.id.toString()
-                            })}
+                            onClick={() => {
+                              // For variable products, use the first variation
+                              if (attrs.isVariableProduct && attrs.variations) {
+                                try {
+                                  const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+                                  if (variations && variations.length > 0) {
+                                    const firstVariation = variations[0];
+                                    addToCart({
+                                      id: product.id.toString(),
+                                      name: `${attrs.Name || attrs.name} - ${firstVariation.attributeValue}`,
+                                      tamil: attrs.tamil ? `${attrs.tamil} - ${firstVariation.attributeValue}` : null,
+                                      price: getPriceByUserType(firstVariation, userType || 'customer'),
+                                      image: attrs.photo || attrs.image,
+                                      category: attrs.category,
+                                      skuid: firstVariation.skuid || attrs.skuid || attrs.SKUID || product.id.toString(),
+                                      variation: firstVariation.attributeValue
+                                    });
+                                    return;
+                                  }
+                                } catch (e) {
+                                  
+                                }
+                              }
+                              
+                              // For regular products
+                              addToCart({
+                                id: product.id.toString(),
+                                name: attrs.Name || attrs.name,
+                                tamil: attrs.tamil || null,
+                                price: getPriceByUserType(attrs, userType || 'customer'),
+                                image: attrs.photo || attrs.image,
+                                category: attrs.category,
+                                skuid: attrs.skuid || attrs.SKUID || product.id.toString()
+                              });
+                            }}
                           >
                             <ShoppingCart className="w-3 h-3 mr-1" />
                             <span className={`${isTamil ? 'tamil-text' : ''}`}>Cart</span>
@@ -555,10 +593,37 @@ const AllProducts = () => {
                           <Button 
                             className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
                             onClick={() => {
+                              // For variable products, use the first variation
+                              if (attrs.isVariableProduct && attrs.variations) {
+                                try {
+                                  const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+                                  if (variations && variations.length > 0) {
+                                    const firstVariation = variations[0];
+                                    setQuickCheckoutItem({
+                                      id: product.id.toString(),
+                                      name: `${attrs.Name || attrs.name} - ${firstVariation.attributeValue}`,
+                                      tamil: attrs.tamil ? `${attrs.tamil} - ${firstVariation.attributeValue}` : null,
+                                      price: getPriceByUserType(firstVariation, userType || 'customer'),
+                                      image: attrs.photo || attrs.image,
+                                      category: attrs.category,
+                                      skuid: firstVariation.skuid || attrs.skuid || attrs.SKUID || product.id.toString(),
+                                      variation: firstVariation.attributeValue,
+                                      quantity: 1
+                                    });
+                                    navigate('/checkout');
+                                    return;
+                                  }
+                                } catch (e) {
+                                  
+                                }
+                              }
+                              
+                              // For regular products
                               setQuickCheckoutItem({
                                 id: product.id.toString(),
                                 name: attrs.Name || attrs.name,
-                                price: getPriceByUserType(attrs, userType),
+                                tamil: attrs.tamil || null,
+                                price: getPriceByUserType(attrs, userType || 'customer'),
                                 image: attrs.photo || attrs.image,
                                 category: attrs.category,
                                 skuid: attrs.skuid || attrs.SKUID || product.id.toString(),

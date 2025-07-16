@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const storedUser = localStorage.getItem('user');
       const loginTime = localStorage.getItem('loginTime');
       
-      console.log('Auth check - storedUser:', !!storedUser, 'loginTime:', loginTime);
+      
       
       if (storedUser && loginTime) {
         try {
@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const currentTime = Date.now();
           const fifteenDays = 15 * 24 * 60 * 60 * 1000; // 15 days in milliseconds
           
-          console.log('Session check - age:', (currentTime - loginTimestamp) / (24 * 60 * 60 * 1000), 'days');
+          
           
           if (currentTime - loginTimestamp < fifteenDays) {
             const userData = JSON.parse(storedUser);
@@ -62,26 +62,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   // User validated, restoring session
                   setUser(userData);
                 } else {
-                  console.log('User not found in API, clearing session');
+                  
                   localStorage.removeItem('user');
                   localStorage.removeItem('loginTime');
                 }
               } else {
-                console.log('User validation failed, clearing session');
+                
                 localStorage.removeItem('user');
                 localStorage.removeItem('loginTime');
               }
             } catch (apiError) {
-              console.warn('User validation error, keeping session:', apiError);
+              // User validation error, keeping session
               setUser(userData);
             }
           } else {
-            console.log('Session expired, clearing data');
+            
             localStorage.removeItem('user');
             localStorage.removeItem('loginTime');
           }
         } catch (error) {
-          console.error('Failed to parse stored user data', error);
+          
           localStorage.removeItem('user');
           localStorage.removeItem('loginTime');
         }
@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Handle old sessions without loginTime
         try {
           const userData = JSON.parse(storedUser);
-          console.log('Migrating old session for:', userData.username);
+          
           localStorage.setItem('loginTime', Date.now().toString());
           setUser(userData);
         } catch (error) {
@@ -196,27 +196,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isVerified: false
       };
       
-      console.log('Creating user with data:', {
-        ...userData,
-        password: '[HIDDEN]'
-      });
+      // Creating user with data
+      // console.log('Creating user with data:', { ...userData, password: '[HIDDEN]' });
       
       const userResponse = await createEcomUser(userData);
-      console.log('User created response:', userResponse);
+      
       
       // Log OTP for testing
-      console.log('Generated OTP for mobile', mobile, ':', otp);
+      
       
       // Send SMS
       try {
         await sendOTPViaSMS(mobile, otp);
       } catch (smsError) {
-        console.warn('SMS sending failed:', smsError);
+        // SMS sending failed
       }
       
       return { success: true, userId: userResponse.data.id };
     } catch (error) {
-      console.error('Registration failed', error);
+      
       return { success: false, message: 'Registration failed. Please try again.' };
     } finally {
       setLoading(false);
@@ -229,24 +227,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userResponse = await getEcomUser(userId);
       const user = userResponse.data.attributes;
       
-      console.log('OTP Verification:', {
-        enteredOTP: otp,
-        storedOTP: user.otp,
-        expiresAt: user.otpExpiresAt,
-        currentTime: new Date().toISOString(),
-        isExpired: new Date() > new Date(user.otpExpiresAt || '')
-      });
+      // OTP Verification
+      // console.log('OTP Verification:', {
+      //   enteredOTP: otp,
+      //   storedOTP: user.otp,
+      //   expiresAt: user.otpExpiresAt,
+      //   currentTime: new Date().toISOString(),
+      //   isExpired: new Date() > new Date(user.otpExpiresAt || '')
+      // });
       
       if (user.otp === otp && new Date() <= new Date(user.otpExpiresAt || '')) {
         await updateEcomUser(userId, { isVerified: true });
-        console.log('OTP verification successful');
+        
         return true;
       }
       
-      console.log('OTP verification failed: mismatch or expired');
+      
       return false;
     } catch (error) {
-      console.error('OTP verification failed', error);
+      
       return false;
     } finally {
       setLoading(false);
@@ -266,7 +265,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       return false;
     } catch (error) {
-      console.error('Resend OTP failed', error);
+      
       return false;
     }
   };
@@ -274,7 +273,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 
   const logout = () => {
-    console.log('User logged out manually');
+    
     localStorage.removeItem('jwt');
     localStorage.removeItem('user');
     localStorage.removeItem('loginTime');

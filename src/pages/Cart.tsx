@@ -7,13 +7,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { saveCartToAPI } from '@/services/cart';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const Cart = () => {
-  const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount, syncCart } = useCart();
   const { language } = useTranslation();
+  const { user } = useAuth();
   const isTamil = language === LANGUAGES.TAMIL;
+  
+  // Force save cart to API when page loads
+  useEffect(() => {
+    if (user?.id && cartItems.length > 0) {
+      
+      saveCartToAPI(user.id, cartItems);
+    }
+  }, []);
 
 
   if (cartCount === 0) {
@@ -87,7 +98,7 @@ const Cart = () => {
                             <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
                               <div className="flex-1">
                                 <h3 className={`font-bold text-lg md:text-xl text-gray-800 mb-2 ${isTamil ? 'tamil-text' : ''}`}>
-                                  {item.name}
+                                  {isTamil && item.tamil ? item.tamil : item.name}
                                 </h3>
                                 <p className="text-sm text-gray-500 mb-3">{item.category}</p>
                                 <p className="text-2xl font-bold text-primary">
@@ -188,6 +199,31 @@ const Cart = () => {
                         Continue Shopping
                       </Button>
                     </Link>
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-2 border-primary/30 text-primary hover:bg-primary/5 py-3"
+                      onClick={() => {
+                        syncCart();
+                        alert('Cart refreshed from server!');
+                      }}
+                    >
+                      Refresh Cart
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      className="w-full py-3"
+                      onClick={() => {
+                        // Clear localStorage cart data
+                        localStorage.removeItem('cart');
+                        localStorage.removeItem('lastSavedCart');
+                        localStorage.removeItem('lastSavedCartUserId');
+                        
+                        // Force hard reload bypassing cache
+                        window.location.href = window.location.href + '?nocache=' + new Date().getTime();
+                      }}
+                    >
+                      Hard Refresh (Clear Cache)
+                    </Button>
                   </div>
                   
                   {/* Security Badge */}

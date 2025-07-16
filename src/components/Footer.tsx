@@ -38,7 +38,7 @@ const Footer = () => {
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error fetching brands:', error);
+        
         setBrands(['Dharani', 'Ayush', 'Patanjali', 'Himalaya', 'Dabur']);
         setLoading(false);
       });
@@ -47,7 +47,7 @@ const Footer = () => {
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle newsletter subscription
-    console.log('Newsletter subscription:', email);
+    
     setEmail('');
   };
   

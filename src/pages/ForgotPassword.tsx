@@ -64,10 +64,10 @@ const ForgotPassword = () => {
         try {
           await sendOTPViaSMS(phone, generatedOTP);
         } catch (smsError) {
-          console.warn('SMS sending failed:', smsError);
+          // SMS sending failed
         }
         
-        console.log('Generated OTP for password reset:', generatedOTP);
+        
         
         setStep(2);
         toast({
@@ -175,7 +175,7 @@ const ForgotPassword = () => {
       });
       
       await sendOTPViaSMS(phone, generatedOTP);
-      console.log('Resent OTP:', generatedOTP);
+      
       
       toast({
         title: "OTP Resent",

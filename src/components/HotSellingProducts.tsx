@@ -41,7 +41,7 @@ const HotSellingProducts = () => {
           setUserType('customer'); // Default user type
         }
       } catch (error) {
-        console.error('Error fetching user type:', error);
+        
         setUserType('customer'); // Default to customer on error
       }
     };
@@ -56,7 +56,7 @@ const HotSellingProducts = () => {
     const loadProducts = async () => {
       try {
         const response = await getProducts(1, 4, { hot_selling: true });
-        console.log('Hot selling products:', response);
+        
         
         let productList = [];
         if (Array.isArray(response)) {
@@ -86,11 +86,11 @@ const HotSellingProducts = () => {
             const stats = await getBulkProductReviewStats(productIds);
             setReviewStats(stats);
           } catch (reviewError) {
-            console.error('Error fetching review stats:', reviewError);
+            
           }
         }
       } catch (error) {
-        console.error('Failed to fetch hot selling products', error);
+        
       } finally {
         setLoading(false);
       }

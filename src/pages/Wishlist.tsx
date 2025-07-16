@@ -11,7 +11,7 @@ import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const Wishlist = () => {
-  const { wishlistItems, removeFromWishlist, wishlistCount } = useWishlist();
+  const { wishlistItems, removeFromWishlist, wishlistCount, syncWishlist } = useWishlist();
   const { addToCart } = useCart();
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
@@ -103,7 +103,7 @@ const Wishlist = () => {
                 <CardContent className="p-6 bg-gradient-to-b from-white to-gray-50">
                   <Link to={`/product/${item.id}`}>
                     <h3 className={`font-bold text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2 cursor-pointer ${isTamil ? 'tamil-text' : ''}`}>
-                      {item.name}
+                      {isTamil && item.tamil ? item.tamil : item.name}
                     </h3>
                   </Link>
                   

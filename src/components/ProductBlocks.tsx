@@ -8,10 +8,11 @@ import { useCart } from '@/contexts/CartContext';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '@/lib/utils';
-import { getPriceByUserType } from '@/lib/pricing';
 import { Link } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
 import { getBulkProductReviewStats } from '@/services/reviews';
+import { useAuth } from '@/contexts/AuthContext';
+import { getPriceByUserType, getVariablePriceRange } from '@/lib/pricing';
 
 // Product Card Component
 const ProductCard = ({ product, reviewStats = {} }) => {
@@ -26,8 +27,9 @@ const ProductCard = ({ product, reviewStats = {} }) => {
     const productData = {
       id: product.id.toString(),
       name: product.name,
-      price: product.price,
-      image: product.image
+      price: product.price || 0,
+      image: product.image,
+      category: product.category
     };
 
     if (isInWishlist(productData.id)) {
@@ -38,10 +40,33 @@ const ProductCard = ({ product, reviewStats = {} }) => {
   };
 
   const handleAddToCart = () => {
+    // For variable products, use the first variation - exactly like AllProducts page
+    if (product.isVariableProduct && product.variations) {
+      try {
+        const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+        if (variations && variations.length > 0) {
+          const firstVariation = variations[0];
+          addToCart({
+            id: product.id.toString(),
+            name: `${product.name} - ${firstVariation.attributeValue}`,
+            price: getPriceByUserType(firstVariation, product.userType || 'customer'),
+            image: product.image,
+            category: product.category,
+            skuid: firstVariation.skuid || product.skuid || product.id.toString(),
+            variation: firstVariation.attributeValue
+          });
+          return;
+        }
+      } catch (e) {
+        
+      }
+    }
+    
+    // For regular products
     addToCart({
       id: product.id.toString(),
       name: product.name,
-      price: product.price,
+      price: product.price || 0,
       image: product.image,
       category: product.category,
       skuid: product.skuid || product.id.toString()
@@ -49,6 +74,31 @@ const ProductCard = ({ product, reviewStats = {} }) => {
   };
   
   const handleBuyNow = () => {
+    // For variable products, use the first variation - exactly like AllProducts page
+    if (product.isVariableProduct && product.variations) {
+      try {
+        const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+        if (variations && variations.length > 0) {
+          const firstVariation = variations[0];
+          setQuickCheckoutItem({
+            id: product.id.toString(),
+            name: `${product.name} - ${firstVariation.attributeValue}`,
+            price: getPriceByUserType(firstVariation, product.userType || 'customer'),
+            image: product.image,
+            category: product.category,
+            skuid: firstVariation.skuid || product.skuid || product.id.toString(),
+            variation: firstVariation.attributeValue,
+            quantity: 1
+          });
+          navigate('/checkout');
+          return;
+        }
+      } catch (e) {
+        
+      }
+    }
+    
+    // For regular products
     setQuickCheckoutItem({
       id: product.id.toString(),
       name: product.name,
@@ -84,7 +134,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
   return (
     <Card className="group hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary/20 bg-white rounded-3xl hover:-translate-y-3 hover:rotate-1">
       <div className="relative overflow-hidden rounded-t-3xl bg-gradient-to-br from-gray-50 via-white to-gray-50">
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/product/${product.id}`} className="block cursor-pointer">
           <img 
             src={product.image} 
             alt={product.name}
@@ -193,29 +243,33 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
   const [products, setProducts] = useState([]);
   const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
-  const [userType, setUserType] = useState(null);
+  const [userType, setUserType] = useState('customer');
+  const { user } = useAuth();
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
 
-  // Fetch user type
+  // Always fetch fresh user type from API - exactly like AllProducts page
   useEffect(() => {
     const fetchUserType = async () => {
       try {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           const userData = JSON.parse(storedUser);
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
+          const timestamp = new Date().getTime();
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
           if (response.ok) {
             const result = await response.json();
             if (result.data && result.data.attributes) {
-              setUserType(result.data.attributes.userType || 'customer');
+              const newUserType = result.data.attributes.userType || 'customer';
+              
+              setUserType(newUserType);
               return;
             }
           }
         }
         setUserType('customer');
       } catch (error) {
-        console.error('Error fetching user type:', error);
+        
         setUserType('customer');
       }
     };
@@ -226,7 +280,9 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1`);
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`);
         
         if (!response.ok) {
           throw new Error(`API responded with status: ${response.status}`);
@@ -245,26 +301,40 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
           const attributes = item.attributes || item;
           const status = attributes.status === true || attributes.status === 'true';
           const hasType = attributes.type?.toLowerCase() === type.toLowerCase();
-          console.log(`Product ${attributes.Name}: type=${attributes.type}, status=${status}, hasType=${hasType}`);
+          
           return hasType && status;
         });
         
         const formattedProducts = filteredProducts.map(item => {
           const attributes = item.attributes || item;
-          let price = getPriceByUserType(attributes, userType);
+          // Use the userType from state - exactly like AllProducts page
+          const currentUserType = userType || 'customer';
+          
+          
+          let price = getPriceByUserType(attributes, currentUserType);
+          
           let priceRange = null;
           
           if (attributes.isVariableProduct && attributes.variations) {
             try {
               const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
-              const prices = variations.map(v => getPriceByUserType(v, userType)).filter(p => p > 0);
+              
+              // Calculate price range for each variation based on user type
+              const prices = variations.map(variation => getPriceByUserType(variation, currentUserType));
+              
               if (prices.length > 0) {
                 const minPrice = Math.min(...prices);
                 const maxPrice = Math.max(...prices);
-                price = minPrice;
-                priceRange = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+                
+                price = minPrice; // Use min price as default
+                priceRange = minPrice === maxPrice ? 
+                  formatPrice(minPrice) : 
+                  `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+                  
+                
               }
-            } catch {
+            } catch (e) {
+              
               // Keep default price
             }
           }
@@ -280,7 +350,10 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
             badge: attributes.type || type,
             originalPrice: attributes.originalPrice || null,
             category: attributes.category,
-            skuid: attributes.skuid || attributes.SKUID
+            skuid: attributes.skuid || attributes.SKUID,
+            isVariableProduct: attributes.isVariableProduct,
+            variations: attributes.variations,
+            userType: userType || 'customer'
           };
         });
         
@@ -293,20 +366,18 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
             const stats = await getBulkProductReviewStats(productIds);
             setReviewStats(stats);
           } catch (reviewError) {
-            console.error('Error fetching review stats:', reviewError);
+            
           }
         }
       } catch (err) {
-        console.error(`Failed to fetch ${type} products`, err);
+        
         setProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
-    if (userType !== null) {
-      fetchProducts();
-    }
+    fetchProducts();
   }, [type, userType]);
 
   if (loading) {

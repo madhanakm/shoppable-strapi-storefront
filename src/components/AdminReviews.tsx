@@ -55,7 +55,7 @@ const AdminReviews: React.FC = () => {
         setPendingReviews(data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching pending reviews:', error);
+      
       toast({
         title: "Error",
         description: "Failed to fetch pending reviews",
@@ -92,7 +92,7 @@ const AdminReviews: React.FC = () => {
         throw new Error('Failed to update review status');
       }
     } catch (error) {
-      console.error('Error updating review status:', error);
+      
       toast({
         title: "Error",
         description: "Failed to update review status",

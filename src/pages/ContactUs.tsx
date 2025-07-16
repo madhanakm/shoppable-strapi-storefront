@@ -82,7 +82,7 @@ const ContactUs = () => {
         throw new Error('Failed to submit form');
       }
     } catch (error) {
-      console.error('Contact form error:', error);
+      
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",

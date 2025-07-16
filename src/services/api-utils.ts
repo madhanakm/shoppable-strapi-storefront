@@ -14,7 +14,7 @@ export const checkApiConnection = async (): Promise<boolean> => {
     
     return response.ok;
   } catch (error) {
-    console.error('API connection check failed:', error);
+    
     return false;
   }
 };

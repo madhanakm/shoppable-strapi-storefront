@@ -43,7 +43,7 @@ export const verifyOTP = async (mobile: string, otp: string): Promise<boolean> =
     
     return now <= expiresAt;
   } catch (error) {
-    console.error('OTP verification failed:', error);
+    
     return false;
   }
 };

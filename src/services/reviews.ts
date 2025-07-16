@@ -36,7 +36,7 @@ export interface ReviewStats {
 export const submitReview = async (reviewData: { user: number; product: number; rating: number; comment: string; skuId?: string; userName?: string; productName?: string }): Promise<any> => {
   try {
     // Log the request for debugging
-    console.log('Submitting review with data:', reviewData);
+    
     
     // Use text labels instead of relations
     const response = await fetch('https://api.dharaniherbbals.com/api/product-reviews', {
@@ -65,13 +65,13 @@ export const submitReview = async (reviewData: { user: number; product: number; 
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('API error response:', errorData);
+      
       throw new Error(errorData.error?.message || `Failed to submit review (${response.status})`);
     }
     
     return response.json();
   } catch (error) {
-    console.error('Error submitting review:', error);
+    
     throw error;
   }
 };
@@ -82,7 +82,7 @@ export const getProductReviews = async (productId: number, skuId?: string): Prom
   }
   
   try {
-    console.log('Fetching reviews for product ID:', productId);
+    
     
     // Use the productId as a filter
     let url = `https://api.dharaniherbbals.com/api/product-reviews?filters[productId][$eq]=${productId}`;
@@ -95,21 +95,21 @@ export const getProductReviews = async (productId: number, skuId?: string): Prom
     // Only show active reviews
     url += '&filters[isActive][$eq]=true';
     
-    console.log('API URL:', url);
+    
     const response = await fetch(url);
     
-    console.log('API response status:', response.status);
+    
     
     if (response.ok) {
       const data = await response.json();
-      console.log('API response data:', data);
+      
       
       const reviews = data.data || [];
-      console.log('Total reviews found:', reviews.length);
+      
       
       // Create mock reviews if none are found
       if (reviews.length === 0) {
-        console.log('No reviews found, creating mock reviews');
+        
         return [
           {
             id: 1,
@@ -151,7 +151,7 @@ export const getProductReviews = async (productId: number, skuId?: string): Prom
       }
       
       // Log raw reviews data
-      console.log('Raw reviews data:', reviews);
+      
       
       // Map the reviews to our interface
       const mappedReviews = reviews.map(item => ({
@@ -176,12 +176,12 @@ export const getProductReviews = async (productId: number, skuId?: string): Prom
         }
       }));
       
-      console.log('Mapped reviews:', mappedReviews);
+      
       return mappedReviews;
     }
     return [];
   } catch (error) {
-    console.error('Failed to fetch reviews:', error);
+    
     return [];
   }
 };
@@ -194,7 +194,7 @@ export const getProductReviewStats = async (productId: number, skuId?: string | 
   try {
     // Get all reviews for the product
     const reviews = await getProductReviews(productId);
-    console.log('Reviews for stats calculation:', reviews);
+    
     
     // If we have reviews, calculate stats
     if (reviews && reviews.length > 0) {
@@ -221,15 +221,15 @@ export const getProductReviewStats = async (productId: number, skuId?: string | 
         count: validRatings.length
       };
       
-      console.log('Calculated stats:', result);
+      
       return result;
     }
     
     // Return mock stats if no reviews
-    console.log('No reviews found, returning mock stats');
+    
     return { average: 4.5, count: 2 };
   } catch (error) {
-    console.error('Failed to calculate review stats:', error);
+    
     // Return mock stats on error
     return { average: 4.5, count: 2 };
   }
@@ -299,7 +299,7 @@ export const getBulkProductReviewStats = async (productIds: number[], skuIds?: s
     }
     return {};
   } catch (error) {
-    console.error('Failed to fetch bulk review stats:', error);
+    
     return {};
   }
 };

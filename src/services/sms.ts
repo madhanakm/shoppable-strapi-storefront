@@ -19,13 +19,13 @@ export const sendOTP = async (phoneNumber: string, otp: string): Promise<boolean
       message: message
     });
 
-    console.log('Sending SMS to:', phoneNumber, 'with OTP:', otp);
+    
     const response = await fetch(`${SMS_CONFIG.base_url}?${params.toString()}`);
     const result = await response.text();
-    console.log('SMS API response:', result);
+    
     return response.ok;
   } catch (error) {
-    console.error('SMS sending failed:', error);
+    
     return false;
   }
 };

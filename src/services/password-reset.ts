@@ -16,7 +16,7 @@ export const sendPasswordResetOTP = async (phone: string): Promise<boolean> => {
     }
     return false;
   } catch (error) {
-    console.error('Password reset OTP failed:', error);
+    
     return false;
   }
 };
@@ -32,7 +32,7 @@ export const verifyPasswordResetOTP = async (phone: string, otp: string): Promis
     }
     return false;
   } catch (error) {
-    console.error('OTP verification failed:', error);
+    
     return false;
   }
 };
@@ -51,7 +51,7 @@ export const resetPassword = async (phone: string, newPassword: string): Promise
     }
     return false;
   } catch (error) {
-    console.error('Password reset failed:', error);
+    
     return false;
   }
 };

@@ -8,6 +8,8 @@ interface QuickCheckoutItem {
   category?: string;
   skuid?: string;
   quantity: number;
+  tamil?: string;
+  variation?: string;
 }
 
 interface QuickCheckoutContextType {

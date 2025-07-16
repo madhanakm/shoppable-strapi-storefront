@@ -1,24 +1,22 @@
 export const getPriceByUserType = (product: any, userType?: string) => {
-  if (!userType) {
-    return parseFloat(product.mrp || product.price || product.customerprice) || 0;
-  }
-
-  // Convert to lowercase for case-insensitive comparison
-  const type = userType.toLowerCase();
+  if (!product) return 0;
+  
+  const type = userType?.toLowerCase() || 'customer';
   
   switch (type) {
     case 'reseller':
-      return parseFloat(product.resellerprice || product.mrp || product.price) || 0;
-    case 'retail':
+      return parseFloat(product.resellerprice || product.customerprice || 0);
     case 'retailer':
-      return parseFloat(product.retailprice || product.mrp || product.price) || 0;
+      return parseFloat(product.retailprice || product.customerprice || 0);
     case 'distributor':
-      return parseFloat(product.distributorprice || product.mrp || product.price) || 0;
+      return parseFloat(product.distributiorprice || product.customerprice || 0);
     case 'sarvo':
-      return parseFloat(product.sarvoprice || product.mrp || product.price) || 0;
+      return parseFloat(product.sarvoprice || product.customerprice || 0);
+    case 'drug':
+      return parseFloat(product.drug || product.customerprice || 0);
     case 'customer':
     default:
-      return parseFloat(product.customerprice || product.mrp || product.price) || 0;
+      return parseFloat(product.customerprice || 0);
   }
 };
 

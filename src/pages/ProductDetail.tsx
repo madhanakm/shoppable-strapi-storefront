@@ -44,28 +44,28 @@ const ProductDetail = () => {
   const imageContainerRef = useRef(null);
   const zoomedImageRef = useRef(null);
 
-  // Fetch user type from local storage or API
+  // Always fetch fresh user type from API
   useEffect(() => {
     const fetchUserType = async () => {
       try {
-        // Get user from local storage
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           const userData = JSON.parse(storedUser);
-          // Fetch user type from API using user ID
           const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
           if (response.ok) {
             const result = await response.json();
             if (result.data && result.data.attributes) {
-              setUserType(result.data.attributes.userType || 'customer');
+              const newUserType = result.data.attributes.userType || 'customer';
+              
+              setUserType(newUserType);
             }
           }
         } else {
-          setUserType('customer'); // Default user type
+          setUserType('customer');
         }
       } catch (error) {
-        console.error('Error fetching user type:', error);
-        setUserType('customer'); // Default to customer on error
+        
+        setUserType('customer');
       }
     };
     
@@ -85,8 +85,11 @@ const ProductDetail = () => {
         // Scroll to top when changing products
         window.scrollTo(0, 0);
         
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        
         // Fetch all products with pagination
-        const response = await fetch('https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1');
+        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`);
         const data = await response.json();
         
         // Process products
@@ -122,16 +125,17 @@ const ProductDetail = () => {
               if (variationsData && variationsData.length > 0) {
                 setSelectedVariation(variationsData[0]);
                 // Use getPriceByUserType to get the correct price based on user type
-                setCurrentPrice(getPriceByUserType(variationsData[0], userType));
+                const firstVariationPrice = getPriceByUserType(variationsData[0], userType || 'customer');
+                setCurrentPrice(firstVariationPrice);
               } else {
-                setCurrentPrice(getPriceByUserType(foundProduct.attributes, userType));
+                setCurrentPrice(getPriceByUserType(foundProduct.attributes, userType || 'customer'));
               }
             } catch (e) {
-              console.error('Failed to parse variations:', e);
+              
               setCurrentPrice(foundProduct.attributes.mrp || foundProduct.attributes.price || 0);
             }
           } else {
-            setCurrentPrice(getPriceByUserType(foundProduct.attributes, userType));
+            setCurrentPrice(getPriceByUserType(foundProduct.attributes, userType || 'customer'));
           }
           
           // Set gallery images if available
@@ -144,7 +148,7 @@ const ProductDetail = () => {
                 setGalleryImages(parsedGallery);
               }
             } catch (e) {
-              console.error('Failed to parse gallery images:', e);
+              
             }
           } else {
             // If no gallery images, set empty array
@@ -153,8 +157,8 @@ const ProductDetail = () => {
           
           // Load categories and brands from separate endpoints
           const [categoriesRes, brandsRes] = await Promise.all([
-            fetch('https://api.dharaniherbbals.com/api/product-categories?pagination[limit]=-1'),
-            fetch('https://api.dharaniherbbals.com/api/brands?pagination[limit]=-1')
+            fetch(`https://api.dharaniherbbals.com/api/product-categories?pagination[limit]=-1&timestamp=${timestamp}`),
+            fetch(`https://api.dharaniherbbals.com/api/brands?pagination[limit]=-1&timestamp=${timestamp}`)
           ]);
           
           // Process categories
@@ -208,11 +212,11 @@ const ProductDetail = () => {
             const stats = await getProductReviewStats(foundProduct.id, skuId.toString());
             setReviewStats(stats);
           } catch (reviewError) {
-            console.error('Error fetching review stats:', reviewError);
+            
           }
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        
       } finally {
         // Add a small delay to make loading state visible for better UX
         setTimeout(() => {
@@ -225,6 +229,17 @@ const ProductDetail = () => {
       fetchData();
     }
   }, [id, userType]);
+  
+  // Update prices when userType changes
+  useEffect(() => {
+    if (product && userType !== null) {
+      if (product.isVariableProduct && selectedVariation) {
+        setCurrentPrice(getPriceByUserType(selectedVariation, userType || 'customer'));
+      } else {
+        setCurrentPrice(getPriceByUserType(product, userType || 'customer'));
+      }
+    }
+  }, [userType, product, selectedVariation]);
   
   useEffect(() => {
     // Reset selected image and set the main product image as the selected image initially
@@ -244,7 +259,7 @@ const ProductDetail = () => {
   const handleVariationChange = (variation) => {
     setSelectedVariation(variation);
     // Use getPriceByUserType to get the correct price based on user type
-    setCurrentPrice(getPriceByUserType(variation, userType));
+    setCurrentPrice(getPriceByUserType(variation, userType || 'customer'));
     
     // Update selected image if variation has an image
     if (variation.image) {
@@ -268,7 +283,8 @@ const ProductDetail = () => {
       const cartItem = {
         id: product.id,
         name: product.Name || product.name || product.title,
-        price: currentPrice,
+        tamil: product.tamil || null,
+        price: currentPrice > 0 ? currentPrice : getPriceByUserType(selectedVariation || product, userType || 'customer'),
         image: selectedImage || product.photo || product.image,
         category: product.category,
         skuid: product.skuid || product.SKUID || product.id.toString()
@@ -276,8 +292,8 @@ const ProductDetail = () => {
       
       // Add variation info if it's a variable product
       if (product.isVariableProduct && selectedVariation) {
-        console.log('Cart - selectedVariation:', selectedVariation);
-        console.log('Cart - attributeValue:', selectedVariation.attributeValue);
+        
+        
         const variationName = selectedVariation.attributeValue || Object.values(selectedVariation)[0];
         cartItem.variation = variationName;
         cartItem.name = `${cartItem.name} - ${variationName}`;
@@ -292,7 +308,8 @@ const ProductDetail = () => {
       const checkoutItem = {
         id: product.id,
         name: product.Name || product.name || product.title,
-        price: currentPrice,
+        tamil: product.tamil || null,
+        price: currentPrice > 0 ? currentPrice : getPriceByUserType(selectedVariation || product, userType || 'customer'),
         image: selectedImage || product.photo || product.image,
         category: product.category,
         skuid: product.skuid || product.SKUID || product.id.toString(),
@@ -301,8 +318,8 @@ const ProductDetail = () => {
       
       // Add variation info if it's a variable product
       if (product.isVariableProduct && selectedVariation) {
-        console.log('Checkout - selectedVariation:', selectedVariation);
-        console.log('Checkout - attributeValue:', selectedVariation.attributeValue);
+        
+        
         const variationName = selectedVariation.attributeValue || Object.values(selectedVariation)[0];
         checkoutItem.variation = variationName;
         checkoutItem.name = `${checkoutItem.name} - ${variationName}`;
@@ -319,8 +336,10 @@ const ProductDetail = () => {
     const productData = {
       id: product.id,
       name: product.Name || product.name || product.title,
-      price: getPriceByUserType(product, userType),
-      image: product.photo || product.image
+      tamil: product.tamil || null,
+      price: currentPrice > 0 ? currentPrice : getPriceByUserType(selectedVariation || product, userType || 'customer'),
+      image: product.photo || product.image,
+      category: product.category
     };
 
     if (isInWishlist(product.id)) {
@@ -667,7 +686,7 @@ const ProductDetail = () => {
                       >
                         <div className="font-medium text-sm">{variation.value || variation.name || variation.attributeValue}</div>
                         <div className="text-xs text-gray-500 mt-1">
-                          {formatPrice(variation.price || 0)}
+                          {formatPrice(getPriceByUserType(variation, userType || 'customer'))}
                         </div>
                       </button>
                     ))}
