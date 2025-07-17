@@ -288,16 +288,22 @@ const ProductDetail = () => {
         price: currentPrice > 0 ? currentPrice : getPriceByUserType(selectedVariation || product, userType || 'customer'),
         image: selectedImage || product.photo || product.image,
         category: product.category,
-        skuid: product.skuid || product.SKUID || product.id.toString()
+        skuid: product.id.toString()
       };
       
       // Add variation info if it's a variable product
       if (product.isVariableProduct && selectedVariation) {
-        
-        
         const variationName = selectedVariation.attributeValue || Object.values(selectedVariation)[0];
         cartItem.variation = variationName;
         cartItem.name = `${cartItem.name} - ${variationName}`;
+        
+        // Use the variation's SKU if available
+        if (selectedVariation.skuid) {
+          cartItem.skuid = selectedVariation.skuid;
+        }
+      } else {
+        // For regular products, use the product SKU
+        cartItem.skuid = product.skuid || product.SKUID || product.id.toString();
       }
       
       addToCart(cartItem);
@@ -313,17 +319,23 @@ const ProductDetail = () => {
         price: currentPrice > 0 ? currentPrice : getPriceByUserType(selectedVariation || product, userType || 'customer'),
         image: selectedImage || product.photo || product.image,
         category: product.category,
-        skuid: product.skuid || product.SKUID || product.id.toString(),
+        skuid: product.id.toString(),
         quantity: quantity
       };
       
       // Add variation info if it's a variable product
       if (product.isVariableProduct && selectedVariation) {
-        
-        
         const variationName = selectedVariation.attributeValue || Object.values(selectedVariation)[0];
         checkoutItem.variation = variationName;
         checkoutItem.name = `${checkoutItem.name} - ${variationName}`;
+        
+        // Use the variation's SKU if available
+        if (selectedVariation.skuid) {
+          checkoutItem.skuid = selectedVariation.skuid;
+        }
+      } else {
+        // For regular products, use the product SKU
+        checkoutItem.skuid = product.skuid || product.SKUID || product.id.toString();
       }
       
       setQuickCheckoutItem(checkoutItem);
@@ -771,12 +783,15 @@ const ProductDetail = () => {
                         </div>
                       </div>
                     )}
-                    {product.skuid && (
+                    {/* Show SKU for single products or the selected variation's SKU for variable products */}
+                    {((product.skuid && !product.isVariableProduct) || (product.isVariableProduct && selectedVariation?.skuid)) && (
                       <div className="flex items-center p-3 bg-white rounded-xl shadow-sm">
                         <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
                         <div>
                           <span className="text-xs text-gray-500 uppercase tracking-wide">SKU</span>
-                          <div className="font-semibold text-gray-800">{product.skuid}</div>
+                          <div className="font-semibold text-gray-800">
+                            {product.isVariableProduct && selectedVariation?.skuid ? selectedVariation.skuid : product.skuid}
+                          </div>
                         </div>
                       </div>
                     )}
