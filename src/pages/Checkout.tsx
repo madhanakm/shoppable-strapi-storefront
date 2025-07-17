@@ -271,7 +271,24 @@ const Checkout = () => {
         const result = JSON.parse(responseText);
         
         // Send order confirmation SMS directly
-        sendOrderConfirmationSMS(formData.phone, orderNumber, total);
+        try {
+          // Create an image element to trigger the SMS API call without CORS issues
+          const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
+          const message = `Thank you for your order. ID: ${orderNumber}, Amt: Rs.${total}. Will notify once shipped. Thanks for shopping - Dharani Herbbals.`;
+          const img = document.createElement('img');
+          img.style.display = 'none';
+          img.src = `http://smsc.biz/httpapi/send?username=sundarppy@gmail.com&password=Dharani123&sender_id=DHHERB&route=T&phonenumber=${cleanPhone}&message=${encodeURIComponent(message)}`;
+          document.body.appendChild(img);
+          
+          // Remove the image after a short delay
+          setTimeout(() => {
+            if (document.body.contains(img)) {
+              document.body.removeChild(img);
+            }
+          }, 5000);
+        } catch (error) {
+          console.error('Error sending SMS:', error);
+        }
         
         toast({
           title: "Order Placed Successfully!",
