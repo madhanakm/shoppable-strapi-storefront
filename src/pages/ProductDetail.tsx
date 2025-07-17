@@ -191,16 +191,17 @@ const ProductDetail = () => {
             setBrands(brandNames);
           }
           
-          // Find related products (same category or brand)
+          // Find related products (same category or brand) - only active products
           const currentCategory = foundProduct.attributes?.category;
           const currentBrand = foundProduct.attributes?.brand;
           
           const related = productArray
-            .filter(p => 
-              p.id !== foundProduct.id && 
-              (p.attributes?.category === currentCategory || 
-               p.attributes?.brand === currentBrand)
-            )
+            .filter(p => {
+              const attrs = p.attributes || p;
+              return p.id !== foundProduct.id && 
+                (attrs.category === currentCategory || attrs.brand === currentBrand) &&
+                (attrs.status === true || attrs.status === 'true');
+            })
             .slice(0, 4); // Limit to 4 related products
           
           setRelatedProducts(related);

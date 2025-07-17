@@ -310,11 +310,14 @@ const AllProducts = () => {
                       <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
                         selectedCategory === 'all' ? 'text-primary font-semibold' : 'text-gray-700'
                       }`}>
-                        All Categories <span className="text-xs text-gray-500">({products.length})</span>
+                        All Categories <span className="text-xs text-gray-500">({products.filter(p => (p.attributes || p).status === true || (p.attributes || p).status === 'true').length})</span>
                       </span>
                     </label>
                     {categories.map((category, index) => {
-                      const count = products.filter(p => (p.attributes || p).category === category).length;
+                      const count = products.filter(p => {
+                        const attrs = p.attributes || p;
+                        return attrs.category === category && (attrs.status === true || attrs.status === 'true');
+                      }).length;
                       return (
                         <label key={index} className="flex items-center cursor-pointer group">
                           <input
@@ -353,22 +356,28 @@ const AllProducts = () => {
                         All Brands
                       </span>
                     </label>
-                    {brands.map((brand, index) => (
-                      <label key={index} className="flex items-center cursor-pointer group">
-                        <input
-                          type="radio"
-                          name="brand"
-                          checked={selectedBrand === brand}
-                          onChange={() => { setSelectedBrand(brand); setPage(1); }}
-                          className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
-                        />
-                        <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
-                          selectedBrand === brand ? 'text-primary font-semibold' : 'text-gray-700'
-                        }`}>
-                          {brand}
-                        </span>
-                      </label>
-                    ))}
+                    {brands.map((brand, index) => {
+                      const count = products.filter(p => {
+                        const attrs = p.attributes || p;
+                        return attrs.brand === brand && (attrs.status === true || attrs.status === 'true');
+                      }).length;
+                      return (
+                        <label key={index} className="flex items-center cursor-pointer group">
+                          <input
+                            type="radio"
+                            name="brand"
+                            checked={selectedBrand === brand}
+                            onChange={() => { setSelectedBrand(brand); setPage(1); }}
+                            className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
+                          />
+                          <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
+                            selectedBrand === brand ? 'text-primary font-semibold' : 'text-gray-700'
+                          }`}>
+                            {brand} <span className="text-xs text-gray-500">({count})</span>
+                          </span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -376,32 +385,42 @@ const AllProducts = () => {
                 <div>
                   <h3 className="font-bold text-lg mb-4 text-gray-800 border-b border-gray-200 pb-2">Product Types</h3>
                   <div className="space-y-3">
-                    {['all', 'deals', 'trending', 'hot', 'popular'].map((type) => (
-                      <label key={type} className="flex items-center cursor-pointer group">
-                        <input
-                          type="radio"
-                          name="type"
-                          checked={selectedType === type}
-                          onChange={() => { setSelectedType(type); setPage(1); }}
-                          className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
-                        />
-                        <span className={`ml-3 text-sm font-medium capitalize group-hover:text-primary transition-colors ${
-                          selectedType === type ? 'text-primary font-semibold' : 'text-gray-700'
-                        }`}>
-                          {type === 'all' ? 'All Types' : type}
-                          {type !== 'all' && (
-                            <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                              type === 'deals' ? 'bg-purple-100 text-purple-600' :
-                              type === 'trending' ? 'bg-blue-100 text-blue-600' :
-                              type === 'hot' ? 'bg-red-100 text-red-600' :
-                              type === 'popular' ? 'bg-green-100 text-green-600' : ''
-                            }`}>
-                              {type.charAt(0).toUpperCase() + type.slice(1)}
-                            </span>
-                          )}
-                        </span>
-                      </label>
-                    ))}
+                    {['all', 'deals', 'trending', 'hot', 'popular'].map((type) => {
+                      const count = type === 'all' ? 
+                        products.filter(p => (p.attributes || p).status === true || (p.attributes || p).status === 'true').length :
+                        products.filter(p => {
+                          const attrs = p.attributes || p;
+                          return (attrs.type?.toLowerCase() === type.toLowerCase()) && 
+                                 (attrs.status === true || attrs.status === 'true');
+                        }).length;
+                      return (
+                        <label key={type} className="flex items-center cursor-pointer group">
+                          <input
+                            type="radio"
+                            name="type"
+                            checked={selectedType === type}
+                            onChange={() => { setSelectedType(type); setPage(1); }}
+                            className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
+                          />
+                          <span className={`ml-3 text-sm font-medium capitalize group-hover:text-primary transition-colors ${
+                            selectedType === type ? 'text-primary font-semibold' : 'text-gray-700'
+                          }`}>
+                            {type === 'all' ? 'All Types' : type}
+                            {type !== 'all' && (
+                              <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
+                                type === 'deals' ? 'bg-purple-100 text-purple-600' :
+                                type === 'trending' ? 'bg-blue-100 text-blue-600' :
+                                type === 'hot' ? 'bg-red-100 text-red-600' :
+                                type === 'popular' ? 'bg-green-100 text-green-600' : ''
+                              }`}>
+                                {type.charAt(0).toUpperCase() + type.slice(1)}
+                              </span>
+                            )}
+                            <span className="text-xs text-gray-500 ml-1">({count})</span>
+                          </span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

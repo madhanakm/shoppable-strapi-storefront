@@ -199,31 +199,6 @@ const Cart = () => {
                         Continue Shopping
                       </Button>
                     </Link>
-                    <Button 
-                      variant="outline" 
-                      className="w-full border-2 border-primary/30 text-primary hover:bg-primary/5 py-3"
-                      onClick={() => {
-                        syncCart();
-                        alert('Cart refreshed from server!');
-                      }}
-                    >
-                      Refresh Cart
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      className="w-full py-3"
-                      onClick={() => {
-                        // Clear localStorage cart data
-                        localStorage.removeItem('cart');
-                        localStorage.removeItem('lastSavedCart');
-                        localStorage.removeItem('lastSavedCartUserId');
-                        
-                        // Force hard reload bypassing cache
-                        window.location.href = window.location.href + '?nocache=' + new Date().getTime();
-                      }}
-                    >
-                      Hard Refresh (Clear Cache)
-                    </Button>
                   </div>
                   
                   {/* Security Badge */}

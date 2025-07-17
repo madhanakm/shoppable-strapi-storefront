@@ -270,13 +270,8 @@ const Checkout = () => {
         
         const result = JSON.parse(responseText);
         
-        // Send order confirmation SMS
-        try {
-          await sendOrderConfirmationSMS(formData.phone, orderNumber, total);
-          // SMS sent
-        } catch (smsError) {
-          // SMS error handling
-        }
+        // Send order confirmation SMS directly
+        sendOrderConfirmationSMS(formData.phone, orderNumber, total);
         
         toast({
           title: "Order Placed Successfully!",

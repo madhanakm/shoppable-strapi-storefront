@@ -45,8 +45,9 @@ const Categories = () => {
           }));
         }
         
-        // Now fetch products to get accurate counts
-        fetch('https://api.dharaniherbbals.com/api/product-masters')
+        // Now fetch products to get accurate counts with timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`)
           .then(response => response.json())
           .then(productData => {
             let productArray = [];
@@ -58,9 +59,10 @@ const Categories = () => {
             
             // Update categories with accurate product counts
             const categoriesWithCounts = formattedCategories.map(category => {
-              const productsInCategory = productArray.filter(
-                p => p.attributes?.category === category.name
-              );
+              const productsInCategory = productArray.filter(p => {
+                const attrs = p.attributes || p;
+                return attrs.category === category.name && (attrs.status === true || attrs.status === 'true');
+              });
               
               const count = productsInCategory.length;
               
