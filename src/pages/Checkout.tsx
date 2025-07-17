@@ -270,22 +270,22 @@ const Checkout = () => {
         
         const result = JSON.parse(responseText);
         
-        // Send order confirmation SMS directly
+        // Send order confirmation SMS using the new API endpoint
         try {
-          // Create an image element to trigger the SMS API call without CORS issues
           const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
-          const message = `Thank you for your order. ID: ${orderNumber}, Amt: Rs.${total}. Will notify once shipped. Thanks for shopping - Dharani Herbbals.`;
-          const img = document.createElement('img');
-          img.style.display = 'none';
-          img.src = `http://smsc.biz/httpapi/send?username=sundarppy@gmail.com&password=Dharani123&sender_id=DHHERB&route=T&phonenumber=${cleanPhone}&message=${encodeURIComponent(message)}`;
-          document.body.appendChild(img);
           
-          // Remove the image after a short delay
-          setTimeout(() => {
-            if (document.body.contains(img)) {
-              document.body.removeChild(img);
-            }
-          }, 5000);
+          // Use the new order-sms endpoint
+          fetch('https://api.dharaniherbbals.com/api/order-sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: {
+                mobile: cleanPhone,
+                orderNumber: orderNumber,
+                amount: total
+              }
+            })
+          });
         } catch (error) {
           console.error('Error sending SMS:', error);
         }
