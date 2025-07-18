@@ -13,6 +13,7 @@ export interface OrderData {
     image?: string;
   }>;
   total: number;
+  shippingCharges?: number; // Optional shipping charges
   customerInfo: {
     name: string;
     email: string;
@@ -121,12 +122,30 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
 const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumber: string, paymentResponse: any) => {
   const shippingAddr = `${orderData.customerInfo.address}, ${orderData.customerInfo.city}, ${orderData.customerInfo.state} - ${orderData.customerInfo.pincode}`;
   
+  // Use shipping charges from OrderData if available, otherwise calculate based on state
+  const calculateShippingRate = (state: string) => {
+    // Normalize state name for flexible matching
+    const normalizedState = state.toLowerCase().replace(/\s+/g, '');
+    
+    // Check if state is Tamil Nadu with flexible matching
+    const isTamilNadu = normalizedState.includes('tamilnadu') || 
+                       normalizedState === 'tn' ||
+                       normalizedState.includes('tamil') && normalizedState.includes('nadu');
+    
+    // Use default shipping prices
+    return isTamilNadu ? 50 : 150;
+  };
+
+  const shippingRate = orderData.shippingCharges || calculateShippingRate(orderData.customerInfo.state);
+  
   const orderPayload = {
     data: {
       ordernum: orderNumber,
       invoicenum: invoiceNumber,
       totalValue: orderData.total,
       total: orderData.total,
+      shippingCharges: shippingRate,
+      shippingRate: shippingRate, // Adding shipping rate as a separate field
       customername: orderData.customerInfo.name,
       phoneNum: orderData.customerInfo.phone,
       email: orderData.customerInfo.email,

@@ -201,6 +201,7 @@ const Checkout = () => {
             image: item.image
           })),
           total: total,
+          shippingCharges: shippingCharges, // Adding shipping charges
           customerInfo: {
             name: formData.fullName,
             email: formData.email,
@@ -230,6 +231,7 @@ const Checkout = () => {
             totalValue: total,
             total: total,
             shippingCharges: shippingCharges,
+            shippingRate: shippingCharges, // Adding shipping rate as a separate field
             customername: formData.fullName,
             phoneNum: formData.phone,
             email: formData.email,
