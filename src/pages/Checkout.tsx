@@ -270,11 +270,11 @@ const Checkout = () => {
         
         const result = JSON.parse(responseText);
         
-        // Send order confirmation SMS using the new API endpoint
+        // Send order confirmation SMS and WhatsApp message
         try {
           const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
           
-          // Use the new order-sms endpoint
+          // Send SMS
           fetch('https://api.dharaniherbbals.com/api/order-sms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -286,8 +286,19 @@ const Checkout = () => {
               }
             })
           });
+          
+          // Send WhatsApp message
+          fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              mobile: cleanPhone,
+              orderNumber: orderNumber,
+              amount: total
+            })
+          });
         } catch (error) {
-          console.error('Error sending SMS:', error);
+          console.error('Error sending notifications:', error);
         }
         
         toast({
