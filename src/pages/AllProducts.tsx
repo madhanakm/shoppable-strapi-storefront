@@ -566,51 +566,53 @@ const AllProducts = () => {
                           </span>
                         </div>
                         
-                        <div className="flex gap-2">
-                          <Button 
-                            className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
-                            onClick={() => {
-                              // For variable products, use the first variation
-                              if (attrs.isVariableProduct && attrs.variations) {
-                                try {
-                                  const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
-                                  if (variations && variations.length > 0) {
-                                    const firstVariation = variations[0];
-                                    addToCart({
-                                      id: product.id.toString(),
-                                      name: `${attrs.Name || attrs.name} - ${firstVariation.attributeValue}`,
-                                      tamil: attrs.tamil ? `${attrs.tamil} - ${firstVariation.attributeValue}` : null,
-                                      price: getPriceByUserType(firstVariation, userType || 'customer'),
-                                      image: attrs.photo || attrs.image,
-                                      category: attrs.category,
-                                      skuid: firstVariation.skuid || attrs.skuid || attrs.SKUID || product.id.toString(),
-                                      variation: firstVariation.attributeValue
-                                    });
-                                    return;
+                        <div className="flex flex-col gap-2">
+                          <div className="flex gap-2">
+                            <Button 
+                              className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
+                              onClick={() => {
+                                // For variable products, use the first variation
+                                if (attrs.isVariableProduct && attrs.variations) {
+                                  try {
+                                    const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+                                    if (variations && variations.length > 0) {
+                                      const firstVariation = variations[0];
+                                      addToCart({
+                                        id: product.id.toString(),
+                                        name: `${attrs.Name || attrs.name} - ${firstVariation.attributeValue}`,
+                                        tamil: attrs.tamil ? `${attrs.tamil} - ${firstVariation.attributeValue}` : null,
+                                        price: getPriceByUserType(firstVariation, userType || 'customer'),
+                                        image: attrs.photo || attrs.image,
+                                        category: attrs.category,
+                                        skuid: firstVariation.skuid || attrs.skuid || attrs.SKUID || product.id.toString(),
+                                        variation: firstVariation.attributeValue
+                                      });
+                                      return;
+                                    }
+                                  } catch (e) {
+                                    
                                   }
-                                } catch (e) {
-                                  
                                 }
-                              }
-                              
-                              // For regular products
-                              addToCart({
-                                id: product.id.toString(),
-                                name: attrs.Name || attrs.name,
-                                tamil: attrs.tamil || null,
-                                price: getPriceByUserType(attrs, userType || 'customer'),
-                                image: attrs.photo || attrs.image,
-                                category: attrs.category,
-                                skuid: attrs.skuid || attrs.SKUID || product.id.toString()
-                              });
-                            }}
-                          >
-                            <ShoppingCart className="w-3 h-3 mr-1" />
-                            <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('products.addToCart')}</span>
-                          </Button>
+                                
+                                // For regular products
+                                addToCart({
+                                  id: product.id.toString(),
+                                  name: attrs.Name || attrs.name,
+                                  tamil: attrs.tamil || null,
+                                  price: getPriceByUserType(attrs, userType || 'customer'),
+                                  image: attrs.photo || attrs.image,
+                                  category: attrs.category,
+                                  skuid: attrs.skuid || attrs.SKUID || product.id.toString()
+                                });
+                              }}
+                            >
+                              <ShoppingCart className="w-3 h-3 mr-1" />
+                              <span className={`${isTamil ? 'tamil-text text-[9px]' : 'text-xs'}`}>{translate('products.addToCart')}</span>
+                            </Button>
+                          </div>
                           
                           <Button 
-                            className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
+                            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
                             onClick={() => {
                               // For variable products, use the first variation
                               if (attrs.isVariableProduct && attrs.variations) {
@@ -651,7 +653,7 @@ const AllProducts = () => {
                               navigate('/checkout');
                             }}
                           >
-                            <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.buyNow')}</span>
+                            <span className={`${isTamil ? 'tamil-text text-[9px]' : 'text-xs'}`}>{translate('product.buyNow')}</span>
                           </Button>
                         </div>
                       </CardContent>
