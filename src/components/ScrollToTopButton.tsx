@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUp } from 'lucide-react';
 
-const ScrollToTop = () => {
+const ScrollToTopButton = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   // Show button when page is scrolled down
@@ -42,4 +42,4 @@ const ScrollToTop = () => {
   );
 };
 
-export default ScrollToTop;
+export default ScrollToTopButton;

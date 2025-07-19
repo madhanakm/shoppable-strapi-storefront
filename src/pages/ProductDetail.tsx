@@ -536,7 +536,7 @@ const ProductDetail = () => {
                     />
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-2xl">
                       <div className="opacity-0 group-hover:opacity-100 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full text-gray-800 font-medium shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                        🔍 Click to zoom
+                        🔍 {isTamil ? translate('product.clickToZoom') : 'Click to zoom'}
                       </div>
                     </div>
                     {/* Decorative elements */}
@@ -549,7 +549,7 @@ const ProductDetail = () => {
                       <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
                         📷
                       </div>
-                      <span className="text-gray-500 text-lg font-medium">No image available</span>
+                      <span className={`text-gray-500 text-lg font-medium ${isTamil ? 'tamil-text' : ''}`}>{translate('product.noImageAvailable')}</span>
                     </div>
                   </div>
                 )}
@@ -608,11 +608,11 @@ const ProductDetail = () => {
                   <div className="w-5 h-5 bg-primary/10 rounded-lg flex items-center justify-center text-xs">
                     📝
                   </div>
-                  Description
+                  <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.description')}</span>
                 </h3>
                 <div className="prose prose-gray max-w-none">
-                  <p className="text-gray-700 leading-relaxed text-sm">
-                    {product.description || product.desc || 'No description available for this product.'}
+                  <p className={`text-gray-700 leading-relaxed text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                    {product.description || product.desc || (isTamil ? translate('product.noDescriptionAvailable') : 'No description available for this product.')}
                   </p>
                 </div>
               </div>
@@ -646,8 +646,8 @@ const ProductDetail = () => {
           <div className="lg:w-1/2">
             <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 md:p-10">
               <div className="mb-6">
-                <h1 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight">
-                  {product.Name || product.name || product.title || 'Product'}
+                <h1 className={`text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight ${isTamil ? 'tamil-text' : ''}`}>
+                  {isTamil && product.tamil ? product.tamil : (product.Name || product.name || product.title || 'Product')}
                 </h1>
                 
                 <div className="flex items-center mb-6">
@@ -711,7 +711,7 @@ const ProductDetail = () => {
             
               {/* Enhanced Quantity Selector */}
               <div className="mb-8">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">Quantity</label>
+                <label className={`block text-sm font-semibold text-gray-700 mb-3 ${isTamil ? 'tamil-text' : ''}`}>{translate('product.quantity')}</label>
                 <div className="flex items-center bg-gray-50 rounded-2xl p-2 w-fit">
                   <button 
                     className="w-10 h-10 rounded-xl bg-white shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center font-bold text-gray-600 hover:text-primary"
@@ -737,14 +737,14 @@ const ProductDetail = () => {
                     onClick={handleAddToCart}
                   >
                     <ShoppingCart className="mr-2 h-5 w-5" />
-                    Add to Cart
+                    <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('products.addToCart')}</span>
                   </Button>
                   
                   <Button 
                     className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-300 py-3 text-base font-medium rounded-xl border border-red-400/20"
                     onClick={handleBuyNow}
                   >
-                    Buy Now
+                    <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.buyNow')}</span>
                   </Button>
                 </div>
                 
@@ -755,7 +755,9 @@ const ProductDetail = () => {
                     onClick={handleWishlistToggle}
                   >
                     <Heart className={`mr-2 h-5 w-5 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                    {isInWishlist(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                    <span className={`${isTamil ? 'tamil-text' : ''}`}>
+                      {isInWishlist(product.id) ? translate('product.removeFromWishlist') : translate('product.addToWishlist')}
+                    </span>
                   </Button>
                 </div>
               </div>
@@ -763,13 +765,13 @@ const ProductDetail = () => {
               {/* Enhanced Product Details */}
               <div className="space-y-6">
                 <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6">
-                  <h2 className="text-xl font-bold mb-4 text-gray-800">Product Details</h2>
+                  <h2 className={`text-xl font-bold mb-4 text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>{translate('product.productDetails')}</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {product.brand && (
                       <div className="flex items-center p-3 bg-white rounded-xl shadow-sm">
                         <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
                         <div>
-                          <span className="text-xs text-gray-500 uppercase tracking-wide">Brand</span>
+                          <span className={`text-xs text-gray-500 uppercase tracking-wide ${isTamil ? 'tamil-text' : ''}`}>{translate('product.brand')}</span>
                           <div className="font-semibold text-gray-800">{product.brand}</div>
                         </div>
                       </div>
@@ -778,7 +780,7 @@ const ProductDetail = () => {
                       <div className="flex items-center p-3 bg-white rounded-xl shadow-sm">
                         <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
                         <div>
-                          <span className="text-xs text-gray-500 uppercase tracking-wide">Category</span>
+                          <span className={`text-xs text-gray-500 uppercase tracking-wide ${isTamil ? 'tamil-text' : ''}`}>{translate('product.category')}</span>
                           <div className="font-semibold text-gray-800">{product.category}</div>
                         </div>
                       </div>
@@ -788,7 +790,7 @@ const ProductDetail = () => {
                       <div className="flex items-center p-3 bg-white rounded-xl shadow-sm">
                         <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
                         <div>
-                          <span className="text-xs text-gray-500 uppercase tracking-wide">SKU</span>
+                          <span className={`text-xs text-gray-500 uppercase tracking-wide ${isTamil ? 'tamil-text' : ''}`}>{translate('product.sku')}</span>
                           <div className="font-semibold text-gray-800">
                             {product.isVariableProduct && selectedVariation?.skuid ? selectedVariation.skuid : product.skuid}
                           </div>
@@ -799,7 +801,7 @@ const ProductDetail = () => {
                       <div className="flex items-center p-3 bg-white rounded-xl shadow-sm">
                         <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
                         <div>
-                          <span className="text-xs text-gray-500 uppercase tracking-wide">HSN</span>
+                          <span className={`text-xs text-gray-500 uppercase tracking-wide ${isTamil ? 'tamil-text' : ''}`}>{translate('product.hsn')}</span>
                           <div className="font-semibold text-gray-800">{product.hsn}</div>
                         </div>
                       </div>
@@ -814,7 +816,7 @@ const ProductDetail = () => {
         {/* Reviews Section */}
         <div className="mt-12 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           <div className="bg-gradient-to-r from-primary to-green-600 p-4 text-white">
-            <h2 className="text-xl font-bold">Customer Reviews</h2>
+            <h2 className={`text-xl font-bold ${isTamil ? 'tamil-text' : ''}`}>{translate('product.reviews')}</h2>
           </div>
           <div className="p-4">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -856,18 +858,18 @@ const ProductDetail = () => {
                       <Sparkles className="w-8 h-8 text-white" />
                     </div>
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-4 tracking-tight">
-                    You Might Also Like
+                  <h2 className={`text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-4 tracking-tight ${isTamil ? 'tamil-text' : ''}`}>
+                    {translate('product.youMightAlsoLike')}
                   </h2>
-                  <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                    Discover more products that complement your selection
+                  <p className={`text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
+                    {isTamil ? 'உங்கள் தேர்வுக்கு நிரப்பும் மேலும் தயாரிப்புகளைக் கண்டறியுங்கள்' : 'Discover more products that complement your selection'}
                   </p>
                   {loading && (
                     <div className="mt-4 flex items-center justify-center gap-2 text-primary">
                       <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
                       <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '300ms' }}></div>
                       <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '600ms' }}></div>
-                      <span className="ml-2 text-sm font-medium">Loading...</span>
+                      <span className={`ml-2 text-sm font-medium ${isTamil ? 'tamil-text' : ''}`}>{translate('common.loading')}</span>
                     </div>
                   )}
                 </div>
@@ -916,14 +918,14 @@ const ProductDetail = () => {
                               />
                             ) : (
                               <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl">
-                                <span className="text-gray-400 text-sm">No image</span>
+                                <span className={`text-gray-400 text-sm ${isTamil ? 'tamil-text' : ''}`}>{translate('product.noImageAvailable')}</span>
                               </div>
                             )}
                             <div className="absolute top-2 right-2 w-8 h-8 bg-primary/10 rounded-full blur-lg group-hover:w-12 group-hover:h-12 transition-all duration-500"></div>
                           </div>
                           <div className="p-6 relative z-20">
-                            <h3 className="font-semibold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                              {relatedProduct.attributes?.Name || 'Product'}
+                            <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 ${isTamil ? 'tamil-text' : ''}`}>
+                              {isTamil && relatedProduct.attributes?.tamil ? relatedProduct.attributes.tamil : (relatedProduct.attributes?.Name || 'Product')}
                             </h3>
                             <div className="flex items-center justify-between">
                               <p className="text-lg font-bold text-primary group-hover:scale-105 origin-left transition-transform">
@@ -953,8 +955,8 @@ const ProductDetail = () => {
                             
                             {/* Quick view button that appears on hover */}
                             <div className="mt-4 pt-3 border-t border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
-                              <span className="text-xs font-medium text-primary flex items-center justify-center">
-                                View Details <span className="ml-1">→</span>
+                              <span className={`text-xs font-medium text-primary flex items-center justify-center ${isTamil ? 'tamil-text' : ''}`}>
+                                {isTamil ? 'விவரங்களைக் காண்க' : 'View Details'} <span className="ml-1">→</span>
                               </span>
                             </div>
                           </div>

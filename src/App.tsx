@@ -28,6 +28,7 @@ import RefundReturns from "./pages/RefundReturns";
 import OrderSuccess from "./pages/OrderSuccess";
 import WhatsAppFloat from "./components/WhatsAppFloat";
 import ScrollToTop from "./components/ScrollToTop";
+import ScrollToTopButton from "./components/ScrollToTopButton";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
               <Toaster />
               <Sonner />
               <WhatsAppFloat />
+              <ScrollToTopButton />
               <BrowserRouter>
                 <ScrollToTop />
                 <Routes>

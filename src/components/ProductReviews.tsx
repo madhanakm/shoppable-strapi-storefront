@@ -3,6 +3,7 @@ import { getProductReviews, getProductReviewStats } from '@/services/reviews';
 import StarRating from './StarRating';
 import { Skeleton } from './ui/skeleton';
 import { User, Calendar } from 'lucide-react';
+import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 interface ProductReviewsProps {
   productId: number;
@@ -10,6 +11,8 @@ interface ProductReviewsProps {
 }
 
 const ProductReviews: React.FC<ProductReviewsProps> = ({ productId, skuId }) => {
+  const { translate, language } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState({ average: 0, count: 0 });
   const [loading, setLoading] = useState(true);
@@ -127,19 +130,19 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId, skuId }) => 
           <div className="flex-1 flex flex-col items-center justify-center">
             <div className="text-3xl font-bold text-gray-800 mb-1">{stats.average > 0 ? stats.average.toFixed(1) : '0.0'}</div>
             <StarRating rating={stats.average} size="md" showCount={false} />
-            <div className="mt-1 text-gray-600 text-sm">{stats.count} reviews</div>
+            <div className={`mt-1 text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>{stats.count} {translate('ui.reviews')}</div>
           </div>
           
           {/* Rating Distribution */}
           <div className="flex-1">
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">Rating Distribution</h4>
+            <h4 className={`text-sm font-semibold text-gray-700 mb-3 ${isTamil ? 'tamil-text' : ''}`}>{isTamil ? 'மதிப்பீட்டு விநியோகம்' : 'Rating Distribution'}</h4>
             {[5, 4, 3, 2, 1].map(rating => {
               const count = ratingCounts[rating] || 0;
               const percentage = stats.count > 0 ? (count / stats.count) * 100 : 0;
               
               return (
                 <div key={rating} className="flex items-center mb-2">
-                  <div className="w-12 text-sm font-medium text-gray-700">{rating} stars</div>
+                  <div className={`w-12 text-sm font-medium text-gray-700 ${isTamil ? 'tamil-text' : ''}`}>{rating} {isTamil ? 'நட்சத்திரங்கள்' : 'stars'}</div>
                   <div className="flex-1 mx-3">
                     <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div 
@@ -158,7 +161,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId, skuId }) => 
       
       {/* Reviews List */}
       <div className="space-y-3">
-        <h3 className="text-base font-semibold">Customer Reviews</h3>
+        <h3 className={`text-base font-semibold ${isTamil ? 'tamil-text' : ''}`}>{translate('product.reviews')}</h3>
         <div className="space-y-3">
           {reviews.slice(0, visibleReviews).map((review, index) => (
             <div key={index} className="bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
@@ -184,7 +187,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId, skuId }) => 
                 onClick={loadMoreReviews}
                 className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
               >
-                See More Reviews ({reviews.length - visibleReviews} more)
+                {isTamil ? 'மேலும் விமர்சனங்களைக் காண்க' : 'See More Reviews'} ({reviews.length - visibleReviews} {isTamil ? 'மேலும்' : 'more'})
               </button>
             </div>
           )}

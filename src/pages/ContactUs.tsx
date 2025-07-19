@@ -66,8 +66,8 @@ const ContactUs = () => {
 
       if (response.ok) {
         toast({
-          title: "Message Sent Successfully!",
-          description: "We'll get back to you within 24 hours.",
+          title: translate('contact.messageSent'),
+          description: translate('contact.messageResponse'),
         });
         
         // Reset form
@@ -84,8 +84,8 @@ const ContactUs = () => {
     } catch (error) {
       
       toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
+        title: translate('contact.error'),
+        description: translate('contact.errorMessage'),
         variant: "destructive",
       });
     } finally {
@@ -96,29 +96,29 @@ const ContactUs = () => {
   const contactInfo = [
     {
       icon: Phone,
-      title: 'Phone',
+      title: isTamil ? 'தொலைபேசி' : 'Phone',
       details: ['+91 97881 22001'],
       color: 'text-green-600',
       bgColor: 'bg-green-100'
     },
     {
       icon: Mail,
-      title: 'Email',
+      title: isTamil ? 'மின்னஞ்சல்' : 'Email',
       details: ['info@dharaniherbbals.in', 'salesdharani@gmail.com'],
       color: 'text-blue-600',
       bgColor: 'bg-blue-100'
     },
     {
       icon: MapPin,
-      title: 'Address',
-      details: ['7/470-1, Chemparuthi Street,', 'West Nehru Nagar Punjai Puliampatti', 'Sathyamangalam(TALUK), Erode - 638 459, TN, India'],
+      title: isTamil ? 'முகவரி' : 'Address',
+      details: ['7/470-1, Chemparuthi Street,', 'West Nehru Nagar, Punjai Puliampatti,', 'Sathyamangalam(TALUK), Erode - 638 459, TN, India'],
       color: 'text-red-600',
       bgColor: 'bg-red-100'
     },
     {
       icon: Clock,
       title: isTamil ? 'வணிக நேரம்' : 'Business Hours',
-      details: isTamil ? ['திங்கள் - சனி: காலை 9:00 - மாலை 7:00', 'ஞாயிறு: காலை 10:00 - மாலை 5:00'] : ['Mon - Sat: 9:00 AM - 7:00 PM', 'Sunday: 10:00 AM - 5:00 PM'],
+      details: isTamil ? ['திங்கள் - சனி: காலை 9:00 - மாலை 7:00'] : ['Mon - Sat: 9:00 AM - 7:00 PM'],
       color: 'text-purple-600',
       bgColor: 'bg-purple-100'
     }
@@ -127,18 +127,18 @@ const ContactUs = () => {
   const features = [
     {
       icon: Headphones,
-      title: '24/7 Support',
-      description: 'Round-the-clock customer support for all your queries'
+      title: isTamil ? '24/7 ஆதரவு' : '24/7 Support',
+      description: isTamil ? 'உங்கள் அனைத்து கேள்விகளுக்கும் 24 மணி நேர வாடிக்கையாளர் ஆதரவு' : 'Round-the-clock customer support for all your queries'
     },
     {
       icon: MessageCircle,
-      title: 'Quick Response',
-      description: 'We respond to all inquiries within 2-4 hours'
+      title: isTamil ? 'விரைவான பதில்' : 'Quick Response',
+      description: isTamil ? 'அனைத்து விசாரணைகளுக்கும் 2-4 மணி நேரத்திற்குள் பதிலளிக்கிறோம்' : 'We respond to all inquiries within 2-4 hours'
     },
     {
       icon: CheckCircle,
-      title: 'Expert Guidance',
-      description: 'Get advice from our herbal wellness experts'
+      title: isTamil ? 'நிபுணர் வழிகாட்டல்' : 'Expert Guidance',
+      description: isTamil ? 'எங்கள் மூலிகை நலவாழ்வு நிபுணர்களிடமிருந்து ஆலோசனை பெறுங்கள்' : 'Get advice from our herbal wellness experts'
     }
   ];
 
@@ -185,17 +185,17 @@ const ContactUs = () => {
           <div className="space-y-8">
             <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
               <CardHeader className="bg-gradient-to-r from-primary/10 to-green-500/10 rounded-t-lg">
-                <CardTitle className="text-2xl font-bold text-center text-gray-800 flex items-center justify-center gap-2">
+                <CardTitle className={`text-2xl font-bold text-center text-gray-800 flex items-center justify-center gap-2 ${isTamil ? 'tamil-text' : ''}`}>
                   <Send className="w-6 h-6 text-primary" />
-                  Send us a Message
+                  {translate('contact.sendMessage')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <Label htmlFor="name" className="text-sm font-medium text-gray-700 mb-2 block">
-                        Full Name *
+                      <Label htmlFor="name" className={`text-sm font-medium text-gray-700 mb-2 block ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('contact.fullName')} *
                       </Label>
                       <Input
                         id="name"
@@ -204,13 +204,13 @@ const ContactUs = () => {
                         value={formData.name}
                         onChange={handleInputChange}
                         required
-                        placeholder="Enter your full name"
+                        placeholder={translate('contact.fullName')}
                         className="h-12 border-gray-300 focus:border-primary focus:ring-primary/20"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone" className="text-sm font-medium text-gray-700 mb-2 block">
-                        Phone Number *
+                      <Label htmlFor="phone" className={`text-sm font-medium text-gray-700 mb-2 block ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('contact.phoneNumber')} *
                       </Label>
                       <Input
                         id="phone"
@@ -219,15 +219,15 @@ const ContactUs = () => {
                         value={formData.phone}
                         onChange={handleInputChange}
                         required
-                        placeholder="Enter your phone number"
+                        placeholder={translate('contact.phoneNumber')}
                         className="h-12 border-gray-300 focus:border-primary focus:ring-primary/20"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 block">
-                      Email Address *
+                    <Label htmlFor="email" className={`text-sm font-medium text-gray-700 mb-2 block ${isTamil ? 'tamil-text' : ''}`}>
+                      {translate('contact.emailAddress')} *
                     </Label>
                     <Input
                       id="email"
@@ -236,14 +236,14 @@ const ContactUs = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
-                      placeholder="Enter your email address"
+                      placeholder={translate('contact.emailAddress')}
                       className="h-12 border-gray-300 focus:border-primary focus:ring-primary/20"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="subject" className="text-sm font-medium text-gray-700 mb-2 block">
-                      Subject *
+                    <Label htmlFor="subject" className={`text-sm font-medium text-gray-700 mb-2 block ${isTamil ? 'tamil-text' : ''}`}>
+                      {translate('contact.subject')} *
                     </Label>
                     <select
                       id="subject"
@@ -253,19 +253,19 @@ const ContactUs = () => {
                       required
                       className="w-full h-12 px-3 border border-gray-300 rounded-md focus:border-primary focus:ring-1 focus:ring-primary/20"
                     >
-                      <option value="">Select a subject</option>
-                      <option value="product-inquiry">Product Inquiry</option>
-                      <option value="order-support">Order Support</option>
-                      <option value="wellness-consultation">Wellness Consultation</option>
-                      <option value="partnership">Partnership Opportunity</option>
-                      <option value="feedback">Feedback & Suggestions</option>
-                      <option value="other">Other</option>
+                      <option value="">{translate('contact.selectSubject')}</option>
+                      <option value="product-inquiry">{translate('contact.productInquiry')}</option>
+                      <option value="order-support">{translate('contact.orderSupport')}</option>
+                      <option value="wellness-consultation">{translate('contact.wellnessConsultation')}</option>
+                      <option value="partnership">{translate('contact.partnership')}</option>
+                      <option value="feedback">{translate('contact.feedback')}</option>
+                      <option value="other">{translate('contact.other')}</option>
                     </select>
                   </div>
 
                   <div>
-                    <Label htmlFor="message" className="text-sm font-medium text-gray-700 mb-2 block">
-                      Message *
+                    <Label htmlFor="message" className={`text-sm font-medium text-gray-700 mb-2 block ${isTamil ? 'tamil-text' : ''}`}>
+                      {translate('contact.message')} *
                     </Label>
                     <Textarea
                       id="message"
@@ -273,7 +273,7 @@ const ContactUs = () => {
                       value={formData.message}
                       onChange={handleInputChange}
                       required
-                      placeholder="Tell us how we can help you..."
+                      placeholder={translate('contact.messagePlaceholder')}
                       className="min-h-[120px] border-gray-300 focus:border-primary focus:ring-primary/20 resize-none"
                     />
                   </div>
@@ -286,12 +286,12 @@ const ContactUs = () => {
                     {isLoading ? (
                       <>
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        Sending Message...
+                        {translate('contact.sendingMessage')}
                       </>
                     ) : (
                       <>
                         <Send className="w-5 h-5 mr-2" />
-                        Send Message
+                        {translate('contact.sendMessage')}
                       </>
                     )}
                   </Button>
@@ -302,21 +302,24 @@ const ContactUs = () => {
             {/* Social Media - Moved here */}
             <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-xl font-bold text-gray-800">Follow Us</CardTitle>
+                <CardTitle className={`text-xl font-bold text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>{translate('contact.followUs')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 mb-4">
-                  Stay connected with us on social media for the latest updates, health tips, and product launches.
+                <p className={`text-gray-600 mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+                  {isTamil ? 'சமூக ஊடகங்களில் எங்களுடன் இணைந்திருங்கள், சமீபத்திய புதுப்பிப்புகள், ஆரோக்கிய குறிப்புகள் மற்றும் தயாரிப்பு அறிமுகங்களுக்காக.' : 'Stay connected with us on social media for the latest updates, health tips, and product launches.'}
                 </p>
                 <div className="flex space-x-4">
-                  <a href="#" className="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors">
+                  <a href="https://www.facebook.com/share/12JML3gctZN/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors">
                     <Facebook className="w-6 h-6 text-white" />
                   </a>
-                  <a href="#" className="w-12 h-12 bg-pink-600 hover:bg-pink-700 rounded-full flex items-center justify-center transition-colors">
+                  <a href="https://www.instagram.com/dharani_herbbals?igsh=MXRueWJqMmtpZHRjOQ==" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-pink-600 hover:bg-pink-700 rounded-full flex items-center justify-center transition-colors">
                     <Instagram className="w-6 h-6 text-white" />
                   </a>
-                  <a href="#" className="w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-colors">
+                  <a href="https://youtube.com/@dharaniherbbals1236?si=6fZfr3WVwFS6nLCC" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-colors">
                     <Youtube className="w-6 h-6 text-white" />
+                  </a>
+                  <a href="https://twitter.com/HerbbalsDharani" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-blue-400 hover:bg-blue-500 rounded-full flex items-center justify-center transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-white"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
                   </a>
                 </div>
               </CardContent>
@@ -328,7 +331,7 @@ const ContactUs = () => {
             {/* Features */}
             <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-xl font-bold text-gray-800">Why Choose Us?</CardTitle>
+                <CardTitle className={`text-xl font-bold text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>{translate('contact.whyChooseUs')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {features.map((feature, index) => (
@@ -337,8 +340,8 @@ const ContactUs = () => {
                       <feature.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-800 mb-1">{feature.title}</h3>
-                      <p className="text-gray-600 text-sm">{feature.description}</p>
+                      <h3 className={`font-semibold text-gray-800 mb-1 ${isTamil ? 'tamil-text' : ''}`}>{feature.title}</h3>
+                      <p className={`text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>{feature.description}</p>
                     </div>
                   </div>
                 ))}
@@ -350,7 +353,7 @@ const ContactUs = () => {
             {/* Map */}
             <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-xl font-bold text-gray-800">Visit Our Store</CardTitle>
+                <CardTitle className={`text-xl font-bold text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>{translate('contact.visitStore')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="rounded-lg overflow-hidden">

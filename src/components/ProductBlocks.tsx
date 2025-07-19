@@ -20,13 +20,14 @@ const ProductCard = ({ product, reviewStats = {} }) => {
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
   const navigate = useNavigate();
-  const { language } = useTranslation();
+  const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
 
   const handleWishlistToggle = () => {
     const productData = {
       id: product.id.toString(),
       name: product.name,
+      tamil: product.tamil || null,
       price: product.price || 0,
       image: product.image,
       category: product.category
@@ -49,6 +50,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
           addToCart({
             id: product.id.toString(),
             name: `${product.name} - ${firstVariation.attributeValue}`,
+            tamil: product.tamil ? `${product.tamil} - ${firstVariation.attributeValue}` : null,
             price: getPriceByUserType(firstVariation, product.userType || 'customer'),
             image: product.image,
             category: product.category,
@@ -66,6 +68,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
     addToCart({
       id: product.id.toString(),
       name: product.name,
+      tamil: product.tamil || null,
       price: product.price || 0,
       image: product.image,
       category: product.category,
@@ -83,6 +86,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
           setQuickCheckoutItem({
             id: product.id.toString(),
             name: `${product.name} - ${firstVariation.attributeValue}`,
+            tamil: product.tamil ? `${product.tamil} - ${firstVariation.attributeValue}` : null,
             price: getPriceByUserType(firstVariation, product.userType || 'customer'),
             image: product.image,
             category: product.category,
@@ -102,6 +106,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
     setQuickCheckoutItem({
       id: product.id.toString(),
       name: product.name,
+      tamil: product.tamil || null,
       price: product.price,
       image: product.image,
       category: product.category,
@@ -180,7 +185,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
       <CardContent className="p-6 bg-white">
         <Link to={`/product/${product.id}`}>
           <h3 className={`font-bold text-base mb-3 group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem] leading-tight ${isTamil ? 'tamil-text' : ''}`}>
-            {product.name}
+            {isTamil && product.tamil ? product.tamil : product.name}
           </h3>
         </Link>
         
@@ -219,7 +224,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
             }}
           >
             <ShoppingCart className="w-3 h-3 mr-1" />
-            <span className={`${isTamil ? 'tamil-text' : ''}`}>Cart</span>
+            <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('products.addToCart')}</span>
           </Button>
           
           <Button 
@@ -230,7 +235,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
               handleBuyNow();
             }}
           >
-            <span className={`${isTamil ? 'tamil-text' : ''}`}>Buy Now</span>
+            <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.buyNow')}</span>
           </Button>
         </div>
       </CardContent>
@@ -245,7 +250,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
   const [loading, setLoading] = useState(true);
   const [userType, setUserType] = useState('customer');
   const { user } = useAuth();
-  const { language } = useTranslation();
+  const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
 
   // Always fetch fresh user type from API - exactly like AllProducts page
@@ -342,6 +347,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
           return {
             id: item.id || Math.random().toString(),
             name: attributes.Name || attributes.name || 'Product',
+            tamil: attributes.tamil || null,
             price: price,
             priceRange: priceRange,
             image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
@@ -413,11 +419,11 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
               <div className="absolute inset-0 rounded-3xl bg-white/20 blur-xl"></div>
               <div className="relative">{icon}</div>
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-4 tracking-tight">
-              {title}
+            <h2 className={`text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-4 tracking-tight ${isTamil ? 'tamil-text' : ''}`}>
+              {typeof title === 'string' ? title : title}
             </h2>
-            <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              {description}
+            <p className={`text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
+              {typeof description === 'string' ? description : description}
             </p>
           </div>
           <div className="flex justify-center items-center gap-2 mb-4">
@@ -445,7 +451,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
               size="lg" 
               className="group bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 hover:from-primary hover:via-emerald-500 hover:to-primary text-white transition-all duration-500 px-12 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl rounded-2xl transform hover:scale-105 hover:-translate-y-1"
             >
-              <span className={`${isTamil ? 'tamil-text' : ''} mr-3`}>View All {title}</span>
+              <span className={`${isTamil ? 'tamil-text' : ''} mr-3`}>{translate('blocks.viewAll')}</span>
               <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
             </Button>
           </Link>
@@ -457,6 +463,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
 
 // Main Component with all Product Blocks
 const ProductBlocks = () => {
+  const { translate } = useTranslation();
   return (
     <>
       <style jsx>{`
@@ -483,8 +490,8 @@ const ProductBlocks = () => {
       
       <ProductBlock 
         type="deals"
-        title="Deals of the Day" 
-        description="Limited time offers with amazing discounts on our best herbal products. Don't miss out on these incredible savings!"
+        title={translate('blocks.dealsOfTheDay')} 
+        description={translate('blocks.dealsDescription')}
         icon={<Tag className="w-8 h-8 text-white" />}
         bgColor="bg-gradient-to-br from-purple-50 via-white to-purple-100"
         accentColor="bg-gradient-to-r from-purple-500 to-purple-600"
@@ -492,8 +499,8 @@ const ProductBlocks = () => {
       
       <ProductBlock 
         type="trending"
-        title="Trending Products" 
-        description="Discover what's popular right now - products that are making waves in the herbal wellness market"
+        title={translate('blocks.trendingProducts')} 
+        description={translate('blocks.trendingDescription')}
         icon={<TrendingUp className="w-8 h-8 text-white" />}
         bgColor="bg-gradient-to-br from-blue-50 via-white to-blue-100"
         accentColor="bg-gradient-to-r from-blue-500 to-blue-600"
@@ -501,8 +508,8 @@ const ProductBlocks = () => {
       
       <ProductBlock 
         type="hot"
-        title="Hot Selling" 
-        description="Our fastest selling herbal products that customers can't get enough of. Join the trend!"
+        title={translate('blocks.hotSelling')} 
+        description={translate('blocks.hotDescription')}
         icon={<Flame className="w-8 h-8 text-white" />}
         bgColor="bg-gradient-to-br from-red-50 via-white to-red-100"
         accentColor="bg-gradient-to-r from-red-500 to-red-600"
@@ -510,8 +517,8 @@ const ProductBlocks = () => {
       
       <ProductBlock 
         type="popular"
-        title="Popular Choices" 
-        description="Customer favorites with the highest ratings and most positive reviews. Trusted by thousands!"
+        title={translate('blocks.popularChoices')} 
+        description={translate('blocks.popularDescription')}
         icon={<Zap className="w-8 h-8 text-white" />}
         bgColor="bg-gradient-to-br from-green-50 via-white to-green-100"
         accentColor="bg-gradient-to-r from-green-500 to-green-600"

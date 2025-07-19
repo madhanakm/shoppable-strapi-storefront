@@ -35,7 +35,7 @@ const AllProducts = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const itemsPerPage = 12; // Show 12 products per page
-  const { language } = useTranslation();
+  const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const { user } = useAuth();
   const [userType, setUserType] = useState('customer');
@@ -606,7 +606,7 @@ const AllProducts = () => {
                             }}
                           >
                             <ShoppingCart className="w-3 h-3 mr-1" />
-                            <span className={`${isTamil ? 'tamil-text' : ''}`}>Cart</span>
+                            <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('products.addToCart')}</span>
                           </Button>
                           
                           <Button 
@@ -651,7 +651,7 @@ const AllProducts = () => {
                               navigate('/checkout');
                             }}
                           >
-                            <span className={`${isTamil ? 'tamil-text' : ''}`}>Buy Now</span>
+                            <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.buyNow')}</span>
                           </Button>
                         </div>
                       </CardContent>

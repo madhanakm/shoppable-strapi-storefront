@@ -272,7 +272,9 @@ const AboutUs = () => {
           <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
             <CardContent className="p-8 md:p-12">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Our Commitment to You</h2>
+                <h2 className={`text-3xl font-bold text-gray-800 mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+                  {translate('about.ourCommitment')}
+                </h2>
               </div>
               
               <div className="grid md:grid-cols-2 gap-8">
@@ -280,24 +282,36 @@ const AboutUs = () => {
                   <div className="flex items-start space-x-3">
                     <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-1">Authentic Products</h4>
-                      <p className="text-gray-600 text-sm">Every product is crafted with authentic ingredients and traditional methods.</p>
+                      <h4 className={`font-semibold text-gray-800 mb-1 ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('about.authenticProducts')}
+                      </h4>
+                      <p className={`text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                        {isTamil ? 'ஒவ்வொரு தயாரிப்பும் உண்மையான பொருட்கள் மற்றும் பாரம்பரிய முறைகளுடன் உருவாக்கப்படுகிறது.' : 'Every product is crafted with authentic ingredients and traditional methods.'}
+                      </p>
                     </div>
                   </div>
                   
                   <div className="flex items-start space-x-3">
                     <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-1">Customer Satisfaction</h4>
-                      <p className="text-gray-600 text-sm">Your health and satisfaction are our top priorities.</p>
+                      <h4 className={`font-semibold text-gray-800 mb-1 ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('about.customerSatisfaction')}
+                      </h4>
+                      <p className={`text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                        {isTamil ? 'உங்கள் ஆரோக்கியமும் திருப்தியும் எங்கள் முதன்மை முன்னுரிமைகள்.' : 'Your health and satisfaction are our top priorities.'}
+                      </p>
                     </div>
                   </div>
                   
                   <div className="flex items-start space-x-3">
                     <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-1">Sustainable Practices</h4>
-                      <p className="text-gray-600 text-sm">We are committed to environmentally responsible sourcing and production.</p>
+                      <h4 className={`font-semibold text-gray-800 mb-1 ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('about.sustainablePractices')}
+                      </h4>
+                      <p className={`text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                        {isTamil ? 'நாங்கள் சுற்றுச்சூழல் பொறுப்புள்ள மூலப்பொருள் மற்றும் உற்பத்திக்கு உறுதிபூண்டுள்ளோம்.' : 'We are committed to environmentally responsible sourcing and production.'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -306,24 +320,36 @@ const AboutUs = () => {
                   <div className="flex items-start space-x-3">
                     <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-1">Expert Guidance</h4>
-                      <p className="text-gray-600 text-sm">Our team of experts is always available to guide you on your wellness journey.</p>
+                      <h4 className={`font-semibold text-gray-800 mb-1 ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('about.expertGuidance')}
+                      </h4>
+                      <p className={`text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                        {isTamil ? 'எங்கள் நிபுணர்கள் குழு உங்கள் நலவாழ்வு பயணத்தில் உங்களுக்கு வழிகாட்ட எப்போதும் கிடைக்கிறது.' : 'Our team of experts is always available to guide you on your wellness journey.'}
+                      </p>
                     </div>
                   </div>
                   
                   <div className="flex items-start space-x-3">
                     <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-1">Continuous Innovation</h4>
-                      <p className="text-gray-600 text-sm">We continuously research and develop new products to meet evolving health needs.</p>
+                      <h4 className={`font-semibold text-gray-800 mb-1 ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('about.continuousInnovation')}
+                      </h4>
+                      <p className={`text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                        {isTamil ? 'வளர்ந்து வரும் ஆரோக்கிய தேவைகளை பூர்த்தி செய்ய நாங்கள் தொடர்ந்து ஆராய்ச்சி செய்து புதிய தயாரிப்புகளை உருவாக்குகிறோம்.' : 'We continuously research and develop new products to meet evolving health needs.'}
+                      </p>
                     </div>
                   </div>
                   
                   <div className="flex items-start space-x-3">
                     <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-1">Transparent Communication</h4>
-                      <p className="text-gray-600 text-sm">We believe in honest, transparent communication about our products and processes.</p>
+                      <h4 className={`font-semibold text-gray-800 mb-1 ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('about.transparentCommunication')}
+                      </h4>
+                      <p className={`text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                        {isTamil ? 'எங்கள் தயாரிப்புகள் மற்றும் செயல்முறைகள் பற்றிய நேர்மையான, வெளிப்படையான தகவல்தொடர்பில் நாங்கள் நம்பிக்கை கொண்டுள்ளோம்.' : 'We believe in honest, transparent communication about our products and processes.'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -336,20 +362,21 @@ const AboutUs = () => {
         <section className="text-center">
           <Card className="shadow-2xl border-0 bg-gradient-to-r from-primary/10 to-green-500/10">
             <CardContent className="p-8 md:p-12">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">Join Our Wellness Journey</h2>
-              <p className="text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                Experience the power of natural wellness with Dharani Herbals. Let us be your partner in achieving 
-                optimal health through the wisdom of nature and the science of modern herbal medicine.
+              <h2 className={`text-3xl font-bold text-gray-800 mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+                {translate('about.joinWellnessJourney')}
+              </h2>
+              <p className={`text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
+                {isTamil ? 'தரணி ஹெர்பல்ஸுடன் இயற்கை நலவாழ்வின் சக்தியை அனுபவியுங்கள். இயற்கையின் ஞானம் மற்றும் நவீன மூலிகை மருத்துவத்தின் அறிவியல் மூலம் சிறந்த ஆரோக்கியத்தை அடைவதற்கு உங்கள் பங்காளராக இருக்க அனுமதியுங்கள்.' : 'Experience the power of natural wellness with Dharani Herbals. Let us be your partner in achieving optimal health through the wisdom of nature and the science of modern herbal medicine.'}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="/products" className="inline-block">
                   <button className="bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-600 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all">
-                    Explore Our Products
+                    {translate('about.exploreProducts')}
                   </button>
                 </a>
                 <a href="/contact" className="inline-block">
                   <button className="border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 rounded-lg font-semibold transition-all">
-                    Get In Touch
+                    {translate('about.getInTouch')}
                   </button>
                 </a>
               </div>

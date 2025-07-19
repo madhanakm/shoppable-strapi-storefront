@@ -1,7 +1,7 @@
-/* Import Tiro Tamil font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Tiro+Tamil&display=swap');
+/* Import Noto Sans Tamil font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap');
 
-/* Apply Tiro Tamil font to Tamil text */
+/* Apply Noto Sans Tamil font to Tamil text */
 .tamil-text {
-  font-family: 'Tiro Tamil', serif;
+  font-family: 'Noto Sans Tamil', 'Montserrat', sans-serif;
 }
