@@ -7,6 +7,7 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { formatPrice } from '@/lib/utils';
 import { getPriceByUserType } from '@/lib/pricing';
+import { filterPriceFromName } from '@/lib/productUtils';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
 import { getProductsWithTamil } from '@/services/products';
 import { getBulkProductReviewStats } from '@/services/reviews';
@@ -232,7 +233,7 @@ const FeaturedProducts = () => {
               
               <CardContent className="p-6">
                 <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>
-                  {isTamil && product.tamilName ? product.tamilName : product.name}
+                  {isTamil && product.tamilName ? filterPriceFromName(product.tamilName) : filterPriceFromName(product.name)}
                 </h3>
                 
                 <div className="flex items-center mb-3">

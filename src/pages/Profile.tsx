@@ -12,8 +12,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { useToast } from '@/hooks/use-toast';
 import { updateProfile, changePassword, addAddress, getAddresses, updateAddress, deleteAddress } from '@/services/profile';
-import { User, Lock, MapPin, Edit, Trash2, Plus, RefreshCw, Package, Calendar, CreditCard, Truck } from 'lucide-react';
+import { User, Lock, MapPin, Edit, Trash2, Plus, RefreshCw, Package, Calendar, CreditCard, Truck, FileText, Download } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatPrice } from '@/lib/utils';
+import { generateOrderReceipt, downloadOrderReceiptHTML } from '@/utils/htmlPdfGenerator';
 
 const Profile = () => {
   const { user, isAuthenticated } = useAuth();
@@ -296,9 +298,7 @@ const Profile = () => {
                                     <p className="text-sm text-gray-500">Invoice: {attrs.invoicenum || 'N/A'}</p>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                      Pending
-                                    </span>
+                                    {/* Receipt button removed */}
                                     <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
                                       attrs.payment === 'Online Payment' ? 'bg-blue-100 text-blue-800' :
                                       'bg-orange-100 text-orange-800'
@@ -326,7 +326,28 @@ const Profile = () => {
                                   {attrs.Name && (
                                     <div className="mt-2">
                                       <p className="text-sm font-medium text-gray-700">Items:</p>
-                                      <p className="text-sm text-gray-600">{attrs.Name}</p>
+                                      <div className="mt-2 border rounded-md overflow-hidden">
+                                        <table className="w-full">
+                                          <thead className="bg-gray-50">
+                                            <tr>
+                                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Product</th>
+                                              <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">Quantity</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody className="divide-y divide-gray-100">
+                                            {attrs.Name.split('|').map((product, index) => {
+                                              const quantities = attrs.quantity ? String(attrs.quantity).split('|') : [];
+                                              const qty = quantities[index] || '1';
+                                              return (
+                                                <tr key={index} className="hover:bg-gray-50">
+                                                  <td className="px-3 py-2 text-sm text-gray-600">{product.trim()}</td>
+                                                  <td className="px-3 py-2 text-sm text-gray-600 text-right">{qty.trim()}</td>
+                                                </tr>
+                                              );
+                                            })}
+                                          </tbody>
+                                        </table>
+                                      </div>
                                     </div>
                                   )}
                                   {attrs.remarks && (

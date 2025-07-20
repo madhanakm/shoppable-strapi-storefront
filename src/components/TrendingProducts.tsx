@@ -6,6 +6,7 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { formatPrice } from '@/lib/utils';
 import { getPriceByUserType } from '@/lib/pricing';
+import { filterPriceFromName } from '@/lib/productUtils';
 import { Link } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
 import { getBulkProductReviewStats } from '@/services/reviews';
@@ -243,7 +244,7 @@ const TrendingProducts = () => {
               
               <CardContent className="p-6">
                 <h3 className={`font-semibold text-lg mb-2 group-hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>
-                  {product.name}
+                  {filterPriceFromName(product.name)}
                 </h3>
                 
                 <div className="flex items-center mb-3">

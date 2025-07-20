@@ -19,4 +19,13 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ['html2canvas'],
+    exclude: ['jspdf'],
+  },
+  build: {
+    rollupOptions: {
+      // Remove html2canvas from external as it needs to be bundled
+    },
+  },
 }));

@@ -13,6 +13,7 @@ import { useTranslation, LANGUAGES } from './TranslationProvider';
 import { getBulkProductReviewStats } from '@/services/reviews';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPriceByUserType, getVariablePriceRange } from '@/lib/pricing';
+import { filterPriceFromName } from '@/lib/productUtils';
 
 // Product Card Component
 const ProductCard = ({ product, reviewStats = {} }) => {
@@ -185,7 +186,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
       <CardContent className="p-6 bg-white">
         <Link to={`/product/${product.id}`}>
           <h3 className={`font-bold text-base mb-3 group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem] leading-tight ${isTamil ? 'tamil-text' : ''}`}>
-            {isTamil && product.tamil ? product.tamil : product.name}
+            {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
           </h3>
         </Link>
         
