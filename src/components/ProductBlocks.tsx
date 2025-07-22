@@ -252,6 +252,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
   const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [userType, setUserType] = useState('customer');
+  const [showAll, setShowAll] = useState(false);
   const { user } = useAuth();
   const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
@@ -366,7 +367,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
           };
         });
         
-        setProducts(formattedProducts.slice(0, 6));
+        setProducts(formattedProducts);
         
         // Fetch review stats
         const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
@@ -437,7 +438,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 mb-16">
-          {products.map((product, index) => (
+          {(showAll ? products : products.slice(0, 8)).map((product, index) => (
             <div 
               key={product.id} 
               className="animate-fade-in-up"
@@ -449,15 +450,26 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         </div>
 
         <div className="text-center">
-          <Link to={`/products?type=${type}`}>
+          {products.length > 8 && !showAll ? (
             <Button 
               size="lg" 
               className="group bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 hover:from-primary hover:via-emerald-500 hover:to-primary text-white transition-all duration-500 px-12 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl rounded-2xl transform hover:scale-105 hover:-translate-y-1"
+              onClick={() => setShowAll(true)}
             >
               <span className={`${isTamil ? 'tamil-text' : ''} mr-3`}>{translate('blocks.viewAll')}</span>
               <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
             </Button>
-          </Link>
+          ) : (
+            <Link to={`/products?type=${type}`}>
+              <Button 
+                size="lg" 
+                className="group bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 hover:from-primary hover:via-emerald-500 hover:to-primary text-white transition-all duration-500 px-12 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl rounded-2xl transform hover:scale-105 hover:-translate-y-1"
+              >
+                <span className={`${isTamil ? 'tamil-text' : ''} mr-3`}>{translate('blocks.viewAll')}</span>
+                <Eye className="h-6 w-6 group-hover:translate-x-2 transition-transform duration-300" />
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </section>
