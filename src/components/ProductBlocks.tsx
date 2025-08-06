@@ -265,7 +265,11 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           const timestamp = new Date().getTime();
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`, {
+            headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+            }
+          });
           if (response.ok) {
             const result = await response.json();
             if (result.data && result.data.attributes) {

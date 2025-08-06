@@ -12,6 +12,8 @@ import { useTranslation, LANGUAGES } from './TranslationProvider';
 import { getProductsWithTamil } from '@/services/products';
 import { getBulkProductReviewStats } from '@/services/reviews';
 import StarRating from './StarRating';
+import { LoadingWithStatus, RealTimeLoadingStatus } from './ProductSkeleton';
+import { useLoadingProgress, LOADING_CONFIGS } from '@/hooks/use-loading-progress';
 
 // Fallback products in case API fails
 const fallbackProducts = [
@@ -53,6 +55,7 @@ const FeaturedProducts = () => {
   const [products, setProducts] = useState([]);
   const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
+  const loadingProgress = useLoadingProgress(LOADING_CONFIGS.FEATURED, false);
   const [error, setError] = useState(null);
   const [userType, setUserType] = useState(null);
   const { language } = useTranslation();
@@ -93,12 +96,19 @@ const FeaturedProducts = () => {
     const loadProducts = async () => {
       try {
         setLoading(true);
+        loadingProgress.startLoading();
+        loadingProgress.setCurrentItem('Connecting to server...');
+        
         // Fetch products with type=featured
         const response = await fetch('https://api.dharaniherbbals.com/api/product-masters?type=featured&pagination[limit]=-1');
         
         if (!response.ok) {
+          loadingProgress.addError(`API responded with status: ${response.status}`);
           throw new Error(`API responded with status: ${response.status}`);
         }
+        
+        loadingProgress.setManualStep(2, 40);
+        loadingProgress.setCurrentItem('Processing product data...');
         
         const data = await response.json();
         
@@ -111,11 +121,19 @@ const FeaturedProducts = () => {
         }
         
         if (productList.length === 0) {
-          
+          loadingProgress.addWarning('No featured products found, using fallback products');
+          loadingProgress.setTotalItems(fallbackProducts.length);
           setProducts(fallbackProducts);
         } else {
-          const formattedProducts = productList.map(item => {
+          loadingProgress.setTotalItems(productList.length);
+          loadingProgress.setManualStep(3, 70);
+          loadingProgress.setCurrentItem('Formatting product data...');
+          
+          const formattedProducts = productList.map((item, index) => {
             const attributes = item.attributes || item;
+            loadingProgress.setCurrentItem(`Processing ${attributes.Name || attributes.name || 'Product'}`);
+            loadingProgress.incrementLoaded();
+            
             return {
               id: item.id || Math.random().toString(),
               name: attributes.Name || attributes.name || 'Product',
@@ -131,22 +149,25 @@ const FeaturedProducts = () => {
           setProducts(formattedProducts);
           
           // Fetch review stats for all products
+          loadingProgress.setCurrentItem('Loading product reviews...');
           const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
           if (productIds.length > 0) {
             try {
               const stats = await getBulkProductReviewStats(productIds);
               setReviewStats(stats);
+              loadingProgress.addLog(`Loaded reviews for ${Object.keys(stats).length} products`);
             } catch (reviewError) {
-              
+              loadingProgress.addWarning('Failed to load product reviews');
             }
           }
         }
       } catch (err) {
-        
+        loadingProgress.addError(`Failed to load products: ${err.message}`);
         setError('Failed to load products. Using sample products instead.');
         setProducts(fallbackProducts);
       } finally {
         setLoading(false);
+        loadingProgress.stopLoading();
       }
     };
 
@@ -184,8 +205,26 @@ const FeaturedProducts = () => {
   if (loading) {
     return (
       <section className="py-16">
-        <div className="container mx-auto px-4 text-center">
-          <p>Loading featured products...</p>
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Featured Products</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Discover our handpicked selection of the best products with amazing deals
+            </p>
+          </div>
+          <RealTimeLoadingStatus 
+            message="Loading Featured Products" 
+            stage={loadingProgress.stage}
+            progress={loadingProgress.progress}
+            loadedItems={loadingProgress.stats.loadedItems}
+            totalItems={loadingProgress.stats.totalItems}
+            currentItem={loadingProgress.stats.currentItem}
+            errors={loadingProgress.stats.errors}
+            warnings={loadingProgress.stats.warnings}
+            logs={loadingProgress.stats.logs}
+            estimatedTimeRemaining={loadingProgress.stats.estimatedTimeRemaining}
+            showLogs={true}
+          />
         </div>
       </section>
     );

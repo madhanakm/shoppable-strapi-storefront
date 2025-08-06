@@ -12,6 +12,7 @@ import { formatPrice } from '@/lib/utils';
 import { getPriceByUserType } from '@/lib/pricing';
 import { getBulkProductReviewStats } from '@/services/reviews';
 import StarRating from './StarRating';
+import { LoadingWithStatus } from './ProductSkeleton';
 
 const HotSellingProducts = () => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
@@ -130,8 +131,24 @@ const HotSellingProducts = () => {
   if (loading) {
     return (
       <section className="py-16">
-        <div className="container mx-auto px-4 text-center">
-          <p>Loading hot selling products...</p>
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Flame className="w-8 h-8 text-orange-500" />
+              <h2 className="text-3xl font-bold">Hot Selling Products</h2>
+            </div>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Our best-selling items that customers can't get enough of
+            </p>
+          </div>
+          <LoadingWithStatus 
+            message="Loading Hot Selling Products" 
+            stage="Finding bestsellers"
+            showProgress={true}
+            progress={75}
+            showSteps={true}
+            currentStep={3}
+          />
         </div>
       </section>
     );

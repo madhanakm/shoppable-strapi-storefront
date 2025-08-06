@@ -128,7 +128,11 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
           if (storedUser) {
             const userData = JSON.parse(storedUser);
             const timestamp = new Date().getTime();
-            const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
+            const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`, {
+              headers: {
+                'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+              }
+            });
             if (response.ok) {
               const result = await response.json();
               if (result.data && result.data.attributes) {
@@ -180,7 +184,11 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           const userTimestamp = new Date().getTime();
-          const userResponse = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${userTimestamp}`);
+          const userResponse = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${userTimestamp}`, {
+            headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+            }
+          });
           if (userResponse.ok) {
             const userResult = await userResponse.json();
             if (userResult.data && userResult.data.attributes) {
@@ -195,7 +203,11 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       
       // Now get products with latest prices
       const timestamp = new Date().getTime();
-      const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`);
+      const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+        }
+      });
       const data = await response.json();
       const products = data.data || [];
       
@@ -255,7 +267,11 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const filterValidProducts = async (items: WishlistItem[]) => {
     try {
       const timestamp = new Date().getTime();
-      const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`);
+      const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+        }
+      });
       const data = await response.json();
       const products = data.data || [];
       

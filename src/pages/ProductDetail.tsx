@@ -15,6 +15,7 @@ import ReviewForm from '@/components/ReviewForm';
 import ProductReviews from '@/components/ProductReviews';
 import StarRating from '@/components/StarRating';
 import { getProductReviewStats } from '@/services/reviews';
+import { ProductDetailSkeleton } from '@/components/ProductSkeleton';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -88,20 +89,16 @@ const ProductDetail = () => {
         // Add timestamp to prevent caching
         const timestamp = new Date().getTime();
         
-        // Fetch all products with pagination
-        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`);
+        // Fetch only the specific product
+        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters/${id}?timestamp=${timestamp}`, {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+          }
+        });
         const data = await response.json();
         
-        // Process products
-        let productArray = [];
-        if (data && data.data && Array.isArray(data.data)) {
-          productArray = data.data;
-        } else if (Array.isArray(data)) {
-          productArray = data;
-        }
-        
-        // Find current product
-        const foundProduct = productArray.find(p => p.id.toString() === id);
+        // Get the product data
+        const foundProduct = data.data || data;
         
         if (foundProduct) {
           // Format product data
@@ -155,10 +152,18 @@ const ProductDetail = () => {
             setGalleryImages([]);
           }
           
-          // Load categories and brands from separate endpoints
+          // Load categories and brands with limited pagination
           const [categoriesRes, brandsRes] = await Promise.all([
-            fetch(`https://api.dharaniherbbals.com/api/product-categories?pagination[limit]=-1&timestamp=${timestamp}`),
-            fetch(`https://api.dharaniherbbals.com/api/brands?pagination[limit]=-1&timestamp=${timestamp}`)
+            fetch(`https://api.dharaniherbbals.com/api/product-categories?pagination[pageSize]=100&timestamp=${timestamp}`, {
+              headers: {
+                'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+              }
+            }),
+            fetch(`https://api.dharaniherbbals.com/api/brands?pagination[pageSize]=100&timestamp=${timestamp}`, {
+              headers: {
+                'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+              }
+            })
           ]);
           
           // Process categories
@@ -191,20 +196,32 @@ const ProductDetail = () => {
             setBrands(brandNames);
           }
           
-          // Find related products (same category or brand) - only active products
+          // Fetch related products separately with filters
           const currentCategory = foundProduct.attributes?.category;
           const currentBrand = foundProduct.attributes?.brand;
           
-          const related = productArray
-            .filter(p => {
-              const attrs = p.attributes || p;
-              return p.id !== foundProduct.id && 
-                (attrs.category === currentCategory || attrs.brand === currentBrand) &&
-                (attrs.status === true || attrs.status === 'true');
-            })
-            .slice(0, 4); // Limit to 4 related products
-          
-          setRelatedProducts(related);
+          if (currentCategory || currentBrand) {
+            let relatedFilters = 'filters[status][$eq]=true';
+            if (currentCategory) {
+              relatedFilters += `&filters[category][$eq]=${encodeURIComponent(currentCategory)}`;
+            }
+            if (currentBrand) {
+              relatedFilters += `&filters[brand][$eq]=${encodeURIComponent(currentBrand)}`;
+            }
+            
+            const relatedResponse = await fetch(`https://api.dharaniherbbals.com/api/product-masters?${relatedFilters}&pagination[pageSize]=5&timestamp=${timestamp}`, {
+              headers: {
+                'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+              }
+            });
+            if (relatedResponse.ok) {
+              const relatedData = await relatedResponse.json();
+              const relatedList = Array.isArray(relatedData) ? relatedData : relatedData.data || [];
+              // Filter out current product and limit to 4
+              const related = relatedList.filter(p => p.id !== foundProduct.id).slice(0, 4);
+              setRelatedProducts(related);
+            }
+          }
           
           // Fetch review stats
           try {
@@ -219,10 +236,7 @@ const ProductDetail = () => {
       } catch (error) {
         
       } finally {
-        // Add a small delay to make loading state visible for better UX
-        setTimeout(() => {
-          setLoading(false);
-        }, 500);
+        setLoading(false);
       }
     };
 
@@ -364,10 +378,136 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <p>Loading product...</p>
+        <div className="container mx-auto px-4 py-8 md:py-16">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Sidebar Skeleton */}
+            <div className="lg:w-80 flex-shrink-0 order-last lg:order-first">
+              <div className="sticky top-24 space-y-4">
+                {/* Categories Card Skeleton */}
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-pulse">
+                  <div className="h-16 bg-gradient-to-r from-gray-300 to-gray-400"></div>
+                  <div className="p-4 space-y-2">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="flex items-center p-3 bg-gray-50 rounded-xl">
+                        <div className="w-2 h-2 bg-gray-300 rounded-full mr-3"></div>
+                        <div className="h-4 bg-gray-300 rounded flex-1"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Brands Card Skeleton */}
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden animate-pulse">
+                  <div className="h-16 bg-gradient-to-r from-blue-300 to-purple-400"></div>
+                  <div className="p-4 space-y-2">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="flex items-center p-3 bg-gray-50 rounded-xl">
+                        <div className="w-2 h-2 bg-gray-300 rounded-full mr-3"></div>
+                        <div className="h-4 bg-gray-300 rounded flex-1"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Product Image Skeleton */}
+            <div className="lg:w-1/2">
+              <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-pulse">
+                <div className="relative bg-gradient-to-br from-gray-50 to-white p-8">
+                  <div className="w-full h-[500px] bg-gray-200 rounded-2xl"></div>
+                </div>
+                
+                {/* Gallery Skeleton */}
+                <div className="mt-4 p-4 bg-gray-50 rounded-2xl">
+                  <div className="h-4 bg-gray-300 rounded w-24 mb-3"></div>
+                  <div className="flex gap-2">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="w-16 h-16 bg-gray-200 rounded-lg"></div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Description Skeleton */}
+                <div className="p-6 border-t border-gray-100">
+                  <div className="h-6 bg-gray-300 rounded w-32 mb-3"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Product Info Skeleton */}
+            <div className="lg:w-1/2">
+              <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 md:p-10 animate-pulse">
+                {/* Title and Rating Skeleton */}
+                <div className="mb-6">
+                  <div className="h-8 bg-gray-300 rounded w-full mb-2"></div>
+                  <div className="h-8 bg-gray-300 rounded w-3/4 mb-4"></div>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="h-5 w-5 bg-gray-200 rounded-full"></div>
+                    ))}
+                    <div className="h-4 bg-gray-200 rounded w-16 ml-2"></div>
+                  </div>
+                </div>
+                
+                {/* Price Skeleton */}
+                <div className="mb-8 p-6 bg-gradient-to-r from-primary/5 to-green-50 rounded-2xl">
+                  <div className="h-12 bg-gray-300 rounded w-32 mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-20"></div>
+                </div>
+                
+                {/* Quantity Skeleton */}
+                <div className="mb-8">
+                  <div className="h-4 bg-gray-300 rounded w-16 mb-3"></div>
+                  <div className="h-12 bg-gray-200 rounded-2xl w-32"></div>
+                </div>
+                
+                {/* Buttons Skeleton */}
+                <div className="mb-8">
+                  <div className="flex gap-4 mb-4">
+                    <div className="flex-1 h-12 bg-gray-300 rounded-xl"></div>
+                    <div className="flex-1 h-12 bg-gray-300 rounded-xl"></div>
+                  </div>
+                  <div className="w-full h-12 bg-gray-200 rounded-xl"></div>
+                </div>
+                
+                {/* Product Details Skeleton */}
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6">
+                  <div className="h-6 bg-gray-300 rounded w-32 mb-4"></div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="p-3 bg-white rounded-xl">
+                        <div className="h-3 bg-gray-200 rounded w-12 mb-1"></div>
+                        <div className="h-4 bg-gray-300 rounded w-20"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Loading Status */}
+          <div className="text-center py-12">
+            <div className="relative inline-block mb-4">
+              <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+              <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-green-500 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+            </div>
+            <p className="text-lg font-medium text-gray-700 mb-2">Loading Product Details...</p>
+            <p className="text-sm text-gray-500">Please wait while we fetch the product information</p>
+            <div className="flex justify-center space-x-1 mt-4">
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+          </div>
         </div>
         <Footer />
       </div>

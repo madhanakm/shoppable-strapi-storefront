@@ -61,7 +61,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           // Fetch user type from API using user ID
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`, {
+            headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+            }
+          });
           if (response.ok) {
             const result = await response.json();
             if (result.data && result.data.attributes) {
@@ -256,7 +260,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       // Update prices based on user type
       const updatedCart = await Promise.all(validCart.map(async (item) => {
         try {
-          const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[productId][$eq]=${item.id}`);
+          const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[productId][$eq]=${item.id}`, {
+            headers: {
+              'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+            }
+          });
           const data = await response.json();
           if (data.data && data.data.length > 0) {
             const productData = data.data[0].attributes;
@@ -286,7 +294,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       
       
       const timestamp = new Date().getTime();
-      const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`);
+      const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+        }
+      });
       const data = await response.json();
       const products = data.data || [];
       
@@ -347,7 +359,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     // Fetch the latest price based on user type if available
     const fetchLatestPrice = async (productId: string) => {
       try {
-        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[productId][$eq]=${productId}`);
+        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[productId][$eq]=${productId}`, {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+          }
+        });
         const data = await response.json();
         if (data.data && data.data.length > 0) {
           const productData = data.data[0].attributes;

@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
 import { getBulkProductReviewStats } from '@/services/reviews';
 import StarRating from './StarRating';
+import { LoadingWithStatus } from './ProductSkeleton';
 
 // Fallback trending products
 const fallbackProducts = [
@@ -192,8 +193,24 @@ const TrendingProducts = () => {
   if (loading) {
     return (
       <section className="py-16 bg-gradient-to-b from-background to-muted/30">
-        <div className="container mx-auto px-4 text-center">
-          <p>Loading trending products...</p>
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <TrendingUp className="w-8 h-8 text-primary" />
+              <h2 className="text-3xl font-bold">Trending Products</h2>
+            </div>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Discover what's popular right now - products that are making waves in the market
+            </p>
+          </div>
+          <LoadingWithStatus 
+            message="Loading Trending Products" 
+            stage="Analyzing trends"
+            showProgress={true}
+            progress={45}
+            showSteps={true}
+            currentStep={2}
+          />
         </div>
       </section>
     );
