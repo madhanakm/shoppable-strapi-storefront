@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ShoppingCart, Filter, Grid, List, Star, Heart, Search, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -11,11 +12,11 @@ import { formatPrice } from '@/lib/utils';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { getBulkProductReviewStats } from '@/services/reviews';
+import { getProducts } from '@/services/products';
 import StarRating from '@/components/StarRating';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPriceByUserType, getVariablePriceRange } from '@/lib/pricing';
 import { CompactLoadingStatus } from '@/components/ProductSkeleton';
-import { useLoadingProgress, LOADING_CONFIGS } from '@/hooks/use-loading-progress';
 
 const AllProducts = () => {
   const { addToCart } = useCart();
@@ -28,7 +29,6 @@ const AllProducts = () => {
   const [brands, setBrands] = useState([]);
   const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
-  const loadingProgress = useLoadingProgress(LOADING_CONFIGS.ALL_PRODUCTS, false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
@@ -37,7 +37,9 @@ const AllProducts = () => {
   const [sortBy, setSortBy] = useState('name');
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
-  const itemsPerPage = 12; // Show 12 products per page
+  const [totalProducts, setTotalProducts] = useState(0);
+
+  const itemsPerPage = 12;
   const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const { user } = useAuth();
@@ -76,8 +78,6 @@ const AllProducts = () => {
     fetchUserType();
   }, []);
 
-
-
   // Get URL parameters
   useEffect(() => {
     const categoryParam = searchParams.get('category');
@@ -90,157 +90,74 @@ const AllProducts = () => {
 
   useEffect(() => {
     loadData();
-  }, [userType]);
+  }, [userType, page, selectedCategory, selectedBrand, selectedType, searchQuery, sortBy]);
+
+  const loadCategoriesAndBrands = async () => {
+    try {
+      const response = await fetch('https://api.dharaniherbbals.com/api/product-masters?fields[0]=category&fields[1]=brand&pagination[pageSize]=1000', {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const products = data.data || [];
+        
+        const uniqueCategories = [...new Set(products.map(p => p.attributes?.category).filter(Boolean))];
+        const uniqueBrands = [...new Set(products.map(p => p.attributes?.brand).filter(Boolean))];
+        
+        setCategories(uniqueCategories);
+        setBrands(uniqueBrands);
+      }
+    } catch (error) {
+      console.error('Failed to load categories and brands:', error);
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);
-    loadingProgress.startLoading();
     
     try {
-      loadingProgress.setCurrentItem('Initializing product catalog...');
-      // Add timestamp to prevent caching
-      const timestamp = new Date().getTime();
+      const filters = {
+        category: selectedCategory,
+        brand: selectedBrand,
+        type: selectedType,
+        search: searchQuery
+      };
       
-      // Fetch all products by making multiple requests if needed
-      let allProducts = [];
-      let page = 1;
-      let hasMore = true;
+      const sortOptions = { sortBy };
       
-      loadingProgress.setManualStep(2, 20);
-      loadingProgress.setCurrentItem('Fetching product data...');
+      const productsData = await getProducts(page, itemsPerPage, filters, sortOptions);
+      const productList = Array.isArray(productsData) ? productsData : productsData.data || [];
+      setProducts(productList);
+      setTotalProducts(productsData.meta?.pagination?.total || productList.length);
       
-      while (hasMore) {
-        loadingProgress.setCurrentItem(`Loading page ${page} of products...`);
-        
-        const productsRes = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[page]=${page}&pagination[pageSize]=100&timestamp=${timestamp}`, {
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
-          }
-        });
-        
-        if (productsRes.ok) {
-          const productsData = await productsRes.json();
-          const productList = Array.isArray(productsData) ? productsData : productsData.data || [];
-          
-          if (productList.length === 0) {
-            hasMore = false;
-          } else {
-            allProducts = [...allProducts, ...productList];
-            loadingProgress.addLog(`Loaded page ${page} with ${productList.length} products`);
-            page++;
-            // Safety check to prevent infinite loop
-            if (page > 50) {
-              hasMore = false;
-              loadingProgress.addWarning('Reached maximum page limit (50)');
-            }
-          }
-        } else {
-          loadingProgress.addError(`Failed to fetch page ${page}: ${productsRes.status}`);
-          hasMore = false;
-        }
-      }
-      
-      loadingProgress.setTotalItems(allProducts.length);
-      loadingProgress.setManualStep(3, 60);
-      loadingProgress.setCurrentItem('Processing product information...');
-      loadingProgress.addLog(`Total products loaded: ${allProducts.length}`);
-      setProducts(allProducts);
-      
-      // Load categories and brands
-      loadingProgress.setCurrentItem('Loading categories and brands...');
-      const [categoriesRes, brandsRes] = await Promise.all([
-        fetch(`https://api.dharaniherbbals.com/api/product-categories?pagination[pageSize]=1000&timestamp=${timestamp}`, {
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
-          }
-        }),
-        fetch(`https://api.dharaniherbbals.com/api/brands?pagination[pageSize]=1000&timestamp=${timestamp}`, {
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
-          }
-        })
-      ]);
-
-      // Fetch review stats for all products
-      loadingProgress.setManualStep(4, 80);
-      loadingProgress.setCurrentItem('Loading product reviews...');
-      const productIds = allProducts.map(p => p.id).filter(id => id && !isNaN(parseInt(id)));
+      // Load reviews for current page products only
+      const productIds = productList.map(p => p.id).filter(id => id && !isNaN(parseInt(id)));
       if (productIds.length > 0) {
         try {
           const stats = await getBulkProductReviewStats(productIds.map(id => parseInt(id)));
           setReviewStats(stats);
-          loadingProgress.addLog(`Loaded reviews for ${Object.keys(stats).length} products`);
         } catch (reviewError) {
-          loadingProgress.addWarning('Failed to load product reviews');
+          console.warn('Failed to load product reviews');
         }
       }
-
-      // Process categories
-      if (categoriesRes.ok) {
-        const categoriesData = await categoriesRes.json();
-        let categoryNames = [];
-        if (Array.isArray(categoriesData)) {
-          categoryNames = categoriesData.map(cat => cat.name || cat.Name || cat.title || cat).filter(Boolean);
-        } else if (categoriesData.data) {
-          categoryNames = categoriesData.data.map(cat => {
-            const attrs = cat.attributes || cat;
-            return attrs.name || attrs.Name || attrs.title;
-          }).filter(Boolean);
-        }
-        setCategories(categoryNames.length > 0 ? categoryNames : ['Hair Care', 'Skin Care', 'Herbal', 'Ayurvedic']);
-      }
-
-      // Process brands
-      if (brandsRes.ok) {
-        const brandsData = await brandsRes.json();
-        let brandNames = [];
-        if (Array.isArray(brandsData)) {
-          brandNames = brandsData.map(brand => brand.name || brand.Name || brand.title || brand).filter(Boolean);
-        } else if (brandsData.data) {
-          brandNames = brandsData.data.map(brand => {
-            const attrs = brand.attributes || brand;
-            return attrs.name || attrs.Name || attrs.title;
-          }).filter(Boolean);
-        }
-        setBrands(brandNames.length > 0 ? brandNames : ['Dharani', 'Ayush', 'Patanjali', 'Himalaya']);
+      
+      // Load categories and brands only once
+      if (page === 1 && (categories.length === 0 || brands.length === 0)) {
+        await loadCategoriesAndBrands();
       }
     } catch (error) {
-      loadingProgress.addError(`Failed to load data: ${error.message}`);
+      console.error('Failed to load data:', error);
     } finally {
-      loadingProgress.stopLoading();
       setLoading(false);
     }
   };
 
-  // Filter and sort products
-  const filteredProducts = products.filter(product => {
-    const attrs = product.attributes || product;
-    const status = attrs.status === true || attrs.status === 'true';
-    const matchesCategory = selectedCategory === 'all' || attrs.category === selectedCategory;
-    const matchesBrand = selectedBrand === 'all' || attrs.brand === selectedBrand;
-    const matchesType = selectedType === 'all' || attrs.type?.toLowerCase() === selectedType.toLowerCase();
-    const matchesSearch = !searchQuery || (attrs.Name || attrs.name || '').toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return status && matchesCategory && matchesBrand && matchesType && matchesSearch;
-  }).sort((a, b) => {
-    const aAttrs = a.attributes || a;
-    const bAttrs = b.attributes || b;
-    
-    switch (sortBy) {
-      case 'price-low':
-        return (parseFloat(aAttrs.mrp) || 0) - (parseFloat(bAttrs.mrp) || 0);
-      case 'price-high':
-        return (parseFloat(bAttrs.mrp) || 0) - (parseFloat(aAttrs.mrp) || 0);
-      case 'name':
-      default:
-        return (aAttrs.Name || aAttrs.name || '').localeCompare(bAttrs.Name || bAttrs.name || '');
-    }
-  });
-
-  // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const startIndex = (page - 1) * itemsPerPage;
-  const displayedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+  // Products come pre-filtered and sorted from API - no client-side processing needed
+  const displayedProducts = products;
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   const handleWishlistToggle = (product) => {
     const attrs = product.attributes || product;
@@ -266,14 +183,12 @@ const AllProducts = () => {
     setSelectedType('all');
     setSearchQuery('');
     setPage(1);
-    // Clear URL search params
     window.history.replaceState({}, '', '/products');
   };
 
   const clearSearch = () => {
     setSearchQuery('');
     setPage(1);
-    // Clear URL search params
     window.history.replaceState({}, '', '/products');
   };
 
@@ -281,102 +196,12 @@ const AllProducts = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
         <Header />
-        <div className="container mx-auto px-4 py-8 md:py-16">
-          {/* Page Header Skeleton */}
-          <div className="text-center mb-12">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gray-300 rounded w-64 mx-auto"></div>
-              <div className="h-4 bg-gray-200 rounded w-96 mx-auto"></div>
-            </div>
-          </div>
-
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar Skeleton */}
-            <div className="lg:w-80 flex-shrink-0">
-              <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 sticky top-24 overflow-hidden">
-                <div className="animate-pulse">
-                  <div className="h-16 bg-gradient-to-r from-gray-300 to-gray-400"></div>
-                  <div className="p-6 space-y-6">
-                    {/* Categories Skeleton */}
-                    <div>
-                      <div className="h-6 bg-gray-300 rounded w-24 mb-4"></div>
-                      <div className="space-y-3">
-                        {[...Array(5)].map((_, i) => (
-                          <div key={i} className="flex items-center">
-                            <div className="w-4 h-4 bg-gray-200 rounded-full mr-3"></div>
-                            <div className="h-4 bg-gray-200 rounded flex-1"></div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    {/* Brands Skeleton */}
-                    <div>
-                      <div className="h-6 bg-gray-300 rounded w-20 mb-4"></div>
-                      <div className="space-y-3">
-                        {[...Array(4)].map((_, i) => (
-                          <div key={i} className="flex items-center">
-                            <div className="w-4 h-4 bg-gray-200 rounded-full mr-3"></div>
-                            <div className="h-4 bg-gray-200 rounded flex-1"></div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Products Section Skeleton */}
-            <div className="flex-1">
-              {/* Toolbar Skeleton */}
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                <div className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-48"></div>
-                </div>
-                <div className="flex items-center gap-4 animate-pulse">
-                  <div className="h-10 bg-gray-200 rounded-lg w-32"></div>
-                  <div className="h-10 bg-gray-200 rounded-lg w-20"></div>
-                </div>
-              </div>
-
-              {/* Simple Loading Status */}
-              <div className="flex justify-center py-8">
-                <CompactLoadingStatus 
-                  message="Loading products..." 
-                  showProgress={false}
-                  size="lg"
-                />
-              </div>
-
-              {/* Products Grid Skeleton */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(12)].map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
-                      <div className="relative">
-                        <div className="w-full h-64 bg-gray-200"></div>
-                        <div className="absolute top-3 right-3 w-12 h-6 bg-gray-300 rounded-2xl"></div>
-                      </div>
-                      <div className="p-6">
-                        <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
-                        <div className="flex items-center mb-3">
-                          {[...Array(5)].map((_, j) => (
-                            <div key={j} className="w-4 h-4 bg-gray-200 rounded-full mr-1"></div>
-                          ))}
-                        </div>
-                        <div className="h-6 bg-gray-200 rounded w-20 mb-3"></div>
-                        <div className="space-y-2">
-                          <div className="h-8 bg-gray-200 rounded-xl"></div>
-                          <div className="h-8 bg-gray-200 rounded-xl"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        <div className="flex justify-center py-16">
+          <CompactLoadingStatus 
+            message="Loading products..." 
+            showProgress={false}
+            size="lg"
+          />
         </div>
         <Footer />
       </div>
@@ -393,7 +218,7 @@ const AllProducts = () => {
             {searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
           </h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            {searchQuery ? `Found ${filteredProducts.length} products matching your search` : 'Discover our complete range of natural and herbal products for your wellness journey'}
+            {searchQuery ? `Found ${totalProducts} products matching your search` : 'Discover our complete range of natural and herbal products for your wellness journey'}
           </p>
           {searchQuery && (
             <Button 
@@ -458,31 +283,25 @@ const AllProducts = () => {
                       <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
                         selectedCategory === 'all' ? 'text-primary font-semibold' : 'text-gray-700'
                       }`}>
-                        All Categories <span className="text-xs text-gray-500">({products.filter(p => (p.attributes || p).status === true || (p.attributes || p).status === 'true').length})</span>
+                        All Categories
                       </span>
                     </label>
-                    {categories.map((category, index) => {
-                      const count = products.filter(p => {
-                        const attrs = p.attributes || p;
-                        return attrs.category === category && (attrs.status === true || attrs.status === 'true');
-                      }).length;
-                      return (
-                        <label key={index} className="flex items-center cursor-pointer group">
-                          <input
-                            type="radio"
-                            name="category"
-                            checked={selectedCategory === category}
-                            onChange={() => { setSelectedCategory(category); setPage(1); }}
-                            className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
-                          />
-                          <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
-                            selectedCategory === category ? 'text-primary font-semibold' : 'text-gray-700'
-                          }`}>
-                            {category} <span className="text-xs text-gray-500">({count})</span>
-                          </span>
-                        </label>
-                      );
-                    })}
+                    {categories.map((category, index) => (
+                      <label key={index} className="flex items-center cursor-pointer group">
+                        <input
+                          type="radio"
+                          name="category"
+                          checked={selectedCategory === category}
+                          onChange={() => { setSelectedCategory(category); setPage(1); }}
+                          className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
+                        />
+                        <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
+                          selectedCategory === category ? 'text-primary font-semibold' : 'text-gray-700'
+                        }`}>
+                          {category}
+                        </span>
+                      </label>
+                    ))}
                   </div>
                 </div>
 
@@ -504,71 +323,57 @@ const AllProducts = () => {
                         All Brands
                       </span>
                     </label>
-                    {brands.map((brand, index) => {
-                      const count = products.filter(p => {
-                        const attrs = p.attributes || p;
-                        return attrs.brand === brand && (attrs.status === true || attrs.status === 'true');
-                      }).length;
-                      return (
-                        <label key={index} className="flex items-center cursor-pointer group">
-                          <input
-                            type="radio"
-                            name="brand"
-                            checked={selectedBrand === brand}
-                            onChange={() => { setSelectedBrand(brand); setPage(1); }}
-                            className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
-                          />
-                          <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
-                            selectedBrand === brand ? 'text-primary font-semibold' : 'text-gray-700'
-                          }`}>
-                            {brand} <span className="text-xs text-gray-500">({count})</span>
-                          </span>
-                        </label>
-                      );
-                    })}
+                    {brands.map((brand, index) => (
+                      <label key={index} className="flex items-center cursor-pointer group">
+                        <input
+                          type="radio"
+                          name="brand"
+                          checked={selectedBrand === brand}
+                          onChange={() => { setSelectedBrand(brand); setPage(1); }}
+                          className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
+                        />
+                        <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
+                          selectedBrand === brand ? 'text-primary font-semibold' : 'text-gray-700'
+                        }`}>
+                          {brand}
+                        </span>
+                      </label>
+                    ))}
                   </div>
                 </div>
+
+
 
                 {/* Product Types */}
                 <div>
                   <h3 className="font-bold text-lg mb-4 text-gray-800 border-b border-gray-200 pb-2">Product Types</h3>
                   <div className="space-y-3">
-                    {['all', 'deals', 'trending', 'hot', 'popular'].map((type) => {
-                      const count = type === 'all' ? 
-                        products.filter(p => (p.attributes || p).status === true || (p.attributes || p).status === 'true').length :
-                        products.filter(p => {
-                          const attrs = p.attributes || p;
-                          return (attrs.type?.toLowerCase() === type.toLowerCase()) && 
-                                 (attrs.status === true || attrs.status === 'true');
-                        }).length;
-                      return (
-                        <label key={type} className="flex items-center cursor-pointer group">
-                          <input
-                            type="radio"
-                            name="type"
-                            checked={selectedType === type}
-                            onChange={() => { setSelectedType(type); setPage(1); }}
-                            className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
-                          />
-                          <span className={`ml-3 text-sm font-medium capitalize group-hover:text-primary transition-colors ${
-                            selectedType === type ? 'text-primary font-semibold' : 'text-gray-700'
-                          }`}>
-                            {type === 'all' ? 'All Types' : type}
-                            {type !== 'all' && (
-                              <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                                type === 'deals' ? 'bg-purple-100 text-purple-600' :
-                                type === 'trending' ? 'bg-blue-100 text-blue-600' :
-                                type === 'hot' ? 'bg-red-100 text-red-600' :
-                                type === 'popular' ? 'bg-green-100 text-green-600' : ''
-                              }`}>
-                                {type.charAt(0).toUpperCase() + type.slice(1)}
-                              </span>
-                            )}
-                            <span className="text-xs text-gray-500 ml-1">({count})</span>
-                          </span>
-                        </label>
-                      );
-                    })}
+                    {['all', 'deals', 'trending', 'hot', 'popular'].map((type) => (
+                      <label key={type} className="flex items-center cursor-pointer group">
+                        <input
+                          type="radio"
+                          name="type"
+                          checked={selectedType === type}
+                          onChange={() => { setSelectedType(type); setPage(1); }}
+                          className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
+                        />
+                        <span className={`ml-3 text-sm font-medium capitalize group-hover:text-primary transition-colors ${
+                          selectedType === type ? 'text-primary font-semibold' : 'text-gray-700'
+                        }`}>
+                          {type === 'all' ? 'All Types' : type}
+                          {type !== 'all' && (
+                            <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
+                              type === 'deals' ? 'bg-purple-100 text-purple-600' :
+                              type === 'trending' ? 'bg-blue-100 text-blue-600' :
+                              type === 'hot' ? 'bg-red-100 text-red-600' :
+                              type === 'popular' ? 'bg-green-100 text-green-600' : ''
+                            }`}>
+                              {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </span>
+                          )}
+                        </span>
+                      </label>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -580,7 +385,7 @@ const AllProducts = () => {
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
               <div className="text-gray-600">
-                Showing {displayedProducts.length} of {filteredProducts.length} products
+                Showing {displayedProducts.length} of {totalProducts} products
               </div>
               
               <div className="flex items-center gap-4">
@@ -614,7 +419,7 @@ const AllProducts = () => {
             </div>
 
             {/* Products Grid/List */}
-            {filteredProducts.length === 0 ? (
+            {totalProducts === 0 ? (
               <div className="text-center py-16">
                 <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">No products found</h3>
@@ -689,9 +494,6 @@ const AllProducts = () => {
                           <span className="text-lg font-bold text-primary">
                             {(() => {
                               const currentUserType = userType || 'customer';
-                              
-                              // Product attrs has properties like:
-                              // customerprice, resellerprice, retailprice, distributiorprice, sarvoprice, drug
                               
                               if (attrs.isVariableProduct && attrs.variations) {
                                 try {

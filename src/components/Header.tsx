@@ -7,10 +7,11 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
+import { useSearch } from '@/hooks/use-search';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const { searchQuery, setSearchQuery, handleSearch, clearSearch } = useSearch();
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
   const { user, logout, isAuthenticated } = useAuth();
@@ -23,11 +24,11 @@ const Header = () => {
     navigate('/login');
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const onSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery('');
+      handleSearch(searchQuery);
+      clearSearch();
       setIsMenuOpen(false);
     }
   };
@@ -55,7 +56,7 @@ const Header = () => {
             <div className="flex items-center space-x-4">
               {/* Search Bar in Top Header */}
               <div className="flex flex-1 max-w-xs mx-4">
-                <form onSubmit={handleSearch} className="relative w-full">
+                <form onSubmit={onSearchSubmit} className="relative w-full">
                   <Input
                     type="text"
                     placeholder="Search products..."
@@ -69,7 +70,7 @@ const Header = () => {
                       type="button"
                       size="sm"
                       variant="ghost"
-                      onClick={() => setSearchQuery('')}
+                      onClick={clearSearch}
                       className="absolute right-8 top-1/2 transform -translate-y-1/2 h-6 px-1 rounded-full hover:bg-gray-100 text-gray-600"
                     >
                       <X className="w-3 h-3" />
@@ -219,7 +220,7 @@ const Header = () => {
 
           {/* Mobile Search */}
           <div className="md:hidden pb-4">
-            <form onSubmit={handleSearch} className="relative">
+            <form onSubmit={onSearchSubmit} className="relative">
               <Input
                 type="text"
                 placeholder="Search products..."
@@ -233,7 +234,7 @@ const Header = () => {
                   type="button"
                   size="sm"
                   variant="ghost"
-                  onClick={() => setSearchQuery('')}
+                  onClick={clearSearch}
                   className="absolute right-10 top-1/2 transform -translate-y-1/2 h-7 px-1 rounded-full hover:bg-gray-200"
                 >
                   <X className="w-3 h-3" />
