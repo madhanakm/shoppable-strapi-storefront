@@ -110,7 +110,9 @@ const Wishlist = () => {
                   <p className="text-sm text-gray-500 mb-3">{item.category}</p>
                   
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-2xl font-bold text-primary">{formatPrice(item.price)}</span>
+                    <span className="text-2xl font-bold text-primary">
+                      {item.priceRange ? `₹${item.priceRange}` : item.price > 0 ? formatPrice(item.price) : 'View Product'}
+                    </span>
                   </div>
                   
                   <div className="flex gap-2">

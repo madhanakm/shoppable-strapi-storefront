@@ -16,12 +16,13 @@ async function fetchAPI<T>(
   endpoint: string, 
   options: RequestInit = {}
 ): Promise<T> {
-  const token = getToken();
+  const apiToken = import.meta.env.VITE_STRAPI_API_TOKEN;
+  const jwtToken = getToken();
   
   const defaultOptions: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(apiToken ? { Authorization: `Bearer ${apiToken}` } : jwtToken ? { Authorization: `Bearer ${jwtToken}` } : {}),
       ...(options.headers || {})
     }
   };

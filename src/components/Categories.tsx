@@ -45,41 +45,14 @@ const Categories = () => {
           }));
         }
         
-        // Now fetch products to get accurate counts with timestamp to prevent caching
-        const timestamp = new Date().getTime();
-        fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`)
-          .then(response => response.json())
-          .then(productData => {
-            let productArray = [];
-            if (productData && productData.data && Array.isArray(productData.data)) {
-              productArray = productData.data;
-            } else if (Array.isArray(productData)) {
-              productArray = productData;
-            }
-            
-            // Update categories with accurate product counts
-            const categoriesWithCounts = formattedCategories.map(category => {
-              const productsInCategory = productArray.filter(p => {
-                const attrs = p.attributes || p;
-                return attrs.category === category.name && (attrs.status === true || attrs.status === 'true');
-              });
-              
-              const count = productsInCategory.length;
-              
-              return {
-                ...category,
-                count: count === 1 ? '1 item' : `${count} items`
-              };
-            });
-            
-            setCategories(categoriesWithCounts);
-            setLoading(false);
-          })
-          .catch(error => {
-            // Handle product fetch error
-            setCategories(formattedCategories);
-            setLoading(false);
-          });
+        // Show categories without counts for faster loading
+        const categoriesWithGenericCounts = formattedCategories.map(category => ({
+          ...category,
+          count: 'View products'
+        }));
+        
+        setCategories(categoriesWithGenericCounts);
+        setLoading(false);
       })
       .catch(error => {
         // Handle category fetch error

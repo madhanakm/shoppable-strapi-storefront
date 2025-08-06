@@ -12,6 +12,7 @@ interface WishlistItem {
   image: string;
   category: string;
   tamil?: string;
+  priceRange?: string;
 }
 
 interface WishlistContextType {
@@ -225,9 +226,23 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
         if (product) {
           const attrs = product.attributes;
           
-          const newPrice = getPriceByUserType(attrs, latestUserType);
+          let price = getPriceByUserType(attrs, latestUserType);
+          let priceRange = null;
           
-          return { ...item, price: newPrice };
+          if (attrs.isVariableProduct && attrs.variations) {
+            try {
+              const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+              const prices = variations.map(variation => getPriceByUserType(variation, latestUserType));
+              if (prices.length > 0) {
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                price = minPrice;
+                priceRange = minPrice === maxPrice ? null : `${minPrice} - ${maxPrice}`;
+              }
+            } catch (e) {}
+          }
+          
+          return { ...item, price, priceRange };
         }
         return item;
       });

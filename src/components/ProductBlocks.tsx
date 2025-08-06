@@ -291,7 +291,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         setLoading(true);
         // Add timestamp to prevent caching
         const timestamp = new Date().getTime();
-        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`);
+        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[type][$eq]=${type}&filters[status][$eq]=true&pagination[pageSize]=8&timestamp=${timestamp}`);
         
         if (!response.ok) {
           throw new Error(`API responded with status: ${response.status}`);
@@ -306,13 +306,8 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
           productList = data.data;
         }
         
-        const filteredProducts = productList.filter(item => {
-          const attributes = item.attributes || item;
-          const status = attributes.status === true || attributes.status === 'true';
-          const hasType = attributes.type?.toLowerCase() === type.toLowerCase();
-          
-          return hasType && status;
-        });
+        // Products are already filtered by API, no need to filter again
+        const filteredProducts = productList;
         
         const formattedProducts = filteredProducts.map(item => {
           const attributes = item.attributes || item;

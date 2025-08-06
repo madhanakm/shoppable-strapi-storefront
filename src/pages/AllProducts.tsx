@@ -69,6 +69,8 @@ const AllProducts = () => {
     fetchUserType();
   }, []);
 
+
+
   // Get URL parameters
   useEffect(() => {
     const categoryParam = searchParams.get('category');
@@ -89,28 +91,47 @@ const AllProducts = () => {
       // Add timestamp to prevent caching
       const timestamp = new Date().getTime();
       
-      // Load products, categories, and brands in parallel
-      const [productsRes, categoriesRes, brandsRes] = await Promise.all([
-        fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[limit]=-1&timestamp=${timestamp}`),
-        fetch(`https://api.dharaniherbbals.com/api/product-categories?pagination[limit]=-1&timestamp=${timestamp}`),
-        fetch(`https://api.dharaniherbbals.com/api/brands?pagination[limit]=-1&timestamp=${timestamp}`)
+      // Fetch all products by making multiple requests if needed
+      let allProducts = [];
+      let page = 1;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const productsRes = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[page]=${page}&pagination[pageSize]=100&timestamp=${timestamp}`);
+        if (productsRes.ok) {
+          const productsData = await productsRes.json();
+          const productList = Array.isArray(productsData) ? productsData : productsData.data || [];
+          
+          if (productList.length === 0) {
+            hasMore = false;
+          } else {
+            allProducts = [...allProducts, ...productList];
+            page++;
+            // Safety check to prevent infinite loop
+            if (page > 50) hasMore = false;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      console.log('Total products loaded:', allProducts.length);
+      setProducts(allProducts);
+      
+      // Load categories and brands
+      const [categoriesRes, brandsRes] = await Promise.all([
+        fetch(`https://api.dharaniherbbals.com/api/product-categories?pagination[pageSize]=1000&timestamp=${timestamp}`),
+        fetch(`https://api.dharaniherbbals.com/api/brands?pagination[pageSize]=1000&timestamp=${timestamp}`)
       ]);
 
-      // Process products
-      if (productsRes.ok) {
-        const productsData = await productsRes.json();
-        const productList = Array.isArray(productsData) ? productsData : productsData.data || [];
-        setProducts(productList);
-        
-        // Fetch review stats for all products
-        const productIds = productList.map(p => p.id).filter(id => id && !isNaN(parseInt(id)));
-        if (productIds.length > 0) {
-          try {
-            const stats = await getBulkProductReviewStats(productIds.map(id => parseInt(id)));
-            setReviewStats(stats);
-          } catch (reviewError) {
-            
-          }
+      // Fetch review stats for all products
+      const productIds = allProducts.map(p => p.id).filter(id => id && !isNaN(parseInt(id)));
+      if (productIds.length > 0) {
+        try {
+          const stats = await getBulkProductReviewStats(productIds.map(id => parseInt(id)));
+          setReviewStats(stats);
+        } catch (reviewError) {
+          
         }
       }
 
@@ -677,9 +698,17 @@ const AllProducts = () => {
                   </Button>
                   
                   <div className="flex items-center space-x-1">
-                    {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                      const pageNum = i + 1;
-                      return (
+                    {(() => {
+                      const maxVisible = 10;
+                      const startPage = Math.max(1, page - Math.floor(maxVisible / 2));
+                      const endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                      const pages = [];
+                      
+                      for (let i = startPage; i <= endPage; i++) {
+                        pages.push(i);
+                      }
+                      
+                      return pages.map((pageNum) => (
                         <Button
                           key={pageNum}
                           variant={page === pageNum ? "default" : "outline"}
@@ -688,8 +717,9 @@ const AllProducts = () => {
                         >
                           {pageNum}
                         </Button>
-                      );
-                    })}
+                      ));
+                    })()
+                    }
                   </div>
                   
                   <Button 
