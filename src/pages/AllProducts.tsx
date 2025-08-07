@@ -209,9 +209,9 @@ const AllProducts = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-x-hidden">
       <Header />
-      <main className="container mx-auto px-4 py-8 md:py-16">
+      <main className="container mx-auto px-4 py-8 md:py-16 max-w-full">
         {/* Page Header */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent mb-4">
@@ -232,7 +232,7 @@ const AllProducts = () => {
           )}
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Mobile Filter Toggle */}
           <div className="lg:hidden">
             <Button
@@ -246,7 +246,7 @@ const AllProducts = () => {
           </div>
 
           {/* Sidebar Filters */}
-          <div className={`lg:w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
+          <div className={`w-full lg:w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
             <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 sticky top-24 overflow-hidden">
               {/* Header */}
               <div className="bg-gradient-to-r from-primary to-green-600 p-6 text-white">
@@ -429,7 +429,7 @@ const AllProducts = () => {
                 </Button>
               </div>
             ) : (
-              <div className={`grid gap-6 ${
+              <div className={`grid gap-4 lg:gap-6 w-full ${
                 viewMode === 'grid' 
                   ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
                   : 'grid-cols-1'
@@ -438,7 +438,7 @@ const AllProducts = () => {
                   // Force re-render with priceKey
                   const attrs = product.attributes || product;
                   return (
-                    <Card key={`${product.id}-${priceKey}`} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-lg hover:-translate-y-2">
+                    <Card key={`${product.id}-${priceKey}`} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-lg hover:-translate-y-2 w-full max-w-full">
                       <div className="relative overflow-hidden">
                         <Link to={`/product/${product.id}`} className="block cursor-pointer">
                           <img 
