@@ -311,6 +311,9 @@ const ProductDetail = () => {
   
   const handleBuyNow = () => {
     if (product) {
+      // Clear any existing quick checkout data first
+      setQuickCheckoutItem(null);
+      
       let skuid, productId;
       
       if (product.isVariableProduct && selectedVariation) {
@@ -338,8 +341,11 @@ const ProductDetail = () => {
         checkoutItem.name = `${checkoutItem.name} - ${variationName}`;
       }
       
-      setQuickCheckoutItem(checkoutItem);
-      navigate('/checkout');
+      // Set the new quick checkout item
+      setTimeout(() => {
+        setQuickCheckoutItem(checkoutItem);
+        navigate('/checkout');
+      }, 10);
     }
   };
 

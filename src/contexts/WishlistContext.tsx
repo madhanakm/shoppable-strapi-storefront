@@ -27,14 +27,9 @@ interface WishlistProviderProps {
 
 export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) => {
   const wishlistHook = useWishlist();
-  const [contextValue, setContextValue] = useState(wishlistHook);
-
-  useEffect(() => {
-    setContextValue(wishlistHook);
-  }, [wishlistHook.wishlistSkuIds, wishlistHook.wishlistCount, wishlistHook.loading]);
 
   return (
-    <WishlistContext.Provider value={contextValue}>
+    <WishlistContext.Provider value={wishlistHook}>
       {children}
     </WishlistContext.Provider>
   );

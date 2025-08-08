@@ -25,15 +25,8 @@ const Checkout = () => {
   const { quickCheckoutItem, clearQuickCheckout } = useQuickCheckout();
   const { user, isAuthenticated, loading } = useAuth();
   
-  // Clear quick checkout if coming from regular cart with items
-  useEffect(() => {
-    if (regularCartItems.length > 0 && quickCheckoutItem) {
-      clearQuickCheckout();
-    }
-  }, [regularCartItems.length, quickCheckoutItem, clearQuickCheckout]);
-  
-  // Determine checkout mode - only use quick checkout if no regular cart items
-  const isQuickCheckout = !!quickCheckoutItem && regularCartItems.length === 0;
+  // Determine checkout mode - prioritize quick checkout when it exists
+  const isQuickCheckout = !!quickCheckoutItem;
   
   // Always process regular cart items through useCartProducts
   const { products: processedCartItems, loading: cartLoading, cartTotal: processedCartTotal } = useCartProducts(regularCartItems);
