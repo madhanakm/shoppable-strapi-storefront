@@ -27,8 +27,7 @@ const Header = () => {
   const onSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      handleSearch(searchQuery);
-      clearSearch();
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
       setIsMenuOpen(false);
     }
   };

@@ -96,16 +96,10 @@ const AllProducts = () => {
   }, [selectedCategory, selectedBrand, selectedType, searchQuery, sortBy]);
   
   useEffect(() => {
-    if (userType !== 'customer' && userType !== null) {
+    if (userType !== null) {
       loadData();
     }
-  }, [userType, page]);
-  
-  useEffect(() => {
-    if (userType === 'customer') {
-      loadData();
-    }
-  }, [userType, page]);
+  }, [userType, page, selectedCategory, selectedBrand, selectedType, searchQuery, sortBy]);
 
   useEffect(() => {
     loadCategoriesAndBrands();

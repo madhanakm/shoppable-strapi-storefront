@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useCart } from '@/contexts/CartContext';
+import { useCartProducts } from '@/hooks/useCartProducts';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { useToast } from '@/hooks/use-toast';
@@ -20,16 +21,28 @@ import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const Checkout = () => {
-  const { cartItems: regularCartItems, cartTotal: regularCartTotal, clearCart } = useCart();
+  const { cartItems: regularCartItems, clearCart } = useCart();
   const { quickCheckoutItem, clearQuickCheckout } = useQuickCheckout();
   const { user, isAuthenticated, loading } = useAuth();
   
-  // Determine if we're in quick checkout mode or regular cart checkout
-  const isQuickCheckout = !!quickCheckoutItem;
-  const cartItems = isQuickCheckout ? [quickCheckoutItem] : regularCartItems;
+  // Clear quick checkout if coming from regular cart with items
+  useEffect(() => {
+    if (regularCartItems.length > 0 && quickCheckoutItem) {
+      clearQuickCheckout();
+    }
+  }, [regularCartItems.length, quickCheckoutItem, clearQuickCheckout]);
+  
+  // Determine checkout mode - only use quick checkout if no regular cart items
+  const isQuickCheckout = !!quickCheckoutItem && regularCartItems.length === 0;
+  
+  // Always process regular cart items through useCartProducts
+  const { products: processedCartItems, loading: cartLoading, cartTotal: processedCartTotal } = useCartProducts(regularCartItems);
+  
+  // Use appropriate cart data based on checkout type
+  const cartItems = isQuickCheckout ? [quickCheckoutItem] : processedCartItems;
   const cartTotal = isQuickCheckout 
     ? quickCheckoutItem.price * quickCheckoutItem.quantity 
-    : regularCartTotal;
+    : processedCartTotal;
   const { toast } = useToast();
   const navigate = useNavigate();
   const { language } = useTranslation();
@@ -241,7 +254,7 @@ const Checkout = () => {
             billingAddress: shippingAddr,
             Name: cartItems.map(item => item.name).join(' | '),
             price: cartItems.map(item => `${item.name}: ${formatPrice(item.price)} x ${item.quantity}`).join(' | '),
-            skuid: cartItems.map(item => item.skuid || item.id).join(' | '),
+            skuid: cartItems.map(item => item.originalSkuid || item.skuid || item.id).join(' | '),
             remarks: formData.notes || 'No special notes',
             quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0))
           }
@@ -339,10 +352,20 @@ const Checkout = () => {
     return null;
   }
   
+  if (!isQuickCheckout && cartLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
   if (cartItems.length === 0) {
     navigate('/cart');
     return null;
   }
+  
+
 
   // Calculate shipping charges based on state
   const getShippingCharges = () => {

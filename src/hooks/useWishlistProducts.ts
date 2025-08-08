@@ -31,24 +31,74 @@ export const useWishlistProducts = (skuIds: string[]) => {
 
       const productPromises = skuIds.map(async (originalSkuid) => {
         try {
-          const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[skuid][$eq]=${originalSkuid}`, {
+          // First try exact SKU match
+          let response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[skuid][$eq]=${originalSkuid}`, {
             headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
           });
+          
+          let product = null;
+          let selectedVariation = null;
           
           if (response.ok) {
             const data = await response.json();
             if (data.data && data.data.length > 0) {
-              const product = data.data[0];
-              const attrs = product.attributes;
+              product = data.data[0];
+            }
+          }
+          
+          // If not found by exact SKU, search all products and check variations
+          if (!product) {
+            response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[status][$eq]=true&pagination[pageSize]=100`, {
+              headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              const products = data.data || [];
               
-              if (attrs.status === false) return null;
-              
-              let price = getPriceByUserType(attrs, userType);
-              let priceRange = null;
-              
-              if (attrs.isVariableProduct && attrs.variations) {
-                try {
-                  const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+              // Find product with matching variation SKU
+              for (const prod of products) {
+                const attrs = prod.attributes;
+                if (attrs.isVariableProduct && attrs.variations) {
+                  try {
+                    const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+                    if (variations.some(v => v.skuid === originalSkuid)) {
+                      product = prod;
+                      break;
+                    }
+                  } catch (e) {}
+                }
+              }
+            }
+          }
+          
+          if (product) {
+            const attrs = product.attributes;
+            
+            if (attrs.status === false) return null;
+            
+            let price = getPriceByUserType(attrs, userType);
+            let productName = attrs.Name || attrs.name;
+            let productImage = attrs.photo || attrs.image;
+            let priceRange = null;
+            
+            // Handle variable products
+            if (attrs.isVariableProduct && attrs.variations) {
+              try {
+                const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+                
+                // Find specific variation by SKU
+                selectedVariation = variations.find(v => v.skuid === originalSkuid);
+                
+                if (selectedVariation) {
+                  price = getPriceByUserType(selectedVariation, userType);
+                  const variationName = selectedVariation.value || selectedVariation.attributeValue || Object.values(selectedVariation)[0];
+                  productName = `${productName} - ${variationName}`;
+                  if (selectedVariation.image) {
+                    productImage = selectedVariation.image;
+                  }
+                } else {
+                  // Show price range for variable products
                   const prices = variations.map(v => getPriceByUserType(v, userType));
                   if (prices.length > 0) {
                     const minPrice = Math.min(...prices);
@@ -56,28 +106,35 @@ export const useWishlistProducts = (skuIds: string[]) => {
                     price = minPrice;
                     priceRange = minPrice === maxPrice ? null : `${minPrice} - ${maxPrice}`;
                   }
-                } catch (e) {}
+                }
+              } catch (e) {
+                console.error('Error parsing variations:', e);
               }
-              
-              return {
-                id: product.id,
-                skuid: attrs.skuid,
-                originalSkuid: originalSkuid,
-                name: attrs.Name || attrs.name,
-                price,
-                priceRange,
-                image: attrs.photo || attrs.image,
-                category: attrs.category,
-                tamil: attrs.tamil
-              };
             }
+            
+            return {
+              id: product.id,
+              skuid: attrs.skuid || product.id,
+              originalSkuid: originalSkuid,
+              name: productName,
+              price,
+              priceRange,
+              image: productImage,
+              category: attrs.category,
+              tamil: attrs.tamil,
+              variation: selectedVariation
+            };
           }
-        } catch (e) {}
+        } catch (e) {
+          console.error('Error fetching wishlist product:', e);
+        }
         return null;
       });
 
       const results = await Promise.all(productPromises);
-      setProducts(results.filter(Boolean));
+      const validProducts = results.filter(Boolean);
+      console.log('Wishlist products fetched:', validProducts.length, validProducts);
+      setProducts(validProducts);
     } catch (error) {
       console.error('Error fetching wishlist products:', error);
     } finally {
