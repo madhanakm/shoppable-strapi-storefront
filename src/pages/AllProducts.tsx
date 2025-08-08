@@ -92,24 +92,43 @@ const AllProducts = () => {
     loadData();
   }, [userType, page, selectedCategory, selectedBrand, selectedType, searchQuery, sortBy]);
 
+  useEffect(() => {
+    loadCategoriesAndBrands();
+  }, []);
+
   const loadCategoriesAndBrands = async () => {
     try {
-      const response = await fetch('https://api.dharaniherbbals.com/api/product-masters?fields[0]=category&fields[1]=brand&pagination[pageSize]=1000', {
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
-        }
-      });
+      // Fetch brands directly from brands API
+      const [brandsRes, categoriesRes] = await Promise.all([
+        fetch(`https://api.dharaniherbbals.com/api/brands?fields[0]=name&fields[1]=Name&fields[2]=title&pagination[pageSize]=100`, {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+          }
+        }),
+        fetch(`https://api.dharaniherbbals.com/api/product-categories?fields[0]=name&fields[1]=Name&fields[2]=title&pagination[pageSize]=100`, {
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+          }
+        })
+      ]);
       
-      if (response.ok) {
-        const data = await response.json();
-        const products = data.data || [];
-        
-        const uniqueCategories = [...new Set(products.map(p => p.attributes?.category).filter(Boolean))];
-        const uniqueBrands = [...new Set(products.map(p => p.attributes?.brand).filter(Boolean))];
-        
-        setCategories(uniqueCategories);
-        setBrands(uniqueBrands);
-      }
+      const [brandsData, categoriesData] = await Promise.all([
+        brandsRes.ok ? brandsRes.json() : { data: [] },
+        categoriesRes.ok ? categoriesRes.json() : { data: [] }
+      ]);
+      
+      const brandNames = (brandsData.data || []).map(brand => {
+        const attrs = brand.attributes || brand;
+        return attrs.name || attrs.Name || attrs.title;
+      }).filter(Boolean);
+      
+      const categoryNames = (categoriesData.data || []).map(cat => {
+        const attrs = cat.attributes || cat;
+        return attrs.name || attrs.Name || attrs.title;
+      }).filter(Boolean);
+      
+      setBrands(brandNames);
+      setCategories(categoryNames);
     } catch (error) {
       console.error('Failed to load categories and brands:', error);
     }
@@ -133,21 +152,17 @@ const AllProducts = () => {
       setProducts(productList);
       setTotalProducts(productsData.meta?.pagination?.total || productList.length);
       
-      // Load reviews for current page products only
+      // Load reviews asynchronously without blocking UI
       const productIds = productList.map(p => p.id).filter(id => id && !isNaN(parseInt(id)));
       if (productIds.length > 0) {
-        try {
-          const stats = await getBulkProductReviewStats(productIds.map(id => parseInt(id)));
-          setReviewStats(stats);
-        } catch (reviewError) {
-          console.warn('Failed to load product reviews');
-        }
+        setTimeout(() => {
+          getBulkProductReviewStats(productIds.map(id => parseInt(id)))
+            .then(stats => setReviewStats(stats))
+            .catch(() => {}); // Silently fail for reviews
+        }, 100);
       }
       
-      // Load categories and brands only once
-      if (page === 1 && (categories.length === 0 || brands.length === 0)) {
-        await loadCategoriesAndBrands();
-      }
+
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
@@ -213,18 +228,18 @@ const AllProducts = () => {
       <Header />
       <main className="container mx-auto px-4 py-8 md:py-16 max-w-full">
         {/* Page Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent mb-4">
+        <div className="text-center mb-8 md:mb-12">
+          <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent mb-3 md:mb-4">
             {searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
           </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-600 text-sm md:text-lg max-w-2xl mx-auto px-4">
             {searchQuery ? `Found ${totalProducts} products matching your search` : 'Discover our complete range of natural and herbal products for your wellness journey'}
           </p>
           {searchQuery && (
             <Button 
               onClick={clearSearch} 
               variant="outline" 
-              className="mt-4 border-primary text-primary hover:bg-primary/10"
+              className="mt-3 md:mt-4 border-primary text-primary hover:bg-primary/10 text-sm"
             >
               <X className="w-4 h-4 mr-2" />
               Clear Search
@@ -383,17 +398,17 @@ const AllProducts = () => {
           {/* Products Section */}
           <div className="flex-1">
             {/* Toolbar */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-              <div className="text-gray-600">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 mb-6 md:mb-8">
+              <div className="text-gray-600 text-sm md:text-base">
                 Showing {displayedProducts.length} of {totalProducts} products
               </div>
               
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 md:gap-4 w-full sm:w-auto">
                 {/* Sort */}
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="flex-1 sm:flex-none px-2 md:px-3 py-2 border border-gray-300 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                 >
                   <option value="name">Sort by Name</option>
                   <option value="price-low">Price: Low to High</option>
@@ -406,13 +421,13 @@ const AllProducts = () => {
                     onClick={() => setViewMode('grid')}
                     className={`p-2 ${viewMode === 'grid' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                   >
-                    <Grid className="w-4 h-4" />
+                    <Grid className="w-3 h-3 md:w-4 md:h-4" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
                     className={`p-2 ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
                   >
-                    <List className="w-4 h-4" />
+                    <List className="w-3 h-3 md:w-4 md:h-4" />
                   </button>
                 </div>
               </div>
@@ -431,7 +446,7 @@ const AllProducts = () => {
             ) : (
               <div className={`grid gap-4 lg:gap-6 w-full ${
                 viewMode === 'grid' 
-                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                  ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
                   : 'grid-cols-1'
               }`}>
                 {displayedProducts.map((product) => {
@@ -444,7 +459,7 @@ const AllProducts = () => {
                           <img 
                             src={attrs.photo || attrs.image || '/placeholder.svg'} 
                             alt={attrs.Name || attrs.name || 'Product'} 
-                            className="w-full h-64 object-contain bg-white group-hover:scale-105 transition-transform duration-500 p-4"
+                            className="w-full h-48 md:h-64 object-contain bg-white group-hover:scale-105 transition-transform duration-500 p-3 md:p-4"
                             onError={(e) => {
                               e.target.src = 'https://via.placeholder.com/300x300?text=Product';
                             }}
@@ -474,14 +489,14 @@ const AllProducts = () => {
                         )}
                       </div>
                       
-                      <CardContent className="p-6 bg-gradient-to-b from-white to-gray-50">
+                      <CardContent className="p-4 md:p-6 bg-gradient-to-b from-white to-gray-50">
                         <Link to={`/product/${product.id}`}>
-                          <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 ${isTamil ? 'tamil-text' : ''}`}>
+                          <h3 className={`font-semibold text-xs md:text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 leading-tight ${isTamil ? 'tamil-text' : ''}`}>
                             {isTamil && attrs.tamil ? attrs.tamil : (attrs.Name || attrs.name || 'Product')}
                           </h3>
                         </Link>
                         
-                        <div className="flex items-center mb-3">
+                        <div className="flex items-center mb-2 md:mb-3">
                           <StarRating 
                             rating={reviewStats[product.id]?.average || 0} 
                             count={reviewStats[product.id]?.count || 0} 
@@ -490,8 +505,8 @@ const AllProducts = () => {
                           />
                         </div>
                         
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-lg font-bold text-primary">
+                        <div className="flex items-center justify-between mb-2 md:mb-3">
+                          <span className="text-base md:text-lg font-bold text-primary">
                             {(() => {
                               const currentUserType = userType || 'customer';
                               
@@ -516,10 +531,10 @@ const AllProducts = () => {
                           </span>
                         </div>
                         
-                        <div className="flex flex-col gap-2">
-                          <div className="flex gap-2">
+                        <div className="flex flex-col gap-1.5 md:gap-2">
+                          <div className="flex gap-1.5 md:gap-2">
                             <Button 
-                              className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
+                              className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1 md:py-1.5 text-[10px] md:text-xs font-medium" 
                               onClick={() => {
                                 // For variable products, use the first variation
                                 if (attrs.isVariableProduct && attrs.variations) {
@@ -556,13 +571,13 @@ const AllProducts = () => {
                                 });
                               }}
                             >
-                              <ShoppingCart className="w-3 h-3 mr-1" />
-                              <span className={`${isTamil ? 'tamil-text text-[9px]' : 'text-xs'}`}>{translate('products.addToCart')}</span>
+                              <ShoppingCart className="w-2.5 h-2.5 md:w-3 md:h-3 mr-0.5 md:mr-1" />
+                              <span className={`${isTamil ? 'tamil-text text-[8px] md:text-[9px]' : 'text-[10px] md:text-xs'}`}>{translate('products.addToCart')}</span>
                             </Button>
                           </div>
                           
                           <Button 
-                            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium" 
+                            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1 md:py-1.5 text-[10px] md:text-xs font-medium" 
                             onClick={() => {
                               // For variable products, use the first variation
                               if (attrs.isVariableProduct && attrs.variations) {
@@ -603,7 +618,7 @@ const AllProducts = () => {
                               navigate('/checkout');
                             }}
                           >
-                            <span className={`${isTamil ? 'tamil-text text-[9px]' : 'text-xs'}`}>{translate('product.buyNow')}</span>
+                            <span className={`${isTamil ? 'tamil-text text-[8px] md:text-[9px]' : 'text-[10px] md:text-xs'}`}>{translate('product.buyNow')}</span>
                           </Button>
                         </div>
                       </CardContent>
@@ -628,25 +643,62 @@ const AllProducts = () => {
                   
                   <div className="flex items-center space-x-1">
                     {(() => {
-                      const maxVisible = 10;
-                      const startPage = Math.max(1, page - Math.floor(maxVisible / 2));
-                      const endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                      const maxVisible = 5;
                       const pages = [];
                       
-                      for (let i = startPage; i <= endPage; i++) {
-                        pages.push(i);
+                      // Always show first page
+                      pages.push(1);
+                      
+                      if (totalPages <= 7) {
+                        // Show all pages if total is small
+                        for (let i = 2; i <= totalPages; i++) {
+                          pages.push(i);
+                        }
+                      } else {
+                        // Show ellipsis logic
+                        if (page > 3) {
+                          pages.push('...');
+                        }
+                        
+                        const start = Math.max(2, page - 1);
+                        const end = Math.min(totalPages - 1, page + 1);
+                        
+                        for (let i = start; i <= end; i++) {
+                          if (i !== 1 && i !== totalPages) {
+                            pages.push(i);
+                          }
+                        }
+                        
+                        if (page < totalPages - 2) {
+                          pages.push('...');
+                        }
+                        
+                        // Always show last page
+                        if (totalPages > 1) {
+                          pages.push(totalPages);
+                        }
                       }
                       
-                      return pages.map((pageNum) => (
-                        <Button
-                          key={pageNum}
-                          variant={page === pageNum ? "default" : "outline"}
-                          onClick={() => setPage(pageNum)}
-                          className={page === pageNum ? "bg-primary" : "border-primary/30 text-primary hover:bg-primary/5"}
-                        >
-                          {pageNum}
-                        </Button>
-                      ));
+                      return pages.map((pageNum, index) => {
+                        if (pageNum === '...') {
+                          return (
+                            <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
+                              ...
+                            </span>
+                          );
+                        }
+                        
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={page === pageNum ? "default" : "outline"}
+                            onClick={() => setPage(pageNum)}
+                            className={page === pageNum ? "bg-primary" : "border-primary/30 text-primary hover:bg-primary/5"}
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      });
                     })()
                     }
                   </div>
