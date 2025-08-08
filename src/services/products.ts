@@ -25,6 +25,7 @@ export const getProducts = async (
     
     queryParams.push(`pagination[page]=${page}`);
     queryParams.push(`pagination[pageSize]=${pageSize}`);
+    queryParams.push('pagination[withCount]=true');
     
     if (filters.category && filters.category !== 'all') {
       queryParams.push(`filters[category][$eq]=${encodeURIComponent(filters.category)}`);

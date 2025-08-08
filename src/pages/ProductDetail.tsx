@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Heart, Star, Sparkles } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { formatPrice } from '@/lib/utils';
 import { getPriceByUserType } from '@/lib/pricing';
@@ -21,7 +21,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
   const { setQuickCheckoutItem } = useQuickCheckout();
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
@@ -295,61 +295,47 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (product) {
-      const cartItem = {
-        id: product.id,
-        name: product.Name || product.name || product.title,
-        tamil: product.tamil || null,
-        price: currentPrice > 0 ? currentPrice : getPriceByUserType(selectedVariation || product, userType || 'customer'),
-        image: selectedImage || product.photo || product.image,
-        category: product.category,
-        skuid: product.id.toString()
-      };
+      let skuid, productId;
       
-      // Add variation info if it's a variable product
       if (product.isVariableProduct && selectedVariation) {
-        const variationName = selectedVariation.attributeValue || Object.values(selectedVariation)[0];
-        cartItem.variation = variationName;
-        cartItem.name = `${cartItem.name} - ${variationName}`;
-        
-        // Use the variation's SKU if available
-        if (selectedVariation.skuid) {
-          cartItem.skuid = selectedVariation.skuid;
-        }
+        skuid = selectedVariation.skuid || `${product.id}-${selectedVariation.value || selectedVariation.attributeValue}`;
+        productId = product.id.toString();
       } else {
-        // For regular products, use the product SKU
-        cartItem.skuid = product.skuid || product.SKUID || product.id.toString();
+        skuid = product.skuid || product.SKUID || product.id.toString();
+        productId = product.id.toString();
       }
       
-      addToCart(cartItem);
+      addToCart(skuid, productId, quantity);
     }
   };
   
   const handleBuyNow = () => {
     if (product) {
+      let skuid, productId;
+      
+      if (product.isVariableProduct && selectedVariation) {
+        skuid = selectedVariation.skuid || `${product.id}-${selectedVariation.value || selectedVariation.attributeValue}`;
+        productId = product.id.toString();
+      } else {
+        skuid = product.skuid || product.SKUID || product.id.toString();
+        productId = product.id.toString();
+      }
+      
       const checkoutItem = {
-        id: product.id,
+        id: productId,
+        skuid: skuid,
         name: product.Name || product.name || product.title,
         tamil: product.tamil || null,
-        price: currentPrice > 0 ? currentPrice : getPriceByUserType(selectedVariation || product, userType || 'customer'),
+        price: currentPrice,
         image: selectedImage || product.photo || product.image,
         category: product.category,
-        skuid: product.id.toString(),
         quantity: quantity
       };
       
-      // Add variation info if it's a variable product
       if (product.isVariableProduct && selectedVariation) {
-        const variationName = selectedVariation.attributeValue || Object.values(selectedVariation)[0];
+        const variationName = selectedVariation.value || selectedVariation.attributeValue || Object.values(selectedVariation)[0];
         checkoutItem.variation = variationName;
         checkoutItem.name = `${checkoutItem.name} - ${variationName}`;
-        
-        // Use the variation's SKU if available
-        if (selectedVariation.skuid) {
-          checkoutItem.skuid = selectedVariation.skuid;
-        }
-      } else {
-        // For regular products, use the product SKU
-        checkoutItem.skuid = product.skuid || product.SKUID || product.id.toString();
       }
       
       setQuickCheckoutItem(checkoutItem);
@@ -360,19 +346,12 @@ const ProductDetail = () => {
   const handleWishlistToggle = () => {
     if (!product) return;
     
-    const productData = {
-      id: product.id,
-      name: product.Name || product.name || product.title,
-      tamil: product.tamil || null,
-      price: currentPrice > 0 ? currentPrice : getPriceByUserType(selectedVariation || product, userType || 'customer'),
-      image: product.photo || product.image,
-      category: product.category
-    };
+    const skuid = (selectedVariation?.skuid || product.skuid || product.SKUID || product.id).toString();
 
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
+    if (isInWishlist(skuid)) {
+      removeFromWishlist(skuid);
     } else {
-      addToWishlist(productData);
+      addToWishlist(skuid);
     }
   };
 
@@ -894,9 +873,9 @@ const ProductDetail = () => {
                     className="w-full border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 shadow-md hover:shadow-lg transition-all duration-300 py-3 text-base font-medium rounded-xl"
                     onClick={handleWishlistToggle}
                   >
-                    <Heart className={`mr-2 h-5 w-5 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                    <Heart className={`mr-2 h-5 w-5 ${isInWishlist((selectedVariation?.skuid || product.skuid || product.SKUID || product.id).toString()) ? 'fill-red-500 text-red-500' : ''}`} />
                     <span className={`${isTamil ? 'tamil-text' : ''}`}>
-                      {isInWishlist(product.id) ? translate('product.removeFromWishlist') : translate('product.addToWishlist')}
+                      {isInWishlist((selectedVariation?.skuid || product.skuid || product.SKUID || product.id).toString()) ? translate('product.removeFromWishlist') : translate('product.addToWishlist')}
                     </span>
                   </Button>
                 </div>

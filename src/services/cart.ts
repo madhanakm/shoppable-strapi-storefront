@@ -1,5 +1,12 @@
-export const saveCartToAPI = async (userId: number, cartItems: any[]): Promise<boolean> => {
+interface CartItem {
+  skuid: string;
+  quantity: number;
+  id: string;
+}
+
+export const saveCartToAPI = async (userId: number, cartItems: CartItem[]): Promise<boolean> => {
   try {
+    // Always save to localStorage as backup
     localStorage.setItem('lastSavedCart', JSON.stringify(cartItems));
     localStorage.setItem('lastSavedCartUserId', userId.toString());
     
@@ -12,7 +19,11 @@ export const saveCartToAPI = async (userId: number, cartItems: any[]): Promise<b
     
     const cartData = {
       user: userId,
-      items: JSON.stringify(cartItems)
+      items: JSON.stringify(cartItems.map(item => ({
+        skuid: item.skuid,
+        quantity: item.quantity,
+        id: item.id
+      })))
     };
 
     if (response.ok) {
@@ -49,7 +60,7 @@ export const saveCartToAPI = async (userId: number, cartItems: any[]): Promise<b
 };
 
 // Helper function to get backup cart from localStorage
-const getBackupCart = (userId: number): any[] => {
+const getBackupCart = (userId: number): CartItem[] => {
   const lastSavedCartUserId = localStorage.getItem('lastSavedCartUserId');
   if (lastSavedCartUserId === userId.toString()) {
     const lastSavedCart = localStorage.getItem('lastSavedCart');
@@ -66,7 +77,7 @@ const getBackupCart = (userId: number): any[] => {
   return [];
 };
 
-export const loadCartFromAPI = async (userId: number): Promise<any[]> => {
+export const loadCartFromAPI = async (userId: number): Promise<CartItem[]> => {
   try {
     const timestamp = new Date().getTime();
     const response = await fetch(`https://api.dharaniherbbals.com/api/user-carts?filters[user][id][$eq]=${userId}&timestamp=${timestamp}`, {
@@ -80,7 +91,20 @@ export const loadCartFromAPI = async (userId: number): Promise<any[]> => {
       if (data.data && data.data.length > 0) {
         const cartData = data.data[0];
         const items = JSON.parse(cartData.attributes.items || '[]');
-        return items;
+        
+        // Validate cart items structure
+        const validItems = items.filter((item: any) => 
+          item && 
+          typeof item.skuid === 'string' && 
+          typeof item.quantity === 'number' && 
+          item.quantity > 0
+        ).map((item: any) => ({
+          skuid: item.skuid,
+          quantity: item.quantity,
+          id: item.id || item.skuid
+        }));
+        
+        return validItems;
       }
     }
     return getBackupCart(userId);

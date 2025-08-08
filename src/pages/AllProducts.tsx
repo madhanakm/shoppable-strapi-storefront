@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ShoppingCart, Filter, Grid, List, Star, Heart, Search, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { formatPrice } from '@/lib/utils';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
@@ -20,7 +20,7 @@ import { CompactLoadingStatus } from '@/components/ProductSkeleton';
 
 const AllProducts = () => {
   const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
   const { setQuickCheckoutItem } = useQuickCheckout();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -37,6 +37,8 @@ const AllProducts = () => {
   const [sortBy, setSortBy] = useState('name');
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [totalProducts, setTotalProducts] = useState(0);
 
   const itemsPerPage = 12;
@@ -89,8 +91,21 @@ const AllProducts = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    loadData();
-  }, [userType, page, selectedCategory, selectedBrand, selectedType, searchQuery, sortBy]);
+    setPage(1);
+    setHasMore(true);
+  }, [selectedCategory, selectedBrand, selectedType, searchQuery, sortBy]);
+  
+  useEffect(() => {
+    if (userType !== 'customer' && userType !== null) {
+      loadData();
+    }
+  }, [userType, page]);
+  
+  useEffect(() => {
+    if (userType === 'customer') {
+      loadData();
+    }
+  }, [userType, page]);
 
   useEffect(() => {
     loadCategoriesAndBrands();
@@ -135,7 +150,11 @@ const AllProducts = () => {
   };
 
   const loadData = async () => {
-    setLoading(true);
+    if (page === 1) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
     
     try {
       const filters = {
@@ -149,8 +168,22 @@ const AllProducts = () => {
       
       const productsData = await getProducts(page, itemsPerPage, filters, sortOptions);
       const productList = Array.isArray(productsData) ? productsData : productsData.data || [];
-      setProducts(productList);
-      setTotalProducts(productsData.meta?.pagination?.total || productList.length);
+      
+      if (page === 1) {
+        setProducts(productList);
+      } else {
+        setProducts(prev => [...prev, ...productList]);
+      }
+      
+      // Handle pagination metadata properly
+      if (productsData.meta?.pagination) {
+        setTotalProducts(productsData.meta.pagination.total);
+        const currentTotal = page === 1 ? productList.length : products.length + productList.length;
+        setHasMore(productList.length === itemsPerPage && currentTotal < productsData.meta.pagination.total);
+      } else {
+        setTotalProducts(productList.length);
+        setHasMore(productList.length === itemsPerPage);
+      }
       
       // Load reviews asynchronously without blocking UI
       const productIds = productList.map(p => p.id).filter(id => id && !isNaN(parseInt(id)));
@@ -167,28 +200,21 @@ const AllProducts = () => {
       console.error('Failed to load data:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
   // Products come pre-filtered and sorted from API - no client-side processing needed
   const displayedProducts = products;
-  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   const handleWishlistToggle = (product) => {
     const attrs = product.attributes || product;
-    const productData = {
-      id: product.id.toString(),
-      name: attrs.Name || attrs.name,
-      tamil: attrs.tamil || null,
-      price: getPriceByUserType(attrs, userType || 'customer'),
-      image: attrs.photo || attrs.image,
-      category: attrs.category
-    };
+    const skuid = attrs.skuid || attrs.SKUID || product.id.toString();
 
-    if (isInWishlist(productData.id)) {
-      removeFromWishlist(productData.id);
+    if (isInWishlist(skuid)) {
+      removeFromWishlist(skuid);
     } else {
-      addToWishlist(productData);
+      addToWishlist(skuid);
     }
   };
 
@@ -198,12 +224,14 @@ const AllProducts = () => {
     setSelectedType('all');
     setSearchQuery('');
     setPage(1);
+    setHasMore(true);
     window.history.replaceState({}, '', '/products');
   };
 
   const clearSearch = () => {
     setSearchQuery('');
     setPage(1);
+    setHasMore(true);
     window.history.replaceState({}, '', '/products');
   };
 
@@ -292,7 +320,7 @@ const AllProducts = () => {
                         type="radio"
                         name="category"
                         checked={selectedCategory === 'all'}
-                        onChange={() => { setSelectedCategory('all'); setPage(1); }}
+                        onChange={() => { setSelectedCategory('all'); setPage(1); setHasMore(true); }}
                         className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
                       />
                       <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
@@ -307,7 +335,7 @@ const AllProducts = () => {
                           type="radio"
                           name="category"
                           checked={selectedCategory === category}
-                          onChange={() => { setSelectedCategory(category); setPage(1); }}
+                          onChange={() => { setSelectedCategory(category); setPage(1); setHasMore(true); }}
                           className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
                         />
                         <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
@@ -329,7 +357,7 @@ const AllProducts = () => {
                         type="radio"
                         name="brand"
                         checked={selectedBrand === 'all'}
-                        onChange={() => { setSelectedBrand('all'); setPage(1); }}
+                        onChange={() => { setSelectedBrand('all'); setPage(1); setHasMore(true); }}
                         className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
                       />
                       <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
@@ -344,7 +372,7 @@ const AllProducts = () => {
                           type="radio"
                           name="brand"
                           checked={selectedBrand === brand}
-                          onChange={() => { setSelectedBrand(brand); setPage(1); }}
+                          onChange={() => { setSelectedBrand(brand); setPage(1); setHasMore(true); }}
                           className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
                         />
                         <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
@@ -369,7 +397,7 @@ const AllProducts = () => {
                           type="radio"
                           name="type"
                           checked={selectedType === type}
-                          onChange={() => { setSelectedType(type); setPage(1); }}
+                          onChange={() => { setSelectedType(type); setPage(1); setHasMore(true); }}
                           className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
                         />
                         <span className={`ml-3 text-sm font-medium capitalize group-hover:text-primary transition-colors ${
@@ -444,7 +472,7 @@ const AllProducts = () => {
                 </Button>
               </div>
             ) : (
-              <div className={`grid gap-4 lg:gap-6 w-full ${
+              <div data-products-grid className={`grid gap-4 lg:gap-6 w-full ${
                 viewMode === 'grid' 
                   ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
                   : 'grid-cols-1'
@@ -473,7 +501,7 @@ const AllProducts = () => {
                           className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity rounded-full shadow-lg"
                           onClick={() => handleWishlistToggle(product)}
                         >
-                          <Heart className={`w-4 h-4 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
+                          <Heart className={`w-4 h-4 ${isInWishlist(attrs.skuid || attrs.SKUID || product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
                         </Button>
 
                         {/* Product Type Badge */}
@@ -542,16 +570,8 @@ const AllProducts = () => {
                                     const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
                                     if (variations && variations.length > 0) {
                                       const firstVariation = variations[0];
-                                      addToCart({
-                                        id: product.id.toString(),
-                                        name: `${attrs.Name || attrs.name} - ${firstVariation.attributeValue}`,
-                                        tamil: attrs.tamil ? `${attrs.tamil} - ${firstVariation.attributeValue}` : null,
-                                        price: getPriceByUserType(firstVariation, userType || 'customer'),
-                                        image: attrs.photo || attrs.image,
-                                        category: attrs.category,
-                                        skuid: firstVariation.skuid || attrs.skuid || attrs.SKUID || product.id.toString(),
-                                        variation: firstVariation.attributeValue
-                                      });
+                                      const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+                                      addToCart(skuid, product.id.toString(), 1);
                                       return;
                                     }
                                   } catch (e) {
@@ -560,15 +580,8 @@ const AllProducts = () => {
                                 }
                                 
                                 // For regular products
-                                addToCart({
-                                  id: product.id.toString(),
-                                  name: attrs.Name || attrs.name,
-                                  tamil: attrs.tamil || null,
-                                  price: getPriceByUserType(attrs, userType || 'customer'),
-                                  image: attrs.photo || attrs.image,
-                                  category: attrs.category,
-                                  skuid: attrs.skuid || attrs.SKUID || product.id.toString()
-                                });
+                                const skuid = attrs.skuid || attrs.SKUID || product.id.toString();
+                                addToCart(skuid, product.id.toString(), 1);
                               }}
                             >
                               <ShoppingCart className="w-2.5 h-2.5 md:w-3 md:h-3 mr-0.5 md:mr-1" />
@@ -628,90 +641,35 @@ const AllProducts = () => {
               </div>
             )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+            {/* Load More Button */}
+            {hasMore && (
               <div className="mt-12 flex justify-center">
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setPage(p => Math.max(1, p - 1))} 
-                    disabled={page === 1}
-                    className="border-2 border-primary/30 text-primary hover:bg-primary/5"
-                  >
-                    Previous
-                  </Button>
-                  
-                  <div className="flex items-center space-x-1">
-                    {(() => {
-                      const maxVisible = 5;
-                      const pages = [];
-                      
-                      // Always show first page
-                      pages.push(1);
-                      
-                      if (totalPages <= 7) {
-                        // Show all pages if total is small
-                        for (let i = 2; i <= totalPages; i++) {
-                          pages.push(i);
+                <Button 
+                  size="lg"
+                  data-load-more
+                  onClick={() => {
+                    const currentProducts = products.length;
+                    setPage(p => p + 1);
+                    
+                    const checkForNewProducts = () => {
+                      if (products.length > currentProducts) {
+                        const productGrid = document.querySelector('[data-products-grid]');
+                        const productCards = productGrid?.children;
+                        if (productCards && productCards[currentProducts]) {
+                          productCards[currentProducts].scrollIntoView({ behavior: 'smooth', block: 'start' });
                         }
                       } else {
-                        // Show ellipsis logic
-                        if (page > 3) {
-                          pages.push('...');
-                        }
-                        
-                        const start = Math.max(2, page - 1);
-                        const end = Math.min(totalPages - 1, page + 1);
-                        
-                        for (let i = start; i <= end; i++) {
-                          if (i !== 1 && i !== totalPages) {
-                            pages.push(i);
-                          }
-                        }
-                        
-                        if (page < totalPages - 2) {
-                          pages.push('...');
-                        }
-                        
-                        // Always show last page
-                        if (totalPages > 1) {
-                          pages.push(totalPages);
-                        }
+                        setTimeout(checkForNewProducts, 100);
                       }
-                      
-                      return pages.map((pageNum, index) => {
-                        if (pageNum === '...') {
-                          return (
-                            <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
-                              ...
-                            </span>
-                          );
-                        }
-                        
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant={page === pageNum ? "default" : "outline"}
-                            onClick={() => setPage(pageNum)}
-                            className={page === pageNum ? "bg-primary" : "border-primary/30 text-primary hover:bg-primary/5"}
-                          >
-                            {pageNum}
-                          </Button>
-                        );
-                      });
-                    })()
-                    }
-                  </div>
-                  
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
-                    disabled={page === totalPages}
-                    className="border-2 border-primary/30 text-primary hover:bg-primary/5"
-                  >
-                    Next
-                  </Button>
-                </div>
+                    };
+                    
+                    setTimeout(checkForNewProducts, 100);
+                  }}
+                  disabled={loadingMore}
+                  className="rounded-full bg-transparent border-2 border-primary text-primary hover:bg-primary/10 w-32 h-32 p-0 text-sm"
+                >
+                  {loadingMore ? '...' : 'Load More'}
+                </Button>
               </div>
             )}
           </div>

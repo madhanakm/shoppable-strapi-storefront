@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart, Flame } from 'lucide-react';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { getProducts } from '@/services/products';
 import { Product, StrapiData } from '@/types/strapi';
@@ -15,7 +15,7 @@ import StarRating from './StarRating';
 import { LoadingWithStatus } from './ProductSkeleton';
 
 const HotSellingProducts = () => {
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
   const { addToCart } = useCart();
   const [products, setProducts] = useState<StrapiData<Product>[]>([]);
   const [reviewStats, setReviewStats] = useState({});
@@ -101,29 +101,18 @@ const HotSellingProducts = () => {
   }, [userType]);
 
   const handleWishlistToggle = (product: any) => {
-    const productData = {
-      id: product.id.toString(),
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      category: product.category
-    };
+    const skuid = product.skuId || product.id.toString();
 
-    if (isInWishlist(productData.id)) {
-      removeFromWishlist(productData.id);
+    if (isInWishlist(skuid)) {
+      removeFromWishlist(skuid);
     } else {
-      addToWishlist(productData);
+      addToWishlist(skuid);
     }
   };
 
   const handleAddToCart = (product: any) => {
-    addToCart({
-      id: product.id.toString(),
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      category: product.category
-    });
+    const skuid = product.skuId || product.id.toString();
+    addToCart(skuid, product.id.toString(), 1);
   };
 
 
@@ -189,7 +178,7 @@ const HotSellingProducts = () => {
                   className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={() => handleWishlistToggle(product)}
                 >
-                  <Heart className={`w-4 h-4 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
+                  <Heart className={`w-4 h-4 ${isInWishlist(product.skuId || product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
               </div>
               

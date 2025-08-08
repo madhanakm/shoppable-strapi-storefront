@@ -1,11 +1,11 @@
-export const saveWishlistToAPI = async (userId: number, wishlistItems: any[]): Promise<void> => {
+export const saveWishlistToAPI = async (userId: number, skuIds: string[]): Promise<void> => {
   try {
     const timestamp = new Date().getTime();
     const response = await fetch(`https://api.dharaniherbbals.com/api/user-wishlists?filters[user][id][$eq]=${userId}&timestamp=${timestamp}`);
     
     const wishlistData = {
       user: userId,
-      items: JSON.stringify(wishlistItems)
+      items: JSON.stringify(skuIds)
     };
 
     if (response.ok) {
@@ -36,7 +36,7 @@ export const saveWishlistToAPI = async (userId: number, wishlistItems: any[]): P
   }
 };
 
-export const loadWishlistFromAPI = async (userId: number): Promise<any[]> => {
+export const loadWishlistFromAPI = async (userId: number): Promise<string[]> => {
   try {
     const timestamp = new Date().getTime();
     const response = await fetch(`https://api.dharaniherbbals.com/api/user-wishlists?filters[user][id][$eq]=${userId}&timestamp=${timestamp}`, {

@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart, Heart, TrendingUp, Flame, Zap, Tag, ArrowRight, Eye } from 'lucide-react';
 import StarRating from './StarRating';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +17,7 @@ import { filterPriceFromName } from '@/lib/productUtils';
 
 // Product Card Component
 const ProductCard = ({ product, reviewStats = {} }) => {
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
   const navigate = useNavigate();
@@ -25,93 +25,75 @@ const ProductCard = ({ product, reviewStats = {} }) => {
   const isTamil = language === LANGUAGES.TAMIL;
 
   const handleWishlistToggle = () => {
-    const productData = {
-      id: product.id.toString(),
-      name: product.name,
-      tamil: product.tamil || null,
-      price: product.price || 0,
-      image: product.image,
-      category: product.category
-    };
+    const skuid = product.skuid || product.SKUID || product.id.toString();
 
-    if (isInWishlist(productData.id)) {
-      removeFromWishlist(productData.id);
+    if (isInWishlist(skuid)) {
+      removeFromWishlist(skuid);
     } else {
-      addToWishlist(productData);
+      addToWishlist(skuid);
     }
   };
 
   const handleAddToCart = () => {
-    // For variable products, use the first variation - exactly like AllProducts page
+    // For variable products, use the first variation
     if (product.isVariableProduct && product.variations) {
       try {
         const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
         if (variations && variations.length > 0) {
           const firstVariation = variations[0];
-          addToCart({
-            id: product.id.toString(),
-            name: `${product.name} - ${firstVariation.attributeValue}`,
-            tamil: product.tamil ? `${product.tamil} - ${firstVariation.attributeValue}` : null,
-            price: getPriceByUserType(firstVariation, product.userType || 'customer'),
-            image: product.image,
-            category: product.category,
-            skuid: firstVariation.skuid || product.skuid || product.id.toString(),
-            variation: firstVariation.attributeValue
-          });
+          const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+          addToCart(skuid, product.id.toString(), 1);
           return;
         }
       } catch (e) {
-        
+        console.error('Error parsing variations:', e);
       }
     }
     
     // For regular products
-    addToCart({
-      id: product.id.toString(),
-      name: product.name,
-      tamil: product.tamil || null,
-      price: product.price || 0,
-      image: product.image,
-      category: product.category,
-      skuid: product.skuid || product.id.toString()
-    });
+    const skuid = product.skuid || product.id.toString();
+    addToCart(skuid, product.id.toString(), 1);
   };
   
   const handleBuyNow = () => {
-    // For variable products, use the first variation - exactly like AllProducts page
+    // For variable products, use the first variation
     if (product.isVariableProduct && product.variations) {
       try {
         const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
         if (variations && variations.length > 0) {
           const firstVariation = variations[0];
+          const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+          const variationName = firstVariation.value || firstVariation.attributeValue || Object.values(firstVariation)[0];
+          
           setQuickCheckoutItem({
             id: product.id.toString(),
-            name: `${product.name} - ${firstVariation.attributeValue}`,
-            tamil: product.tamil ? `${product.tamil} - ${firstVariation.attributeValue}` : null,
+            skuid: skuid,
+            name: `${product.name} - ${variationName}`,
+            tamil: product.tamil ? `${product.tamil} - ${variationName}` : null,
             price: getPriceByUserType(firstVariation, product.userType || 'customer'),
             image: product.image,
             category: product.category,
-            skuid: firstVariation.skuid || product.skuid || product.id.toString(),
-            variation: firstVariation.attributeValue,
+            variation: variationName,
             quantity: 1
           });
           navigate('/checkout');
           return;
         }
       } catch (e) {
-        
+        console.error('Error parsing variations:', e);
       }
     }
     
     // For regular products
+    const skuid = product.skuid || product.id.toString();
     setQuickCheckoutItem({
       id: product.id.toString(),
+      skuid: skuid,
       name: product.name,
       tamil: product.tamil || null,
       price: product.price,
       image: product.image,
       category: product.category,
-      skuid: product.skuid || product.id.toString(),
       quantity: 1
     });
     navigate('/checkout');
@@ -179,7 +161,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
             handleWishlistToggle();
           }}
         >
-          <Heart className={`w-4 h-4 transition-colors ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600 hover:text-red-500'}`} />
+          <Heart className={`w-4 h-4 transition-colors ${isInWishlist(product.skuid || product.SKUID || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600 hover:text-red-500'}`} />
         </Button>
       </div>
       
@@ -295,7 +277,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         setLoading(true);
         // Add timestamp to prevent caching
         const timestamp = new Date().getTime();
-        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[type][$eq]=${type}&filters[status][$eq]=true&pagination[pageSize]=8&timestamp=${timestamp}`);
+        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[type][$eq]=${type}&filters[status][$eq]=true&pagination[pageSize]=20&timestamp=${timestamp}`);
         
         if (!response.ok) {
           throw new Error(`API responded with status: ${response.status}`);
@@ -437,7 +419,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 mb-16">
-          {(showAll ? products : products.slice(0, 8)).map((product, index) => (
+          {(showAll ? products : products.slice(0, 12)).map((product, index) => (
             <div 
               key={product.id} 
               className="animate-fade-in-up"
@@ -449,7 +431,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         </div>
 
         <div className="text-center">
-          {products.length > 8 && !showAll ? (
+          {products.length > 12 && !showAll ? (
             <Button 
               size="lg" 
               className="group bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 hover:from-primary hover:via-emerald-500 hover:to-primary text-white transition-all duration-500 px-12 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl rounded-2xl transform hover:scale-105 hover:-translate-y-1"

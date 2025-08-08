@@ -5,26 +5,22 @@ import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, ShoppingCart, Trash2, ShoppingBag } from 'lucide-react';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlistContext } from '@/contexts/WishlistContext';
+import { useWishlistProducts } from '@/hooks/useWishlistProducts';
 import { useCart } from '@/contexts/CartContext';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const Wishlist = () => {
-  const { wishlistItems, removeFromWishlist, wishlistCount, syncWishlist } = useWishlist();
+  const { wishlistSkuIds, removeFromWishlist, wishlistCount } = useWishlistContext();
+  const { products, loading } = useWishlistProducts(wishlistSkuIds);
   const { addToCart } = useCart();
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
 
   const handleAddToCart = (item: any) => {
-    addToCart({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      image: item.image,
-      category: item.category,
-      skuid: item.skuid || item.id
-    });
+    const skuid = item.originalSkuid || item.skuid || item.id.toString();
+    addToCart(skuid, item.id.toString(), 1);
   };
 
   if (wishlistCount === 0) {
@@ -74,8 +70,14 @@ const Wishlist = () => {
           </div>
           
           {/* Wishlist Items */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {wishlistItems.map((item) => (
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading wishlist...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((item) => (
               <Card key={item.id} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-lg hover:-translate-y-2">
                 <div className="relative overflow-hidden">
                   <img 
@@ -93,7 +95,7 @@ const Wishlist = () => {
                       size="sm" 
                       variant="secondary" 
                       className="rounded-full shadow-lg bg-white/90 hover:bg-white"
-                      onClick={() => removeFromWishlist(item.id)}
+                      onClick={() => removeFromWishlist(item.originalSkuid || item.skuid)}
                     >
                       <Heart className="w-4 h-4 fill-red-500 text-red-500" />
                     </Button>
@@ -126,7 +128,7 @@ const Wishlist = () => {
                     <Button 
                       variant="destructive" 
                       size="sm"
-                      onClick={() => removeFromWishlist(item.id)}
+                      onClick={() => removeFromWishlist(item.originalSkuid || item.skuid)}
                       className="px-3"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -134,8 +136,9 @@ const Wishlist = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
           
           {/* Continue Shopping */}
           <div className="text-center mt-12">

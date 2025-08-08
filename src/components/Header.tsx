@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Menu, X, Search, ShoppingCart, Heart, User, Leaf, Globe, Phone, Mail } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
+import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
 import { useSearch } from '@/hooks/use-search';
@@ -13,7 +13,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { searchQuery, setSearchQuery, handleSearch, clearSearch } = useSearch();
   const { cartCount } = useCart();
-  const { wishlistCount } = useWishlist();
+  const { wishlistCount } = useWishlistContext();
   const { user, logout, isAuthenticated } = useAuth();
   const { translate, language, setLanguage } = useTranslation();
   const navigate = useNavigate();

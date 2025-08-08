@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -7,24 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { saveCartToAPI } from '@/services/cart';
+import { useCartProducts } from '@/hooks/useCartProducts';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const Cart = () => {
-  const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount, syncCart } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, cartCount } = useCart();
+  const { products, loading, cartTotal } = useCartProducts(cartItems);
   const { language } = useTranslation();
-  const { user } = useAuth();
   const isTamil = language === LANGUAGES.TAMIL;
-  
-  // Force save cart to API when page loads
-  useEffect(() => {
-    if (user?.id && cartItems.length > 0) {
-      
-      saveCartToAPI(user.id, cartItems);
-    }
-  }, []);
 
 
   if (cartCount === 0) {
@@ -62,6 +53,9 @@ const Cart = () => {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-gray-500 to-gray-600 rounded-full mb-4">
+              <ShoppingCart className="w-8 h-8 text-white" />
+            </div>
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4">
               Shopping Cart
             </h1>
@@ -76,20 +70,28 @@ const Cart = () => {
               <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-6 md:p-8">
                   <div className="space-y-6">
-                    {cartItems.map((item, index) => (
+                    {loading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                        <p className="mt-4 text-gray-600">Loading cart...</p>
+                      </div>
+                    ) : (
+                      products.map((item, index) => (
                       <div key={item.id} className={`${index !== 0 ? 'border-t pt-6' : ''}`}>
                         <div className="flex flex-col sm:flex-row gap-6">
                           {/* Product Image */}
                           <div className="flex-shrink-0">
                             <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-xl shadow-md overflow-hidden">
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                className="w-full h-full object-contain p-2"
-                                onError={(e) => {
-                                  e.target.src = 'https://via.placeholder.com/150x150?text=Product';
-                                }}
-                              />
+                              <Link to={`/product/${item.id}`}>
+                                <img
+                                  src={item.image}
+                                  alt={item.name}
+                                  className="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                  onError={(e) => {
+                                    e.target.src = 'https://via.placeholder.com/150x150?text=Product';
+                                  }}
+                                />
+                              </Link>
                             </div>
                           </div>
                           
@@ -97,9 +99,11 @@ const Cart = () => {
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
                               <div className="flex-1">
-                                <h3 className={`font-bold text-lg md:text-xl text-gray-800 mb-2 ${isTamil ? 'tamil-text' : ''}`}>
-                                  {isTamil && item.tamil ? item.tamil : item.name}
-                                </h3>
+                                <Link to={`/product/${item.id}`}>
+                                  <h3 className={`font-bold text-lg md:text-xl text-gray-800 mb-2 hover:text-primary transition-colors cursor-pointer ${isTamil ? 'tamil-text' : ''}`}>
+                                    {isTamil && item.tamil ? item.tamil : item.name}
+                                  </h3>
+                                </Link>
                                 <p className="text-sm text-gray-500 mb-3">{item.category}</p>
                                 <p className="text-2xl font-bold text-primary">
                                   {formatPrice(item.price)}
@@ -112,7 +116,7 @@ const Cart = () => {
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                    onClick={() => updateQuantity(item.originalSkuid, item.quantity - 1)}
                                     className="h-10 w-10 rounded-md hover:bg-white"
                                     disabled={item.quantity <= 1}
                                   >
@@ -121,14 +125,14 @@ const Cart = () => {
                                   <Input
                                     type="number"
                                     value={item.quantity}
-                                    onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                                    onChange={(e) => updateQuantity(item.originalSkuid, parseInt(e.target.value) || 1)}
                                     className="w-16 text-center border-0 bg-transparent font-semibold"
                                     min="1"
                                   />
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                    onClick={() => updateQuantity(item.originalSkuid, item.quantity + 1)}
                                     className="h-10 w-10 rounded-md hover:bg-white"
                                   >
                                     <Plus className="w-4 h-4" />
@@ -142,7 +146,7 @@ const Cart = () => {
                                   <Button
                                     size="sm"
                                     variant="destructive"
-                                    onClick={() => removeFromCart(item.id)}
+                                    onClick={() => removeFromCart(item.originalSkuid)}
                                     className="flex items-center gap-2"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -154,7 +158,8 @@ const Cart = () => {
                           </div>
                         </div>
                       </div>
-                    ))}
+                    ))
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -210,6 +215,16 @@ const Cart = () => {
                 </CardContent>
               </Card>
             </div>
+          </div>
+          
+          {/* Continue Shopping */}
+          <div className="text-center mt-12">
+            <Link to="/products">
+              <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:bg-gray-50 px-8 py-3">
+                <ShoppingBag className="w-5 h-5 mr-2" />
+                Continue Shopping
+              </Button>
+            </Link>
           </div>
         </div>
       </main>
