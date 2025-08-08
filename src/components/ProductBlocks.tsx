@@ -25,7 +25,24 @@ const ProductCard = ({ product, reviewStats = {} }) => {
   const isTamil = language === LANGUAGES.TAMIL;
 
   const handleWishlistToggle = () => {
-    const skuid = product.skuid || product.SKUID || product.id.toString();
+    let skuid;
+    
+    // For variable products, use first variation's SKU
+    if (product.isVariableProduct && product.variations) {
+      try {
+        const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+        if (variations && variations.length > 0) {
+          const firstVariation = variations[0];
+          skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+        } else {
+          skuid = product.skuid || product.SKUID || product.id.toString();
+        }
+      } catch (e) {
+        skuid = product.skuid || product.SKUID || product.id.toString();
+      }
+    } else {
+      skuid = product.skuid || product.SKUID || product.id.toString();
+    }
 
     if (isInWishlist(skuid)) {
       removeFromWishlist(skuid);
@@ -161,7 +178,25 @@ const ProductCard = ({ product, reviewStats = {} }) => {
             handleWishlistToggle();
           }}
         >
-          <Heart className={`w-4 h-4 transition-colors ${isInWishlist(product.skuid || product.SKUID || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600 hover:text-red-500'}`} />
+          <Heart className={`w-4 h-4 transition-colors ${(() => {
+            let checkSkuid;
+            if (product.isVariableProduct && product.variations) {
+              try {
+                const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+                if (variations && variations.length > 0) {
+                  const firstVariation = variations[0];
+                  checkSkuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+                } else {
+                  checkSkuid = product.skuid || product.SKUID || product.id.toString();
+                }
+              } catch (e) {
+                checkSkuid = product.skuid || product.SKUID || product.id.toString();
+              }
+            } else {
+              checkSkuid = product.skuid || product.SKUID || product.id.toString();
+            }
+            return isInWishlist(checkSkuid) ? 'fill-red-500 text-red-500' : 'text-gray-600 hover:text-red-500';
+          })()} `} />
         </Button>
       </div>
       
@@ -419,7 +454,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 mb-16">
-          {(showAll ? products : products.slice(0, 12)).map((product, index) => (
+          {(showAll ? products : products.slice(0, type === 'popular' ? 8 : 12)).map((product, index) => (
             <div 
               key={product.id} 
               className="animate-fade-in-up"
@@ -431,7 +466,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         </div>
 
         <div className="text-center">
-          {products.length > 12 && !showAll ? (
+          {products.length > (type === 'popular' ? 8 : 12) && !showAll ? (
             <Button 
               size="lg" 
               className="group bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 hover:from-primary hover:via-emerald-500 hover:to-primary text-white transition-all duration-500 px-12 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl rounded-2xl transform hover:scale-105 hover:-translate-y-1"

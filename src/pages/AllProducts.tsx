@@ -203,7 +203,24 @@ const AllProducts = () => {
 
   const handleWishlistToggle = (product) => {
     const attrs = product.attributes || product;
-    const skuid = attrs.skuid || attrs.SKUID || product.id.toString();
+    let skuid;
+    
+    // For variable products, use first variation's SKU
+    if (attrs.isVariableProduct && attrs.variations) {
+      try {
+        const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+        if (variations && variations.length > 0) {
+          const firstVariation = variations[0];
+          skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+        } else {
+          skuid = attrs.skuid || attrs.SKUID || product.id.toString();
+        }
+      } catch (e) {
+        skuid = attrs.skuid || attrs.SKUID || product.id.toString();
+      }
+    } else {
+      skuid = attrs.skuid || attrs.SKUID || product.id.toString();
+    }
 
     if (isInWishlist(skuid)) {
       removeFromWishlist(skuid);
@@ -495,7 +512,25 @@ const AllProducts = () => {
                           className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity rounded-full shadow-lg"
                           onClick={() => handleWishlistToggle(product)}
                         >
-                          <Heart className={`w-4 h-4 ${isInWishlist(attrs.skuid || attrs.SKUID || product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
+                          <Heart className={`w-4 h-4 ${(() => {
+                            let checkSkuid;
+                            if (attrs.isVariableProduct && attrs.variations) {
+                              try {
+                                const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+                                if (variations && variations.length > 0) {
+                                  const firstVariation = variations[0];
+                                  checkSkuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+                                } else {
+                                  checkSkuid = attrs.skuid || attrs.SKUID || product.id.toString();
+                                }
+                              } catch (e) {
+                                checkSkuid = attrs.skuid || attrs.SKUID || product.id.toString();
+                              }
+                            } else {
+                              checkSkuid = attrs.skuid || attrs.SKUID || product.id.toString();
+                            }
+                            return isInWishlist(checkSkuid) ? 'fill-red-500 text-red-500' : '';
+                          })()} `} />
                         </Button>
 
                         {/* Product Type Badge */}
