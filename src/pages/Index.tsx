@@ -17,7 +17,7 @@ const Index = () => {
       <main className="overflow-hidden">
         {/* Hero Image Slider */}
         <ErrorBoundary>
-          <div className="relative">
+          <div className="relative mb-4">
             <ImageSlider />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/20 pointer-events-none" />
           </div>
@@ -25,7 +25,7 @@ const Index = () => {
         
         {/* Hero Section */}
         <ErrorBoundary>
-          <div className="relative -mt-20 z-10">
+          <div className="relative -mt-16 z-10">
             <Hero />
           </div>
         </ErrorBoundary>

@@ -49,15 +49,15 @@ const ImageSlider = () => {
   };
 
   if (loading) {
-    return <div className="h-[650px] md:h-[650px] sm:h-[450px] h-[300px] bg-gray-100 flex items-center justify-center">Loading slider...</div>;
+    return <div className="h-[300px] sm:h-[400px] md:h-[550px] bg-gray-100 flex items-center justify-center">Loading slider...</div>;
   }
 
   if (slides.length === 0) {
-    return <div className="h-[650px] md:h-[650px] sm:h-[450px] h-[300px] bg-gray-100 flex items-center justify-center">No slides available</div>;
+    return <div className="h-[300px] sm:h-[400px] md:h-[550px] bg-gray-100 flex items-center justify-center">No slides available</div>;
   }
 
   return (
-    <div className="relative w-full h-[300px] sm:h-[450px] md:h-[650px] overflow-hidden rounded-none md:rounded-2xl shadow-2xl">
+    <div className="relative w-full h-[300px] sm:h-[400px] md:h-[550px] overflow-hidden shadow-2xl isolate">
       {/* Background overlay for better contrast */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10"></div>
       
@@ -99,15 +99,15 @@ const ImageSlider = () => {
       ))}
       
       {/* Navigation dots */}
-      <div className="absolute bottom-6 left-0 right-0 flex justify-center space-x-2 sm:space-x-3 z-30">
+      <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 flex justify-center space-x-2 sm:space-x-3 z-20">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
             className={`transition-all duration-300 rounded-full border-2 ${
               index === currentSlide 
-                ? 'w-4 h-4 sm:w-5 sm:h-5 bg-white border-white shadow-lg scale-110' 
-                : 'w-3 h-3 sm:w-4 sm:h-4 bg-white/50 border-white/70 hover:bg-white/70 hover:scale-105'
+                ? 'w-3 h-3 sm:w-4 sm:h-4 bg-white border-white shadow-lg scale-110' 
+                : 'w-2.5 h-2.5 sm:w-3 sm:h-3 bg-white/50 border-white/70 hover:bg-white/70 hover:scale-105'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
@@ -116,20 +116,20 @@ const ImageSlider = () => {
       
       {/* Previous/Next buttons */}
       <button
-        className="absolute left-4 sm:left-6 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white text-primary p-2 sm:p-3 md:p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-white/20 z-30 group"
+        className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white text-primary p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl border border-white/20 z-20 group"
         onClick={() => setCurrentSlide((currentSlide - 1 + slides.length) % slides.length)}
         aria-label="Previous slide"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6 md:w-7 md:h-7 group-hover:-translate-x-1 transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:-translate-x-0.5 transition-transform">
           <path d="M15 18l-6-6 6-6" />
         </svg>
       </button>
       <button
-        className="absolute right-4 sm:right-6 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white text-primary p-2 sm:p-3 md:p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 hover:shadow-2xl border border-white/20 z-30 group"
+        className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white text-primary p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl border border-white/20 z-20 group"
         onClick={() => setCurrentSlide((currentSlide + 1) % slides.length)}
         aria-label="Next slide"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-6 sm:h-6 md:w-7 md:h-7 group-hover:translate-x-1 transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:translate-x-0.5 transition-transform">
           <path d="M9 18l6-6-6-6" />
         </svg>
       </button>
