@@ -79,20 +79,48 @@ export const generateOrderNumber = async (): Promise<string> => {
 };
 
 export const initiatePayment = async (orderData: OrderData, orderNumber: string, invoiceNumber: string): Promise<any> => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (!window.Razorpay) {
       reject(new Error('Razorpay SDK not loaded'));
       return;
     }
 
-    const options = {
-      key: 'rzp_live_RoueJU66A0iiz5',
-      amount: Math.round(orderData.total * 100),
-      currency: 'INR',
-      name: 'Dharani Herbbals',
-      description: `Order #${orderNumber}`,
-      receipt: orderNumber,
-      payment_capture: 1,
+    try {
+      // Create Razorpay order server-side with auto-capture
+      const createOrderResponse = await fetch('https://api.dharaniherbbals.com/api/create-razorpay-orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: {
+            amount: Math.round(orderData.total * 100),
+            currency: 'INR',
+            receipt: orderNumber
+          }
+        })
+      });
+      
+      if (!createOrderResponse.ok) {
+        throw new Error('Failed to create Razorpay order');
+      }
+      
+      const response = await createOrderResponse.json();
+      console.log('Full backend response:', JSON.stringify(response, null, 2));
+      
+      const razorpayOrderId = response.razorpayOrderId;
+      console.log('Extracted razorpayOrderId:', razorpayOrderId);
+      
+      if (!razorpayOrderId) {
+        console.error('Response structure:', response);
+        throw new Error('No Razorpay order ID returned');
+      }
+      
+      const options = {
+        key: 'rzp_live_RoueJU66A0iiz5',
+        amount: Math.round(orderData.total * 100),
+        currency: 'INR',
+        name: 'Dharani Herbbals',
+        description: `Order #${orderNumber}`,
+        order_id: razorpayOrderId,
       prefill: {
         name: orderData.customerInfo.name,
         email: orderData.customerInfo.email,
@@ -119,6 +147,10 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
 
     const rzp = new window.Razorpay(options);
     rzp.open();
+    
+    } catch (error) {
+      reject(error);
+    }
   });
 };
 

@@ -120,7 +120,23 @@ export const useCartProducts = (cartItems: CartItem[]) => {
       });
 
       const results = await Promise.all(productPromises);
-      setProducts(results.filter(Boolean));
+      const validProducts = results.filter(Boolean);
+      
+      // Remove inactive products from cart
+      const validSkuids = validProducts.map(p => p.originalSkuid);
+      const invalidSkuids = cartItems.filter(item => !validSkuids.includes(item.skuid)).map(item => item.skuid);
+      
+      if (invalidSkuids.length > 0) {
+        // Auto-remove inactive products from cart
+        const { removeFromCart } = require('@/contexts/CartContext');
+        invalidSkuids.forEach(skuid => {
+          try {
+            removeFromCart(skuid);
+          } catch (e) {}
+        });
+      }
+      
+      setProducts(validProducts);
     } catch (error) {
       console.error('Error fetching cart products:', error);
     } finally {

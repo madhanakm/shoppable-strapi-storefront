@@ -85,14 +85,22 @@ const AllProducts = () => {
     const categoryParam = searchParams.get('category');
     const typeParam = searchParams.get('type');
     const searchParam = searchParams.get('search');
+    
     if (categoryParam) setSelectedCategory(categoryParam);
     if (typeParam) setSelectedType(typeParam);
-    if (searchParam) setSearchQuery(searchParam);
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    } else {
+      setSearchQuery('');
+    }
   }, [searchParams]);
 
   useEffect(() => {
-    setPage(1);
-    setHasMore(true);
+    // Only reset page if we're not on the initial load with URL params
+    if (searchQuery !== searchParams.get('search')) {
+      setPage(1);
+      setHasMore(true);
+    }
   }, [selectedCategory, selectedBrand, selectedType, searchQuery, sortBy]);
   
   useEffect(() => {
