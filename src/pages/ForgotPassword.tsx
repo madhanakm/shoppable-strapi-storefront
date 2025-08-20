@@ -102,6 +102,8 @@ const ForgotPassword = () => {
       const user = userData.data.attributes;
       
       if (user.otp === otp && new Date() <= new Date(user.otpExpiresAt || '')) {
+        // Mark user as verified since OTP is confirmed
+        await updateEcomUser(userId, { isVerified: true });
         setStep(3);
         toast({
           title: "OTP Verified",
