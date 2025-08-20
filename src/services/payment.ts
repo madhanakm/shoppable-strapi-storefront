@@ -11,6 +11,7 @@ export interface OrderData {
     price: number;
     quantity: number;
     image?: string;
+    skuid?: string;
   }>;
   total: number;
   shippingCharges?: number; // Optional shipping charges
@@ -155,6 +156,7 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumb
       billingAddress: shippingAddr,
       Name: orderData.items.map(item => item.name).join(' | '),
       price: orderData.items.map(item => `${item.name}: ${item.price} x ${item.quantity}`).join(' | '),
+      skuid: orderData.items.map(item => item.skuid || item.id).join(' | '),
       remarks: `Payment ID: ${paymentResponse.razorpay_payment_id}`,
       quantity: String(orderData.items.reduce((sum, item) => sum + item.quantity, 0))
     }

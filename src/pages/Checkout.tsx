@@ -204,7 +204,8 @@ const Checkout = () => {
             name: item.name,
             price: item.price,
             quantity: item.quantity,
-            image: item.image
+            image: item.image,
+            skuid: item.originalSkuid || item.skuid || item.id
           })),
           total: total,
           shippingCharges: shippingCharges, // Adding shipping charges
