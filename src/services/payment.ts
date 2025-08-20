@@ -92,6 +92,7 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
       name: 'Dharani Herbbals',
       description: `Order #${orderNumber}`,
       receipt: orderNumber,
+      payment_capture: 1,
       prefill: {
         name: orderData.customerInfo.name,
         email: orderData.customerInfo.email,
