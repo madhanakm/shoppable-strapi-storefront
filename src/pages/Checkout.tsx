@@ -221,14 +221,18 @@ const Checkout = () => {
         };
 
         // Initiating payment
-        
-        // Initiate Razorpay payment
-        await initiatePayment(orderData, orderNumber, invoiceNumber);
-        
-        toast({
-          title: "Payment Successful!",
-          description: `Order #${orderNumber} placed successfully. You will receive a confirmation call shortly.`,
-        });
+        try {
+          // Initiate Razorpay payment
+          await initiatePayment(orderData, orderNumber, invoiceNumber);
+          
+          toast({
+            title: "Payment Successful!",
+            description: `Order #${orderNumber} placed successfully. You will receive a confirmation SMS shortly.`,
+          });
+        } catch (paymentError) {
+          console.error('Payment error:', paymentError);
+          throw new Error(paymentError.message || 'Payment failed');
+        }
       } else {
         // COD Order - Store directly
         const orderPayload = {

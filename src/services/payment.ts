@@ -103,11 +103,12 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
       },
       handler: async (response: any) => {
         try {
-          
+          console.log('Payment successful, storing order:', { orderNumber, paymentId: response.razorpay_payment_id });
           await storeOrder(orderData, orderNumber, invoiceNumber, response);
+          console.log('Order stored successfully');
           resolve(response);
         } catch (error) {
-          
+          console.error('Error storing order:', error);
           reject(error);
         }
       },
@@ -159,17 +160,23 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumb
       price: orderData.items.map(item => `${item.name}: ${item.price} x ${item.quantity}`).join(' | '),
       skuid: orderData.items.map(item => item.skuid || item.id).join(' | '),
       remarks: `Payment ID: ${paymentResponse.razorpay_payment_id}`,
+      notes: `Online Payment - ${paymentResponse.razorpay_payment_id}`,
       quantity: String(orderData.items.reduce((sum, item) => sum + item.quantity, 0))
     }
   };
 
-  
+  console.log('Storing order with payload:', orderPayload);
   
   const response = await fetch('https://api.dharaniherbbals.com/api/orders', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
     body: JSON.stringify(orderPayload)
   });
+  
+  console.log('Order API response status:', response.status);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -178,6 +185,37 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumb
   }
 
   const result = await response.json();
+  
+  // Send order confirmation SMS and WhatsApp message
+  try {
+    const cleanPhone = orderData.customerInfo.phone.replace(/[^0-9]/g, '');
+    
+    // Send SMS
+    fetch('https://api.dharaniherbbals.com/api/order-sms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        data: {
+          mobile: cleanPhone,
+          orderNumber: orderNumber,
+          amount: orderData.total
+        }
+      })
+    });
+    
+    // Send WhatsApp message
+    fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mobile: cleanPhone,
+        orderNumber: orderNumber,
+        amount: orderData.total
+      })
+    });
+  } catch (error) {
+    console.error('Error sending notifications:', error);
+  }
   
   return result;
 };
