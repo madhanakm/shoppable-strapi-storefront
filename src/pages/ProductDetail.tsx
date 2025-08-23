@@ -500,9 +500,40 @@ const ProductDetail = () => {
     );
   }
 
+  // Render meta tags immediately, even before product loads
+  const renderMetaTags = () => {
+    const productName = product?.Name || product?.name || 'Premium Herbal Product';
+    const productDesc = product?.description || product?.desc || 'Premium natural herbal product from Dharani Herbbals';
+    const productImage = selectedImage || product?.photo || 'https://api.dharaniherbbals.com/uploads/favicon_b04c8c6af4.png';
+    const price = currentPrice || 0;
+    
+    return (
+      <Helmet>
+        <title>{`${productName} | Dharani Herbbals`}</title>
+        <meta name="description" content={`${productDesc} Buy now with free delivery on orders above ₹5000.`} />
+        <link rel="canonical" href={`https://dharaniherbbals.com/product/${id}`} />
+        
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={`${productName} | Dharani Herbbals`} />
+        <meta property="og:description" content={`${productDesc} 💰 ${price > 0 ? formatPrice(price) : 'Best Price'} ✅ Quality Assured ✅ Free Delivery`} />
+        <meta property="og:image" content={productImage} />
+        <meta property="og:image:width" content="512" />
+        <meta property="og:image:height" content="512" />
+        <meta property="og:url" content={`https://dharaniherbbals.com/product/${id}`} />
+        <meta property="og:site_name" content="Dharani Herbbals" />
+        
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${productName} | Dharani Herbbals`} />
+        <meta name="twitter:description" content={`${productDesc} ${price > 0 ? `Price: ${formatPrice(price)}` : ''} • Quality Assured • Free Delivery`} />
+        <meta name="twitter:image" content={productImage} />
+      </Helmet>
+    );
+  };
+
   if (!product) {
     return (
       <div>
+        {renderMetaTags()}
         <Header />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
@@ -515,72 +546,7 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      <Helmet>
-        {/* Product Meta Tags */}
-        <title>{`${isTamil && product.tamil ? product.tamil : (product.Name || product.name)} | Dharani Herbbals`}</title>
-        <meta name="description" content={`${product.description || product.desc || `Premium ${product.Name || product.name} from Dharani Herbbals. Natural herbal product with quality assurance.`} Buy now with free delivery on orders above ₹5000.`} />
-        <meta name="keywords" content={`${product.Name || product.name}, ${product.category || 'herbal products'}, ${product.brand || 'Dharani Herbbals'}, ayurveda, natural remedies, herbal medicine`} />
-        <link rel="canonical" href={`https://dharaniherbbals.com/product/${product.id}`} />
-        
-        {/* Open Graph (Facebook, WhatsApp, LinkedIn) */}
-        <meta property="og:type" content="product" />
-        <meta property="og:title" content={`${isTamil && product.tamil ? product.tamil : (product.Name || product.name)} | Dharani Herbbals`} />
-        <meta property="og:description" content={`${product.description || product.desc || `Premium ${product.Name || product.name} from Dharani Herbbals`} 💰 ${formatPrice(currentPrice)} ✅ Quality Assured ✅ Free Delivery`} />
-        <meta property="og:image" content={selectedImage || product.photo || 'https://api.dharaniherbbals.com/uploads/logo_12f2d3e78e.png'} />
-        <meta property="og:image:width" content="800" />
-        <meta property="og:image:height" content="600" />
-        <meta property="og:url" content={`https://dharaniherbbals.com/product/${product.id}`} />
-        <meta property="og:site_name" content="Dharani Herbbals" />
-        
-        {/* Product Specific Open Graph */}
-        <meta property="product:brand" content={product.brand || 'Dharani Herbbals'} />
-        <meta property="product:availability" content="in stock" />
-        <meta property="product:condition" content="new" />
-        <meta property="product:price:amount" content={currentPrice.toString()} />
-        <meta property="product:price:currency" content="INR" />
-        {product.category && <meta property="product:category" content={product.category} />}
-        
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${isTamil && product.tamil ? product.tamil : (product.Name || product.name)} | Dharani Herbbals`} />
-        <meta name="twitter:description" content={`${product.description || `Premium ${product.Name || product.name}`} Price: ${formatPrice(currentPrice)} • Quality Assured • Free Delivery`} />
-        <meta name="twitter:image" content={selectedImage || product.photo || 'https://api.dharaniherbbals.com/uploads/logo_12f2d3e78e.png'} />
-        
-        {/* WhatsApp Specific */}
-        <meta property="og:image:alt" content={`${product.Name || product.name} - Premium herbal product from Dharani Herbbals`} />
-        
-        {/* Structured Data for Google Shopping */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Product",
-            "name": product.Name || product.name,
-            "description": product.description || product.desc || `Premium ${product.Name || product.name} from Dharani Herbbals`,
-            "image": selectedImage || product.photo || 'https://api.dharaniherbbals.com/uploads/logo_12f2d3e78e.png',
-            "brand": {
-              "@type": "Brand",
-              "name": product.brand || 'Dharani Herbbals'
-            },
-            "category": product.category || 'Herbal Products',
-            "sku": (selectedVariation?.skuid || product.skuid || product.SKUID || product.id).toString(),
-            "offers": {
-              "@type": "Offer",
-              "price": currentPrice,
-              "priceCurrency": "INR",
-              "availability": "https://schema.org/InStock",
-              "seller": {
-                "@type": "Organization",
-                "name": "Dharani Herbbals"
-              }
-            },
-            "aggregateRating": reviewStats.count > 0 ? {
-              "@type": "AggregateRating",
-              "ratingValue": reviewStats.average,
-              "reviewCount": reviewStats.count
-            } : undefined
-          })}
-        </script>
-      </Helmet>
+      {renderMetaTags()}
       <Header />
       <div className="container mx-auto px-4 py-8 md:py-16">
         <div className="flex flex-col lg:flex-row gap-8">
