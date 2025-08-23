@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
@@ -13,6 +14,70 @@ const Index = () => {
   const isTamil = language === LANGUAGES.TAMIL;
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50/30 via-white to-emerald-50/30">
+      <Helmet>
+        {/* Basic Meta Tags */}
+        <title>Dharani Herbbals - Premium Natural & Herbal Products | Ayurvedic Wellness</title>
+        <meta name="description" content="Discover premium natural and herbal products at Dharani Herbbals. Traditional Ayurvedic remedies, organic wellness solutions, and quality-assured herbal medicines for your health journey." />
+        <meta name="keywords" content="herbal products, ayurveda, natural remedies, organic wellness, traditional medicine, herbal supplements, ayurvedic products, natural health, wellness products, herbal medicine" />
+        <link rel="canonical" href="https://dharaniherbbals.com/" />
+        
+        {/* Open Graph (Facebook, WhatsApp, LinkedIn) */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Dharani Herbbals - Premium Natural & Herbal Products" />
+        <meta property="og:description" content="Discover premium natural and herbal products. Traditional Ayurvedic remedies, organic wellness solutions for your health journey. ✅ 100% Natural ✅ Lab Tested ✅ Free Delivery" />
+        <meta property="og:image" content="https://api.dharaniherbbals.com/uploads/logo_12f2d3e78e.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:url" content="https://dharaniherbbals.com/" />
+        <meta property="og:site_name" content="Dharani Herbbals" />
+        <meta property="og:locale" content="en_IN" />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Dharani Herbbals - Premium Natural & Herbal Products" />
+        <meta name="twitter:description" content="Discover premium natural and herbal products. Traditional Ayurvedic remedies, organic wellness solutions. 100% Natural • Lab Tested • Free Delivery" />
+        <meta name="twitter:image" content="https://api.dharaniherbbals.com/uploads/logo_12f2d3e78e.png" />
+        <meta name="twitter:site" content="@dharaniherbbals" />
+        
+        {/* WhatsApp Specific */}
+        <meta property="og:image:alt" content="Dharani Herbbals - Premium Natural & Herbal Products for Wellness" />
+        
+        {/* Structured Data for Google */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Dharani Herbbals",
+            "description": "Premium natural and herbal products for wellness. Traditional Ayurvedic remedies and organic health solutions.",
+            "url": "https://dharaniherbbals.com",
+            "logo": "https://api.dharaniherbbals.com/uploads/favicon_b04c8c6af4.png",
+            "image": "https://api.dharaniherbbals.com/uploads/logo_12f2d3e78e.png",
+            "sameAs": [
+              "https://facebook.com/dharaniherbbals",
+              "https://instagram.com/dharaniherbbals",
+              "https://twitter.com/dharaniherbbals"
+            ],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+91-9876543210",
+              "contactType": "customer service",
+              "availableLanguage": ["English", "Tamil"]
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "IN",
+              "addressRegion": "Tamil Nadu"
+            }
+          })}
+        </script>
+        
+        {/* Mobile & Theme */}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#22c55e" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+      </Helmet>
       <Header />
       <main className="overflow-hidden">
         {/* Hero Image Slider */}
