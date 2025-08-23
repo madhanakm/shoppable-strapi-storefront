@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from 'react-helmet-async';
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -33,8 +34,9 @@ import ScrollToTopButton from "./components/ScrollToTopButton";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TranslationProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <TranslationProvider>
       <AuthProvider>
         <QuickCheckoutProvider>
           <CartProvider>
@@ -73,8 +75,9 @@ const App = () => (
           </CartProvider>
         </QuickCheckoutProvider>
       </AuthProvider>
-    </TranslationProvider>
-  </QueryClientProvider>
+      </TranslationProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
