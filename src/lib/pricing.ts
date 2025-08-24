@@ -9,7 +9,7 @@ export const getPriceByUserType = (product: any, userType?: string) => {
     case 'retailer':
       return parseFloat(product.retailprice || product.customerprice || 0);
     case 'distributor':
-      return parseFloat(product.distributiorprice || product.customerprice || 0);
+      return parseFloat(product.distributorprice || product.customerprice || 0);
     case 'sarvo':
       return parseFloat(product.sarvoprice || product.customerprice || 0);
     case 'drug':

@@ -53,20 +53,22 @@ const ProductDetail = () => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
           const userData = JSON.parse(storedUser);
+          console.log('Fetching user type for user ID:', userData.id);
           const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
           if (response.ok) {
             const result = await response.json();
             if (result.data && result.data.attributes) {
               const newUserType = result.data.attributes.userType || 'customer';
-              
+              console.log('User type fetched:', newUserType);
               setUserType(newUserType);
             }
           }
         } else {
+          console.log('No stored user, setting customer type');
           setUserType('customer');
         }
       } catch (error) {
-        
+        console.error('Error fetching user type:', error);
         setUserType('customer');
       }
     };
@@ -249,11 +251,24 @@ const ProductDetail = () => {
   // Update prices when userType changes
   useEffect(() => {
     if (product && userType !== null) {
+      console.log('Updating price for user type:', userType);
+      console.log('Product pricing data:', {
+        customerprice: product.customerprice,
+        resellerprice: product.resellerprice,
+        retailprice: product.retailprice,
+        distributorprice: product.distributorprice,
+        sarvoprice: product.sarvoprice
+      });
+      
+      let newPrice;
       if (product.isVariableProduct && selectedVariation) {
-        setCurrentPrice(getPriceByUserType(selectedVariation, userType || 'customer'));
+        newPrice = getPriceByUserType(selectedVariation, userType || 'customer');
+        console.log('Variable product price for', userType, ':', newPrice);
       } else {
-        setCurrentPrice(getPriceByUserType(product, userType || 'customer'));
+        newPrice = getPriceByUserType(product, userType || 'customer');
+        console.log('Regular product price for', userType, ':', newPrice);
       }
+      setCurrentPrice(newPrice);
     }
   }, [userType, product, selectedVariation]);
   
