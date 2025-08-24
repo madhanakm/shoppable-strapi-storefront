@@ -53,10 +53,10 @@ const AboutUs = () => {
 
   const stats = [
     { number: '15+', label: isTamil ? 'மகிமையான ஆண்டுகள்' : 'Glorious years' },
-    { number: '30,000+', label: isTamil ? 'மகிழ்ச்சியான வாடிக்கையாளர்கள்' : 'Happy clients' },
-    { number: '325+', label: isTamil ? 'தயாரிப்புகள்' : 'Products' },
+    { number: '6L+', label: isTamil ? 'மகிழ்ச்சியான வாடிக்கையாளர்கள்' : 'Customers' },
+    { number: '350+', label: isTamil ? 'தயாரிப்புகள்' : 'Products' },
     { number: '24+', label: isTamil ? 'குழு ஆலோசகர்கள்' : 'Team advisor' },
-    { number: '6500+', label: isTamil ? 'மறுவிற்பனையாளர்கள்' : 'Resellers' }
+    { number: '7,500+', label: isTamil ? 'மறுவிற்பனையாளர்கள்' : 'Resellers' }
   ];
 
   return (
