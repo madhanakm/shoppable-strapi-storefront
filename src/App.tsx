@@ -27,6 +27,7 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import RefundReturns from "./pages/RefundReturns";
 import OrderSuccess from "./pages/OrderSuccess";
+import AdminPendingOrders from "./pages/AdminPendingOrders";
 import WhatsAppFloat from "./components/WhatsAppFloat";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
@@ -66,6 +67,7 @@ const App = () => (
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/refund-returns" element={<RefundReturns />} />
                   <Route path="/order-success" element={<OrderSuccess />} />
+                  <Route path="/admin/pending-orders" element={<AdminPendingOrders />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

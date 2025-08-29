@@ -1,3 +1,5 @@
+import { createPendingOrder, updatePendingOrderStatus, updatePendingOrderRazorpayId, updatePendingOrderPaymentDetails, PendingOrderData } from './pending-orders';
+
 declare global {
   interface Window {
     Razorpay: any;
@@ -51,34 +53,55 @@ export const generateInvoiceNumber = async (): Promise<string> => {
 
 export const generateOrderNumber = async (): Promise<string> => {
   try {
-    const response = await fetch('https://api.dharaniherbbals.com/api/order-entries');
-    const data = await response.json();
-    const count = Array.isArray(data) ? data.length : (data.data?.length || 0);
-    const orderNumber = `DH-ECOM-${String(count + 1).padStart(3, '0')}`;
+    // Get the latest order numbers from both orders and pending-orders
+    const [ordersResponse, pendingOrdersResponse] = await Promise.all([
+      fetch('https://api.dharaniherbbals.com/api/orders?sort=ordernum:desc&pagination[limit]=1'),
+      fetch('https://api.dharaniherbbals.com/api/pending-orders?sort=orderNumber:desc&pagination[limit]=1')
+    ]);
     
+    let maxNumber = 26; // Starting from 027 since current is 026
     
-    
-    // Store order number in order-entries
-    const storeResponse = await fetch('https://api.dharaniherbbals.com/api/order-entries', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: { orderNumber } })
-    });
-    
-    if (!storeResponse.ok) {
-      
-    } else {
-      
+    // Check latest order from orders collection
+    if (ordersResponse.ok) {
+      const ordersData = await ordersResponse.json();
+      if (ordersData.data && ordersData.data.length > 0) {
+        const lastOrder = ordersData.data[0].attributes?.ordernum || ordersData.data[0].ordernum;
+        if (lastOrder && lastOrder.startsWith('DH-ECOM-')) {
+          const lastNumber = parseInt(lastOrder.replace('DH-ECOM-', ''));
+          if (!isNaN(lastNumber)) {
+            maxNumber = Math.max(maxNumber, lastNumber);
+          }
+        }
+      }
     }
+    
+    // Check latest order from pending-orders collection
+    if (pendingOrdersResponse.ok) {
+      const pendingData = await pendingOrdersResponse.json();
+      if (pendingData.data && pendingData.data.length > 0) {
+        const lastPendingOrder = pendingData.data[0].attributes?.orderNumber || pendingData.data[0].orderNumber;
+        if (lastPendingOrder && lastPendingOrder.startsWith('DH-ECOM-')) {
+          const lastNumber = parseInt(lastPendingOrder.replace('DH-ECOM-', ''));
+          if (!isNaN(lastNumber)) {
+            maxNumber = Math.max(maxNumber, lastNumber);
+          }
+        }
+      }
+    }
+    
+    // Generate next order number
+    const nextNumber = maxNumber + 1;
+    const orderNumber = `DH-ECOM-${String(nextNumber).padStart(3, '0')}`;
     
     return orderNumber;
   } catch (error) {
-    
+    console.error('Error generating order number:', error);
+    // Fallback to timestamp-based number
     return `DH-ECOM-${String(Date.now()).slice(-3)}`;
   }
 };
 
-export const initiatePayment = async (orderData: OrderData, orderNumber: string, invoiceNumber: string): Promise<any> => {
+export const initiatePayment = async (orderData: OrderData, orderNumber: string, invoiceNumber: string, notes?: string): Promise<any> => {
   return new Promise(async (resolve, reject) => {
     if (!window.Razorpay) {
       reject(new Error('Razorpay SDK not loaded'));
@@ -86,6 +109,20 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
     }
 
     try {
+      // Validate order data before proceeding
+      if (!orderData.customerInfo?.email || !orderData.items?.length) {
+        throw new Error('Invalid order data provided');
+      }
+
+      // Pending order should already be created in checkout, just update with Razorpay ID
+      
+      // Store order number for recovery
+      localStorage.setItem(`pendingOrder_${orderNumber}`, JSON.stringify({
+        orderNumber,
+        email: orderData.customerInfo.email,
+        timestamp: Date.now()
+      }));
+
       // Create Razorpay order server-side with auto-capture
       const createOrderResponse = await fetch('https://api.dharaniherbbals.com/api/create-razorpay-orders', {
         method: 'POST',
@@ -100,6 +137,7 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
       });
       
       if (!createOrderResponse.ok) {
+        await updatePendingOrderStatus(orderNumber, 'failed');
         throw new Error('Failed to create Razorpay order');
       }
       
@@ -111,7 +149,18 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
       
       if (!razorpayOrderId) {
         console.error('Response structure:', response);
+        await updatePendingOrderStatus(orderNumber, 'failed');
         throw new Error('No Razorpay order ID returned');
+      }
+      
+      // Update pending order with Razorpay order ID immediately
+      console.log('Attempting to update Razorpay order ID for:', orderNumber, 'with ID:', razorpayOrderId);
+      const razorpayUpdateSuccess = await updatePendingOrderRazorpayId(orderNumber, razorpayOrderId);
+      if (!razorpayUpdateSuccess) {
+        console.error('Failed to update Razorpay order ID for:', orderNumber);
+        // Don't throw error, continue with payment
+      } else {
+        console.log('Razorpay order ID updated successfully for order:', orderNumber);
       }
       
       const options = {
@@ -131,21 +180,61 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
       },
       handler: async (response: any) => {
         try {
-          console.log('Payment successful, storing order:', { orderNumber, paymentId: response.razorpay_payment_id });
           await storeOrder(orderData, orderNumber, invoiceNumber, response);
-          console.log('Order stored successfully');
+          await updatePendingOrderStatus(orderNumber, 'completed', response.razorpay_payment_id);
+          
+          // Update pending order with invoice number
+          await fetch(`https://api.dharaniherbbals.com/api/pending-orders?filters[orderNumber][$eq]=${encodeURIComponent(orderNumber)}`, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+          }).then(async (res) => {
+            if (res.ok) {
+              const data = await res.json();
+              if (data.data && data.data.length > 0) {
+                const pendingOrderId = data.data[0].id;
+                await fetch(`https://api.dharaniherbbals.com/api/pending-orders/${pendingOrderId}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    data: {
+                      invoiceNumber,
+                      updatedAt: new Date().toISOString()
+                    }
+                  })
+                });
+              }
+            }
+          });
+          
+          localStorage.removeItem(`pendingOrder_${orderNumber}`);
           resolve(response);
         } catch (error) {
-          console.error('Error storing order:', error);
+          await updatePendingOrderStatus(orderNumber, 'failed', response?.razorpay_payment_id, error.message);
           reject(error);
         }
       },
       modal: {
-        ondismiss: () => reject(new Error('Payment cancelled'))
+        ondismiss: () => {
+          console.log('Payment modal dismissed for order:', orderNumber, '- keeping as pending');
+          reject(new Error('Payment cancelled'));
+        }
       }
     };
 
     const rzp = new window.Razorpay(options);
+    
+    // Handle payment failures
+    rzp.on('payment.failed', async (response: any) => {
+      console.log('Payment failed:', response.error);
+      await updatePendingOrderStatus(
+        orderNumber, 
+        'failed', 
+        response.error.metadata?.payment_id,
+        `Payment failed: ${response.error.description || response.error.reason}`
+      );
+      reject(new Error(`Payment failed: ${response.error.description || response.error.reason}`));
+    });
+    
     rzp.open();
     
     } catch (error) {
@@ -222,7 +311,7 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumb
   try {
     const cleanPhone = orderData.customerInfo.phone.replace(/[^0-9]/g, '');
     
-    // Send SMS
+    // Send SMS with error handling
     fetch('https://api.dharaniherbbals.com/api/order-sms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -233,9 +322,11 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumb
           amount: orderData.total
         }
       })
+    }).catch(error => {
+      console.error('Failed to send SMS notification:', error);
     });
     
-    // Send WhatsApp message
+    // Send WhatsApp message with error handling
     fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -244,9 +335,11 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumb
         orderNumber: orderNumber,
         amount: orderData.total
       })
+    }).catch(error => {
+      console.error('Failed to send WhatsApp notification:', error);
     });
   } catch (error) {
-    console.error('Error sending notifications:', error);
+    console.error('Error preparing notifications:', error);
   }
   
   return result;

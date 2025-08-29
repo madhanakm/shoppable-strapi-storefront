@@ -15,10 +15,12 @@ import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/lib/utils';
 import { getAddresses } from '@/services/profile';
 import { generateOrderNumber, generateInvoiceNumber, initiatePayment, OrderData } from '@/services/payment';
+import { createPendingOrder, completePendingOrder, failPendingOrder, PendingOrderData } from '@/services/pending-orders';
 import { sendOrderConfirmationSMS } from '@/services/order-sms';
 import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-settings';
 import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package, Plus } from 'lucide-react';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
+import { recoverPendingPayments } from '@/services/payment-recovery';
 
 const Checkout = () => {
   const { cartItems: regularCartItems, clearCart } = useCart();
@@ -81,6 +83,9 @@ const Checkout = () => {
       navigate('/login?redirect=checkout');
       return;
     }
+    
+    // Recover any pending payments on checkout load
+    recoverPendingPayments();
     
     if (user?.id) {
       if (currentUserId !== null && user.id !== currentUserId) {
@@ -182,10 +187,8 @@ const Checkout = () => {
     }
 
     try {
-      // Generate order number and invoice number
+      // Generate order number only (invoice number generated only for successful orders)
       const orderNumber = await generateOrderNumber();
-      const invoiceNumber = await generateInvoiceNumber();
-      // Order and invoice numbers generated
       
       // Get address info
       let shippingAddr = '';
@@ -197,6 +200,40 @@ const Checkout = () => {
       }
 
       if (formData.paymentMethod === 'online') {
+        // Create pending order first (without invoice number)
+        const pendingOrderData: PendingOrderData = {
+          orderNumber,
+          invoiceNumber: '', // No invoice number for pending orders
+          items: cartItems.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            skuid: item.originalSkuid || item.skuid || item.id
+          })),
+          total: total,
+          shippingCharges: shippingCharges,
+          customerInfo: {
+            name: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            address: formData.shippingAddress || selectedShippingAddress?.attributes?.address || selectedShippingAddress?.address || '',
+            city: formData.shippingCity || selectedShippingAddress?.attributes?.city || selectedShippingAddress?.city || '',
+            state: formData.shippingState || selectedShippingAddress?.attributes?.state || selectedShippingAddress?.state || '',
+            pincode: formData.shippingPincode || selectedShippingAddress?.attributes?.pincode || selectedShippingAddress?.pincode || ''
+          },
+          paymentMethod: 'online',
+          notes: formData.notes,
+          status: 'pending',
+          createdAt: new Date().toISOString()
+        };
+        
+        // Create pending order
+        const pendingOrderId = await createPendingOrder(pendingOrderData);
+        if (!pendingOrderId) {
+          throw new Error('Failed to create pending order record');
+        }
+
         // Prepare order data for Razorpay
         const orderData: OrderData = {
           items: cartItems.map(item => ({
@@ -204,11 +241,10 @@ const Checkout = () => {
             name: item.name,
             price: item.price,
             quantity: item.quantity,
-            image: item.image,
             skuid: item.originalSkuid || item.skuid || item.id
           })),
           total: total,
-          shippingCharges: shippingCharges, // Adding shipping charges
+          shippingCharges: shippingCharges,
           customerInfo: {
             name: formData.fullName,
             email: formData.email,
@@ -222,8 +258,10 @@ const Checkout = () => {
 
         // Initiating payment
         try {
+          // Generate invoice number only for successful payment
+          const invoiceNumber = await generateInvoiceNumber();
           // Initiate Razorpay payment
-          await initiatePayment(orderData, orderNumber, invoiceNumber);
+          await initiatePayment(orderData, orderNumber, invoiceNumber, formData.notes);
           
           toast({
             title: "Payment Successful!",
@@ -231,10 +269,61 @@ const Checkout = () => {
           });
         } catch (paymentError) {
           console.error('Payment error:', paymentError);
+          // Only update to failed if it's not a cancellation
+          if (!paymentError.message?.includes('Payment cancelled')) {
+            await failPendingOrder(orderNumber, paymentError.message || 'Payment failed');
+          }
           throw new Error(paymentError.message || 'Payment failed');
         }
       } else {
-        // COD Order - Store directly
+        // COD Order - Create pending order first (without invoice number), then store
+        const pendingOrderData: PendingOrderData = {
+          orderNumber,
+          invoiceNumber: '', // No invoice number for pending COD orders
+          items: cartItems.map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            skuid: item.originalSkuid || item.skuid || item.id
+          })),
+          total: total,
+          shippingCharges: shippingCharges,
+          customerInfo: {
+            name: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            address: formData.shippingAddress || selectedShippingAddress?.attributes?.address || selectedShippingAddress?.address || '',
+            city: formData.shippingCity || selectedShippingAddress?.attributes?.city || selectedShippingAddress?.city || '',
+            state: formData.shippingState || selectedShippingAddress?.attributes?.state || selectedShippingAddress?.state || '',
+            pincode: formData.shippingPincode || selectedShippingAddress?.attributes?.pincode || selectedShippingAddress?.pincode || ''
+          },
+          paymentMethod: 'cod',
+          notes: formData.notes,
+          status: 'pending',
+          createdAt: new Date().toISOString()
+        };
+        
+        // Validate customer info before creating order
+        if (!pendingOrderData.customerInfo.name || !pendingOrderData.customerInfo.email || !pendingOrderData.customerInfo.phone) {
+          throw new Error('Missing required customer information');
+        }
+        
+        // Create pending order with error handling
+        let pendingOrderId: string;
+        try {
+          pendingOrderId = await createPendingOrder(pendingOrderData);
+          if (!pendingOrderId) {
+            throw new Error('No order ID returned');
+          }
+        } catch (error) {
+          console.error('Failed to create pending order:', error);
+          throw new Error(`Failed to create order record: ${error.message}`);
+        }
+        
+        // Generate invoice number for COD orders
+        const invoiceNumber = await generateInvoiceNumber();
+        
         const orderPayload = {
           data: {
             ordernum: orderNumber,
@@ -260,28 +349,51 @@ const Checkout = () => {
 
         // Validate required fields
         if (!formData.fullName || !formData.email || !formData.phone || !shippingAddr) {
+          await failPendingOrder(orderNumber, 'Missing required customer information');
           throw new Error('Missing required customer information');
         }
         
+        // Invoice number already generated above
+        
         // Placing COD order
+        let response: Response;
+        let responseText: string;
         
-        const response = await fetch('https://api.dharaniherbbals.com/api/orders', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(orderPayload)
-        });
+        try {
+          response = await fetch('https://api.dharaniherbbals.com/api/orders', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(orderPayload)
+          });
 
-        const responseText = await response.text();
-        
-        if (!response.ok) {
-          // Error handling
-          throw new Error(`Failed to place order: ${response.status} - ${responseText}`);
+          responseText = await response.text();
+          
+          if (!response.ok) {
+            // Update pending order status to failed
+            await failPendingOrder(orderNumber, `API Error: ${response.status} - ${responseText}`);
+            throw new Error(`Failed to place order: ${response.status} - ${responseText}`);
+          }
+        } catch (fetchError) {
+          await failPendingOrder(orderNumber, `Network error: ${fetchError.message}`);
+          throw new Error(`Network error while placing order: ${fetchError.message}`);
         }
         
-        const result = JSON.parse(responseText);
+        let result;
+        try {
+          result = JSON.parse(responseText);
+        } catch (parseError) {
+          await failPendingOrder(orderNumber, `Invalid response format: ${responseText}`);
+          throw new Error('Invalid response from server');
+        }
+        
+        // Update pending order status to completed
+        const updateSuccess = await completePendingOrder(orderNumber);
+        if (!updateSuccess) {
+          console.warn('Failed to update pending order status to completed');
+        }
         
         // Send order confirmation SMS and WhatsApp message
         try {
@@ -327,10 +439,26 @@ const Checkout = () => {
       }
       navigate('/order-success');
     } catch (error) {
-      // Order error handling
+      console.error('Checkout error:', error);
+      
+      // Provide specific error messages based on error type
+      let errorMessage = "Please try again or contact support.";
+      
+      if (error.message.includes('Network error')) {
+        errorMessage = "Network connection issue. Please check your internet and try again.";
+      } else if (error.message.includes('Missing required')) {
+        errorMessage = "Please fill in all required fields.";
+      } else if (error.message.includes('Payment')) {
+        errorMessage = "Payment processing failed. Please try again.";
+      } else if (error.message.includes('API Error')) {
+        errorMessage = "Server error occurred. Please try again in a few minutes.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Order Failed",
-        description: error.message || "Please try again or contact support.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

@@ -1,3 +1,0 @@
-License: 37222837678
-Secretkey: jptj0i50vc94z1n2ydir
-api: https://login.tendigit.in/api/sendtemplate.php?LicenseNumber=37222837678&APIKey=gBDOus806SnCkiwMRxYHImXzQ&Contact=91XXXXXXXXXX&Template=XXXXXXXXXX&Param=xxx,xxx,xx&Fileurl=xxxxxx&URLParam=xxxxxx&HeadURL=xxxxx&HeadParam=xxxxx&Name=xxxxx&PDFName=xxxx

@@ -12,10 +12,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { useToast } from '@/hooks/use-toast';
 import { updateProfile, changePassword, addAddress, getAddresses, updateAddress, deleteAddress } from '@/services/profile';
-import { User, Lock, MapPin, Edit, Trash2, Plus, RefreshCw, Package, Calendar, CreditCard, Truck, FileText, Download } from 'lucide-react';
+import { User, Lock, MapPin, Edit, Trash2, Plus, RefreshCw, Package, Calendar, CreditCard, Truck, FileText, Download, Clock, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatPrice } from '@/lib/utils';
 import { generateOrderReceipt, downloadOrderReceiptHTML } from '@/utils/htmlPdfGenerator';
+
 
 const Profile = () => {
   const { user, isAuthenticated } = useAuth();
@@ -55,6 +56,8 @@ const Profile = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   
+
+  
   // Address data
   const [addresses, setAddresses] = useState<any[]>([]);
   const [editingAddress, setEditingAddress] = useState<any>(null);
@@ -71,6 +74,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (user?.id) {
+
       loadAddresses();
       loadOrders();
     }
@@ -97,6 +101,41 @@ const Profile = () => {
       setLoadingOrders(false);
     }
   };
+  
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Clock className="w-4 h-4" />;
+      case 'processing':
+        return <AlertCircle className="w-4 h-4" />;
+      case 'completed':
+        return <CheckCircle className="w-4 h-4" />;
+      case 'failed':
+      case 'cancelled':
+        return <XCircle className="w-4 h-4" />;
+      default:
+        return <Package className="w-4 h-4" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'processing':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'failed':
+        return 'bg-red-100 text-red-800';
+      case 'cancelled':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+  
+
   
   const handleEditAddress = (address: any) => {
     setEditingAddress(address);
@@ -272,7 +311,7 @@ const Profile = () => {
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                       <p className="text-gray-500">Loading orders...</p>
                     </div>
-                  ) : orders.length === 0 ? (
+                  ) : (orders.length === 0) ? (
                     <div className="text-center py-12">
                       <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                       <p className="text-gray-500 text-lg">No orders found</p>
@@ -280,95 +319,99 @@ const Profile = () => {
                     </div>
                   ) : (
                     <div className="space-y-6">
-                      {orders.map((order) => {
-                        const attrs = order.attributes || order;
-                        const orderDate = new Date(attrs.createdAt).toLocaleDateString('en-IN', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        });
-                        
-                        return (
-                          <div key={order.id} className="bg-gradient-to-r from-gray-50 to-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
-                            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-                              <div className="flex-1">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-                                  <div>
-                                    <h3 className="font-bold text-lg text-gray-800">Order #{attrs.ordernum || 'N/A'}</h3>
-                                    <p className="text-sm text-gray-500">Invoice: {attrs.invoicenum || 'N/A'}</p>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    {/* Receipt button removed */}
-                                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                                      attrs.payment === 'Online Payment' ? 'bg-blue-100 text-blue-800' :
-                                      'bg-orange-100 text-orange-800'
-                                    }`}>
-                                      {attrs.payment || 'COD'}
-                                    </span>
-                                  </div>
-                                </div>
-                                
-                                <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                                  <div className="flex items-center gap-2 text-gray-600">
-                                    <Calendar className="w-4 h-4" />
-                                    <span className="text-sm">{orderDate}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 text-gray-600">
-                                    <CreditCard className="w-4 h-4" />
-                                    <span className="text-sm font-semibold">{formatPrice(attrs.totalValue || attrs.total || 0)}</span>
-                                  </div>
-                                </div>
-                                
-                                <div className="mb-4">
-                                  <h4 className="font-semibold text-gray-700 mb-2">Customer: {attrs.customername}</h4>
-                                  <p className="text-sm text-gray-600">Phone: {attrs.phoneNum}</p>
-                                  <p className="text-sm text-gray-600">Quantity: {attrs.quantity} items</p>
-                                  {attrs.Name && (
-                                    <div className="mt-2">
-                                      <p className="text-sm font-medium text-gray-700">Items:</p>
-                                      <div className="mt-2 border rounded-md overflow-hidden">
-                                        <table className="w-full">
-                                          <thead className="bg-gray-50">
-                                            <tr>
-                                              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Product</th>
-                                              <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">Quantity</th>
-                                            </tr>
-                                          </thead>
-                                          <tbody className="divide-y divide-gray-100">
-                                            {attrs.Name.split('|').map((product, index) => {
-                                              const quantities = attrs.quantity ? String(attrs.quantity).split('|') : [];
-                                              const qty = quantities[index] || '1';
-                                              return (
-                                                <tr key={index} className="hover:bg-gray-50">
-                                                  <td className="px-3 py-2 text-sm text-gray-600">{product.trim()}</td>
-                                                  <td className="px-3 py-2 text-sm text-gray-600 text-right">{qty.trim()}</td>
-                                                </tr>
-                                              );
-                                            })}
-                                          </tbody>
-                                        </table>
+                      {/* Completed Orders Section */}
+                      {orders.length > 0 && (
+                          <div className="space-y-4">
+                            {orders.map((order) => {
+                              const attrs = order.attributes || order;
+                              const orderDate = new Date(attrs.createdAt).toLocaleDateString('en-IN', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              });
+                              
+                              return (
+                                <div key={order.id} className="bg-gradient-to-r from-gray-50 to-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300">
+                                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+                                    <div className="flex-1">
+                                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+                                        <div>
+                                          <h3 className="font-bold text-lg text-gray-800">Order #{attrs.ordernum || 'N/A'}</h3>
+                                          <p className="text-sm text-gray-500">Invoice: {attrs.invoicenum || 'N/A'}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                                            attrs.payment === 'Online Payment' ? 'bg-blue-100 text-blue-800' :
+                                            'bg-orange-100 text-orange-800'
+                                          }`}>
+                                            {attrs.payment || 'COD'}
+                                          </span>
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
-                                  {attrs.remarks && (
-                                    <p className="text-sm text-gray-600 mt-2">Notes: {attrs.remarks}</p>
-                                  )}
-                                </div>
-                                
-                                {attrs.shippingAddress && (
-                                  <div className="flex items-start gap-2 text-sm text-gray-600">
-                                    <Truck className="w-4 h-4 mt-1" />
-                                    <div>
-                                      <span className="font-medium">Delivery Address:</span>
-                                      <p className="mt-1">{attrs.shippingAddress}</p>
+                                      
+                                      <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                                        <div className="flex items-center gap-2 text-gray-600">
+                                          <Calendar className="w-4 h-4" />
+                                          <span className="text-sm">{orderDate}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-gray-600">
+                                          <CreditCard className="w-4 h-4" />
+                                          <span className="text-sm font-semibold">{formatPrice(attrs.totalValue || attrs.total || 0)}</span>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="mb-4">
+                                        <h4 className="font-semibold text-gray-700 mb-2">Customer: {attrs.customername}</h4>
+                                        <p className="text-sm text-gray-600">Phone: {attrs.phoneNum}</p>
+                                        <p className="text-sm text-gray-600">Quantity: {attrs.quantity} items</p>
+                                        {attrs.Name && (
+                                          <div className="mt-2">
+                                            <p className="text-sm font-medium text-gray-700">Items:</p>
+                                            <div className="mt-2 border rounded-md overflow-hidden">
+                                              <table className="w-full">
+                                                <thead className="bg-gray-50">
+                                                  <tr>
+                                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Product</th>
+                                                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500">Quantity</th>
+                                                  </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-100">
+                                                  {attrs.Name.split('|').map((product, index) => {
+                                                    const quantities = attrs.quantity ? String(attrs.quantity).split('|') : [];
+                                                    const qty = quantities[index] || '1';
+                                                    return (
+                                                      <tr key={index} className="hover:bg-gray-50">
+                                                        <td className="px-3 py-2 text-sm text-gray-600">{product.trim()}</td>
+                                                        <td className="px-3 py-2 text-sm text-gray-600 text-right">{qty.trim()}</td>
+                                                      </tr>
+                                                    );
+                                                  })}
+                                                </tbody>
+                                              </table>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {attrs.remarks && (
+                                          <p className="text-sm text-gray-600 mt-2">Notes: {attrs.remarks}</p>
+                                        )}
+                                      </div>
+                                      
+                                      {attrs.shippingAddress && (
+                                        <div className="flex items-start gap-2 text-sm text-gray-600">
+                                          <Truck className="w-4 h-4 mt-1" />
+                                          <div>
+                                            <span className="font-medium">Delivery Address:</span>
+                                            <p className="mt-1">{attrs.shippingAddress}</p>
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
-                                )}
-                              </div>
-                            </div>
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
+                        )}
                     </div>
                   )}
                 </CardContent>
