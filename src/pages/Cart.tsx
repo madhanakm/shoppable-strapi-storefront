@@ -10,12 +10,43 @@ import { useCart } from '@/contexts/CartContext';
 import { useCartProducts } from '@/hooks/useCartProducts';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
+import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-settings';
+import { calculateShipping } from '@/lib/shipping';
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, cartCount } = useCart();
   const { products, loading, cartTotal } = useCartProducts(cartItems);
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
+  const [ecomSettings, setEcomSettings] = React.useState<EcommerceSettings>({
+    cod: true,
+    onlinePay: true,
+    tamilNaduShipping: '50',
+    otherStateShipping: '150',
+    tamilNaduFreeShipping: '750',
+    otherStateFreeShipping: '1000'
+  });
+  
+  // Fetch ecommerce settings
+  React.useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settings = await getEcommerceSettings();
+        setEcomSettings(settings);
+      } catch (error) {
+        console.error('Failed to fetch ecommerce settings:', error);
+      }
+    };
+    
+    fetchSettings();
+  }, []);
+  
+  // Calculate shipping for Tamil Nadu (default state for cart preview)
+  const shippingInfo = calculateShipping({
+    cartTotal,
+    state: 'Tamil Nadu', // Default to Tamil Nadu for cart preview
+    ecomSettings
+  });
 
 
   if (cartCount === 0) {
@@ -178,8 +209,15 @@ const Cart = () => {
                     </div>
                     <div className="flex justify-between text-lg">
                       <span className="text-gray-600">Shipping</span>
-                      <span className="font-semibold text-green-600">Free</span>
+                      <span className={`font-semibold ${shippingInfo.isFree ? 'text-green-600' : 'text-gray-600'}`}>
+                        {shippingInfo.isFree ? 'Free' : 'Calculated at checkout'}
+                      </span>
                     </div>
+                    {!shippingInfo.isFree && shippingInfo.remainingForFreeShipping > 0 && (
+                      <div className="text-sm text-green-600 mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                        🎉 Add {formatPrice(shippingInfo.remainingForFreeShipping)} more for free shipping in Tamil Nadu!
+                      </div>
+                    )}
                     <div className="flex justify-between text-lg">
                       <span className="text-gray-600">Tax</span>
                       <span className="font-semibold text-gray-500">Inclusive</span>
@@ -188,6 +226,9 @@ const Cart = () => {
                       <div className="flex justify-between text-xl font-bold">
                         <span>Total</span>
                         <span className="text-primary">{formatPrice(cartTotal)}</span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        *Final shipping calculated at checkout based on delivery location
                       </div>
                     </div>
                   </div>

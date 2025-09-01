@@ -18,6 +18,7 @@ import { generateOrderNumber, generateInvoiceNumber, initiatePayment, OrderData 
 import { createPendingOrder, completePendingOrder, failPendingOrder, PendingOrderData } from '@/services/pending-orders';
 import { sendOrderConfirmationSMS } from '@/services/order-sms';
 import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-settings';
+import { calculateShipping } from '@/lib/shipping';
 import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package, Plus } from 'lucide-react';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { recoverPendingPayments } from '@/services/payment-recovery';
@@ -493,8 +494,8 @@ const Checkout = () => {
   
 
 
-  // Calculate shipping charges based on state
-  const getShippingCharges = () => {
+  // Calculate shipping charges based on state and cart total
+  const getShippingInfo = () => {
     let state = '';
     if (selectedShippingAddress && !useManualAddress) {
       const attrs = selectedShippingAddress.attributes || selectedShippingAddress;
@@ -503,23 +504,16 @@ const Checkout = () => {
       state = formData.shippingState || '';
     }
     
-    // Normalize state name for flexible matching
-    const normalizedState = state.toLowerCase().replace(/\s+/g, '');
-    
-    // Check if state is Tamil Nadu with flexible matching
-    const isTamilNadu = normalizedState.includes('tamilnadu') || 
-                       normalizedState === 'tn' ||
-                       normalizedState.includes('tamil') && normalizedState.includes('nadu');
-    
-    // Use shipping prices from ecommerce settings
-    const tamilNaduShipping = parseInt(ecomSettings.tamilNaduShipping || '50');
-    const otherStateShipping = parseInt(ecomSettings.otherStateShipping || '150');
-    
-    return isTamilNadu ? tamilNaduShipping : otherStateShipping;
+    return calculateShipping({
+      cartTotal,
+      state,
+      ecomSettings
+    });
   };
 
-  // Recalculate shipping charges when state or ecomSettings change
-  const shippingCharges = getShippingCharges();
+  // Get shipping information
+  const shippingInfo = getShippingInfo();
+  const shippingCharges = shippingInfo.charges;
   const total = cartTotal + shippingCharges;
 
   return (
@@ -960,8 +954,15 @@ const Checkout = () => {
                       </div>
                       <div className="flex justify-between text-lg">
                         <span>Shipping</span>
-                        <span className="font-semibold">{formatPrice(shippingCharges)}</span>
+                        <span className={`font-semibold ${shippingInfo.isFree ? 'text-green-600' : ''}`}>
+                          {shippingInfo.isFree ? 'Free' : formatPrice(shippingCharges)}
+                        </span>
                       </div>
+                      {!shippingInfo.isFree && shippingInfo.remainingForFreeShipping > 0 && (
+                        <div className="text-sm text-green-600 mt-1">
+                          Add {formatPrice(shippingInfo.remainingForFreeShipping)} more for free shipping!
+                        </div>
+                      )}
                       <div className="flex justify-between text-lg text-gray-500">
                         <span>Tax</span>
                         <span>Inclusive</span>

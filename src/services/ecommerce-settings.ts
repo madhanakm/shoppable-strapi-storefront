@@ -7,6 +7,8 @@ export interface EcommerceSettings {
   onlinePay: boolean;
   tamilNaduShipping: string;
   otherStateShipping: string;
+  tamilNaduFreeShipping: string;
+  otherStateFreeShipping: string;
 }
 
 /**
@@ -40,7 +42,9 @@ export const getEcommerceSettings = async (): Promise<EcommerceSettings> => {
       cod: settings.cod === true,
       onlinePay: settings.onlinePay === true,
       tamilNaduShipping: settings.tamilNaduShipping || '50',
-      otherStateShipping: settings.otherStateShipping || '150'
+      otherStateShipping: settings.otherStateShipping || '150',
+      tamilNaduFreeShipping: settings.tamilNaduFreeShipping || '750',
+      otherStateFreeShipping: settings.otherStateFreeShipping || '1000'
     };
     return result;
   } catch (error) {
@@ -48,7 +52,11 @@ export const getEcommerceSettings = async (): Promise<EcommerceSettings> => {
     // Default values if API fails
     return {
       cod: true,
-      onlinePay: true
+      onlinePay: true,
+      tamilNaduShipping: '50',
+      otherStateShipping: '150',
+      tamilNaduFreeShipping: '750',
+      otherStateFreeShipping: '1000'
     };
   }
 };
