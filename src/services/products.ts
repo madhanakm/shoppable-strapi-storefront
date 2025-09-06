@@ -37,7 +37,8 @@ export const getProducts = async (
       queryParams.push(`filters[type][$eq]=${encodeURIComponent(filters.type)}`);
     }
     if (filters.search) {
-      queryParams.push(`filters[Name][$containsi]=${encodeURIComponent(filters.search)}`);
+      const searchTerm = encodeURIComponent(filters.search);
+      queryParams.push(`filters[Name][$containsi]=${searchTerm}`);
     }
     if (filters.minPrice !== undefined) {
       queryParams.push(`filters[mrp][$gte]=${filters.minPrice}`);

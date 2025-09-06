@@ -88,20 +88,20 @@ const AllProducts = () => {
     
     if (categoryParam) setSelectedCategory(categoryParam);
     if (typeParam) setSelectedType(typeParam);
-    if (searchParam) {
-      setSearchQuery(searchParam);
-    } else {
-      setSearchQuery('');
-    }
+    
+    // Always update search query based on URL param
+    setSearchQuery(searchParam || '');
+    
+    // Reset pagination when URL params change
+    setPage(1);
+    setHasMore(true);
   }, [searchParams]);
 
   useEffect(() => {
-    // Only reset page if we're not on the initial load with URL params
-    if (searchQuery !== searchParams.get('search')) {
-      setPage(1);
-      setHasMore(true);
-    }
-  }, [selectedCategory, selectedBrand, selectedType, searchQuery, sortBy]);
+    // Reset pagination when filters change
+    setPage(1);
+    setHasMore(true);
+  }, [selectedCategory, selectedBrand, selectedType, sortBy, searchQuery]);
   
   useEffect(() => {
     if (userType !== null) {
@@ -244,14 +244,14 @@ const AllProducts = () => {
     setSearchQuery('');
     setPage(1);
     setHasMore(true);
-    window.history.replaceState({}, '', '/products');
+    navigate('/products');
   };
 
   const clearSearch = () => {
     setSearchQuery('');
     setPage(1);
     setHasMore(true);
-    window.history.replaceState({}, '', '/products');
+    navigate('/products');
   };
 
   if (loading) {

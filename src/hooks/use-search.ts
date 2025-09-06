@@ -32,8 +32,9 @@ export const useSearch = () => {
   }, []);
 
   const handleSearch = useCallback((query: string) => {
-    if (query.trim()) {
-      navigate(`/products?search=${encodeURIComponent(query)}`);
+    const trimmedQuery = query.trim();
+    if (trimmedQuery) {
+      navigate(`/products?search=${encodeURIComponent(trimmedQuery)}`);
     }
   }, [navigate]);
 

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Menu, X, Search, ShoppingCart, Heart, User, Leaf, Globe, Phone, Mail } from 'lucide-react';
@@ -7,11 +7,23 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
-import { useSearch } from '@/hooks/use-search';
+
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { searchQuery, setSearchQuery, handleSearch, clearSearch } = useSearch();
+  const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  
+  // Sync search query with URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const searchParam = urlParams.get('search');
+    setSearchQuery(searchParam || '');
+  }, [location.search, location.pathname]);
+  
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlistContext();
   const { user, logout, isAuthenticated } = useAuth();
@@ -26,8 +38,10 @@ const Header = () => {
 
   const onSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery) {
+      // Navigate to products page with search query
+      navigate(`/products?search=${encodeURIComponent(trimmedQuery)}`);
       setIsMenuOpen(false);
     }
   };
@@ -57,10 +71,16 @@ const Header = () => {
               <div className="flex flex-1 max-w-xs mx-4">
                 <form onSubmit={onSearchSubmit} className="relative w-full">
                   <Input
+                    key={location.search}
                     type="text"
                     placeholder="Search products..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        onSearchSubmit(e);
+                      }
+                    }}
                     className="pl-10 pr-16 h-8 border-white/50 focus:border-white rounded-full bg-white focus:bg-white transition-all text-sm text-gray-700 placeholder-gray-500"
                   />
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
@@ -221,10 +241,16 @@ const Header = () => {
           <div className="md:hidden pb-4">
             <form onSubmit={onSearchSubmit} className="relative">
               <Input
+                key={location.search}
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    onSearchSubmit(e);
+                  }
+                }}
                 className="pl-10 pr-20 h-9 border-gray-300 focus:border-primary rounded-full bg-gray-50 focus:bg-white text-sm"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
