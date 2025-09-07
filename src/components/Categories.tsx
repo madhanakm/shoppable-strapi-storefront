@@ -69,7 +69,7 @@ const Categories = () => {
         <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-teal-400 rounded-full blur-2xl"></div>
       </div>
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="w-full px-4 relative z-10">
         {/* Enhanced header section */}
         <div className="text-center mb-8">
           <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
@@ -109,10 +109,10 @@ const Categories = () => {
             
             <div 
               id="categories-slider"
-              className="flex overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-smooth"
+              className="flex overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-smooth w-full"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              <div className="flex gap-6 px-4">
+              <div className="flex gap-6 px-4 w-full">
                 {categories.map((category, index) => (
                   <Link 
                     to={`/products?category=${encodeURIComponent(category.name)}`}

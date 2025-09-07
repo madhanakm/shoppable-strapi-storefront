@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ImageSlider from '@/components/ImageSlider';
 import ProductBlocks from '@/components/ProductBlocks';
+import SimpleGoogleReviews from '@/components/SimpleGoogleReviews';
 
 const Index = () => {
   const { translate, language } = useTranslation();
@@ -102,6 +103,18 @@ const Index = () => {
           </div>
         </ErrorBoundary>
         
+        {/* Google Reviews Section - Full Screen */}
+        <ErrorBoundary>
+          <section className="py-16 bg-gray-50 w-full">
+            <SimpleGoogleReviews 
+              businessName="Dharani Herbbals"
+              googleMapsUrl="https://www.google.com/maps/place/Dharani+Herbbals/@11.3580339,77.1641668,17.06z/data=!4m8!3m7!1s0x3ba8e1bdd6179ddb:0x82f81936cbaf1a2!8m2!3d11.3580361!4d77.166633!9m1!1b1!16s%2Fg%2F11c6f588fq!5m1!1e1?entry=ttu&g_ep=EgoyMDI1MDkwMy4wIKXMDSoASAFQAw%3D%3D"
+              rating={4.8}
+              reviewCount={150}
+            />
+          </section>
+        </ErrorBoundary>
+        
         {/* Product Blocks Section */}
         <ErrorBoundary>
           <div className="py-16 bg-white relative">
@@ -135,7 +148,7 @@ const Index = () => {
                   {isTamil ? 'இலவச டெலிவரி' : 'Free Delivery'}
                 </h3>
                 <p className={`text-sm text-gray-600 ${isTamil ? 'tamil-text' : ''}`}>
-                  {isTamil ? '₹5,000க்கு மேல் ஆர்டர்களில்' : 'On orders above ₹5,000'}
+                  {isTamil ? '₹750 (TN) / ₹1000 (மற்ற மாநிலங்கள்) க்கு மேல் ஆர்டர்களில்' : 'On orders above ₹750 (Tamil Nadu) / ₹1000 (Other States)'}
                 </p>
               </div>
               <div className="group">
