@@ -9,6 +9,8 @@ export interface EcommerceSettings {
   otherStateShipping: string;
   tamilNaduFreeShipping: string;
   otherStateFreeShipping: string;
+  minimumOrderValueTamilNadu: string;
+  minimumOrderValueOtherState: string;
 }
 
 /**
@@ -44,7 +46,9 @@ export const getEcommerceSettings = async (): Promise<EcommerceSettings> => {
       tamilNaduShipping: settings.tamilNaduShipping || '50',
       otherStateShipping: settings.otherStateShipping || '150',
       tamilNaduFreeShipping: settings.tamilNaduFreeShipping || '750',
-      otherStateFreeShipping: settings.otherStateFreeShipping || '1000'
+      otherStateFreeShipping: settings.otherStateFreeShipping || '1000',
+      minimumOrderValueTamilNadu: settings.minimumOrderValueTamilNadu || '0',
+      minimumOrderValueOtherState: settings.minimumOrderValueOtherState || '0'
     };
     return result;
   } catch (error) {
@@ -56,7 +60,9 @@ export const getEcommerceSettings = async (): Promise<EcommerceSettings> => {
       tamilNaduShipping: '50',
       otherStateShipping: '150',
       tamilNaduFreeShipping: '750',
-      otherStateFreeShipping: '1000'
+      otherStateFreeShipping: '1000',
+      minimumOrderValueTamilNadu: '0',
+      minimumOrderValueOtherState: '0'
     };
   }
 };

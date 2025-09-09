@@ -218,6 +218,7 @@ const Cart = () => {
                         🎉 Add {formatPrice(shippingInfo.remainingForFreeShipping)} more for free shipping in Tamil Nadu!
                       </div>
                     )}
+
                     <div className="flex justify-between text-lg">
                       <span className="text-gray-600">Tax</span>
                       <span className="font-semibold text-gray-500">Inclusive</span>

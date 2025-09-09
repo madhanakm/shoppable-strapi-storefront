@@ -51,7 +51,7 @@ const Checkout = () => {
   const [differentBillingAddress, setDifferentBillingAddress] = useState(false);
   const [useManualAddress, setUseManualAddress] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
-  const [ecomSettings, setEcomSettings] = useState<EcommerceSettings>({ cod: true, onlinePay: true });
+  const [ecomSettings, setEcomSettings] = useState<EcommerceSettings>({ cod: true, onlinePay: true, minimumOrderValueTamilNadu: '0', minimumOrderValueOtherState: '0' });
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   
   const [formData, setFormData] = useState({
@@ -165,6 +165,17 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // Validate minimum order value (including shipping charges)
+    if (minimumOrderValue > 0 && total < minimumOrderValue) {
+      toast({
+        title: "Minimum Order Value Not Met",
+        description: `Minimum order value is ${formatPrice(minimumOrderValue)}. Please add more items to your cart.`,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
     
     // Validate payment method is available
     if (formData.paymentMethod === 'cod' && !ecomSettings.cod) {
@@ -511,10 +522,14 @@ const Checkout = () => {
     });
   };
 
-  // Get shipping information
+  // Get shipping information (recalculates when address changes)
   const shippingInfo = getShippingInfo();
   const shippingCharges = shippingInfo.charges;
   const total = cartTotal + shippingCharges;
+  
+  // Get minimum order value based on current shipping state
+  const minimumOrderValue = parseFloat(shippingInfo.isTamilNadu ? ecomSettings.minimumOrderValueTamilNadu : ecomSettings.minimumOrderValueOtherState || '0');
+  const isMinimumOrderMet = minimumOrderValue === 0 || total >= minimumOrderValue;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
@@ -535,9 +550,9 @@ const Checkout = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="grid lg:grid-cols-3 gap-2 sm:gap-4 md:gap-8">
+            <div className="grid lg:grid-cols-3 gap-4 md:gap-8">
               {/* Checkout Form */}
-              <div className="lg:col-span-2 space-y-4 md:space-y-8">
+              <div className="lg:col-span-2 space-y-6">
                 {/* Customer Information */}
                 <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                   <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-t-lg">
@@ -546,8 +561,8 @@ const Checkout = () => {
                       Customer Information
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-4 md:p-6 lg:p-8">
-                    <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+                  <CardContent className="p-4 md:p-6">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">Full Name</Label>
                         <Input
@@ -601,7 +616,7 @@ const Checkout = () => {
                       Shipping Address
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6 md:p-8">
+                  <CardContent className="p-4 md:p-6">
                     {addresses.length > 0 && (
                       <div className="mb-6">
                         <div className="flex items-center gap-4 mb-4">
@@ -667,7 +682,7 @@ const Checkout = () => {
                             placeholder="Enter your complete address"
                           />
                         </div>
-                        <div className="grid md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                           <div>
                             <Label htmlFor="shippingCity" className="text-sm font-medium text-gray-700">City</Label>
                             <Input
@@ -715,7 +730,7 @@ const Checkout = () => {
                       Billing Address
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6 md:p-8">
+                  <CardContent className="p-4 md:p-6">
                     <div className="flex items-center gap-4 mb-6">
                       <input
                         type="checkbox"
@@ -793,7 +808,7 @@ const Checkout = () => {
                                 placeholder="Enter billing address"
                               />
                             </div>
-                            <div className="grid md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                               <div>
                                 <Label htmlFor="billingCity" className="text-sm font-medium text-gray-700">City</Label>
                                 <Input
@@ -843,7 +858,7 @@ const Checkout = () => {
                       Payment Method
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6 md:p-8">
+                  <CardContent className="p-4 md:p-6">
                     {isLoadingSettings ? (
                       <div className="flex items-center justify-center p-4">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
@@ -899,7 +914,7 @@ const Checkout = () => {
 
                 {/* Order Notes */}
                 <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-                  <CardContent className="p-6 md:p-8">
+                  <CardContent className="p-4 md:p-6">
                     <Label htmlFor="notes" className="text-sm font-medium text-gray-700">Order Notes (Optional)</Label>
                     <Textarea
                       id="notes"
@@ -915,12 +930,12 @@ const Checkout = () => {
               </div>
 
               {/* Order Summary */}
-              <div className="order-first lg:order-last">
+              <div className="order-last lg:order-last">
                 <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm lg:sticky lg:top-8">
                   <CardHeader className="bg-gradient-to-r from-gray-100 to-gray-50 rounded-t-lg">
                     <CardTitle className="text-xl">Order Summary</CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6 md:p-8">
+                  <CardContent className="p-4 md:p-6">
                     {/* Order Items */}
                     <div className="space-y-4 mb-6">
                       {cartItems.map((item) => (
@@ -952,6 +967,17 @@ const Checkout = () => {
                         <span>Subtotal</span>
                         <span>{formatPrice(cartTotal)}</span>
                       </div>
+                      {/* Minimum Order Value Warning */}
+                      {minimumOrderValue > 0 && total < minimumOrderValue && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                          <p className="text-sm text-red-600">
+                            Minimum order value: {formatPrice(minimumOrderValue)}
+                          </p>
+                          <p className="text-xs text-red-500 mt-1">
+                            Add {formatPrice(minimumOrderValue - total)} more to place order
+                          </p>
+                        </div>
+                      )}
                       <div className="flex justify-between text-lg">
                         <span>Shipping</span>
                         <span className={`font-semibold ${shippingInfo.isFree ? 'text-green-600' : ''}`}>
@@ -979,13 +1005,21 @@ const Checkout = () => {
                     {(ecomSettings.cod || ecomSettings.onlinePay) && (
                       <Button
                         type="submit"
-                        disabled={isLoading}
-                        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg py-2 md:py-3 text-base md:text-lg font-semibold"
+                        disabled={isLoading || !isMinimumOrderMet}
+                        className={`w-full shadow-lg py-2 md:py-3 text-base md:text-lg font-semibold ${
+                          isMinimumOrderMet 
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' 
+                            : 'bg-gray-400 cursor-not-allowed'
+                        }`}
                       >
                         {isLoading ? (
                           <>
                             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                             Processing Order...
+                          </>
+                        ) : !isMinimumOrderMet ? (
+                          <>
+                            Minimum Order Not Met
                           </>
                         ) : (
                           <>
