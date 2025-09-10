@@ -180,7 +180,13 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
       },
       handler: async (response: any) => {
         try {
+          // First update pending order status to processing with payment ID
+          await updatePendingOrderStatus(orderNumber, 'processing', response.razorpay_payment_id);
+          
+          // Store the order in main orders collection
           await storeOrder(orderData, orderNumber, invoiceNumber, response);
+          
+          // Mark as completed only after successful order storage
           await updatePendingOrderStatus(orderNumber, 'completed', response.razorpay_payment_id);
           
           // Update pending order with invoice number
@@ -209,7 +215,9 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
           localStorage.removeItem(`pendingOrder_${orderNumber}`);
           resolve(response);
         } catch (error) {
-          await updatePendingOrderStatus(orderNumber, 'failed', response?.razorpay_payment_id, error.message);
+          console.error('Order storage failed after successful payment:', error);
+          // Mark as payment_success_order_failed to handle later
+          await updatePendingOrderStatus(orderNumber, 'payment_success_order_failed', response?.razorpay_payment_id, error.message);
           reject(error);
         }
       },

@@ -272,7 +272,7 @@ const Checkout = () => {
         try {
           // Generate invoice number only for successful payment
           const invoiceNumber = await generateInvoiceNumber();
-          // Initiate Razorpay payment
+          // Initiate Razorpay payment (handles order creation and completion internally)
           await initiatePayment(orderData, orderNumber, invoiceNumber, formData.notes);
           
           toast({
