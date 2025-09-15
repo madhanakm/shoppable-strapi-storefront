@@ -44,4 +44,6 @@ export default defineConfig(({ mode }) => ({
       }
     },
   },
+  publicDir: 'public',
+  assetsInclude: ['**/.htaccess'],
 }));
