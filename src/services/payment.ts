@@ -289,7 +289,6 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumb
       price: orderData.items.map(item => `${item.name}: ${item.price} x ${item.quantity}`).join(' | '),
       skuid: orderData.items.map(item => item.skuid || item.id).join(' | '),
       prodid: orderData.items.map(item => item.id).join(' | '),
-      prodid: orderData.items.map(item => item.id).join(' | '),
       remarks: `Payment ID: ${paymentResponse.razorpay_payment_id}`,
       notes: `Online Payment - ${paymentResponse.razorpay_payment_id}`,
       quantity: String(orderData.items.reduce((sum, item) => sum + item.quantity, 0))
