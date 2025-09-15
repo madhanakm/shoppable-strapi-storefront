@@ -355,6 +355,7 @@ const Checkout = () => {
             price: cartItems.map(item => `${item.name}: ${formatPrice(item.price)} x ${item.quantity}`).join(' | '),
             skuid: cartItems.map(item => item.originalSkuid || item.skuid || item.id).join(' | '),
             prodid: cartItems.map(item => item.id).join(' | '),
+            prodid: cartItems.map(item => item.id).join(' | '),
             remarks: formData.notes || 'No special notes',
             quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0))
           }
