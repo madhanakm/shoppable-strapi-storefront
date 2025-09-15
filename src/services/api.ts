@@ -2,7 +2,7 @@ import { AuthResponse, StrapiResponse, StrapiSingleResponse } from '@/types/stra
 
 const API_URL = import.meta.env.MODE === 'development' 
   ? '/api' 
-  : (import.meta.env.VITE_API_URL || 'https://api.dharaniherbbals.com/api');
+  : 'https://api.dharaniherbbals.com/api';
 
 /**
  * Helper to get the auth token from localStorage

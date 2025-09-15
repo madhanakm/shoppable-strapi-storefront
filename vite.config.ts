@@ -8,13 +8,15 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    proxy: {
-      '/api': {
-        target: 'https://api.dharaniherbbals.com',
-        changeOrigin: true,
-        secure: true,
+    ...(mode === 'development' && {
+      proxy: {
+        '/api': {
+          target: 'https://api.dharaniherbbals.com',
+          changeOrigin: true,
+          secure: true,
+        }
       }
-    }
+    })
   },
   plugins: [
     react(),
@@ -32,7 +34,14 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     rollupOptions: {
-      // Remove html2canvas from external as it needs to be bundled
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          pdf: ['jspdf', 'html2canvas']
+        }
+      }
     },
   },
 }));
