@@ -56,7 +56,7 @@ const HotSellingProducts = () => {
     
     const loadProducts = async () => {
       try {
-        const response = await getProducts(1, 4, { hot_selling: true });
+        const response = await getProducts(1, 12, { hot_selling: true });
         
         
         let productList = [];
@@ -156,7 +156,7 @@ const HotSellingProducts = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
             <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
               <div className="relative overflow-hidden">

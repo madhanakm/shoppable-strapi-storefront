@@ -282,11 +282,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           const timestamp = new Date().getTime();
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`, {
-            headers: {
-              'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
-            }
-          });
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
           if (response.ok) {
             const result = await response.json();
             if (result.data && result.data.attributes) {
@@ -453,8 +449,8 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 mb-16">
-          {(showAll ? products : products.slice(0, type === 'popular' ? 8 : 12)).map((product, index) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6 mb-16">
+          {(showAll ? products : products.slice(0, 8)).map((product, index) => (
             <div 
               key={product.id} 
               className="animate-fade-in-up"
@@ -466,7 +462,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         </div>
 
         <div className="text-center">
-          {products.length > (type === 'popular' ? 8 : 12) && !showAll ? (
+          {products.length > 8 && !showAll ? (
             <Button 
               size="lg" 
               className="group bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 hover:from-primary hover:via-emerald-500 hover:to-primary text-white transition-all duration-500 px-12 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl rounded-2xl transform hover:scale-105 hover:-translate-y-1"
