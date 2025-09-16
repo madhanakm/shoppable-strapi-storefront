@@ -420,7 +420,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
   }
 
   return (
-    <section className={`py-12 ${bgColor} relative overflow-hidden`}>
+    <section className={`py-12 ${bgColor} relative overflow-hidden w-full`}>
       {/* Enhanced Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-40 h-40 rounded-full bg-gradient-to-br from-primary to-emerald-400 blur-3xl animate-pulse"></div>
@@ -428,40 +428,91 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         <div className="absolute top-1/2 left-1/4 w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
       </div>
       
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-12">
-          <div className="flex flex-col items-center mb-8">
-            <div className={`p-6 rounded-3xl ${accentColor} shadow-2xl mb-6 transform hover:scale-110 hover:rotate-6 transition-all duration-500 relative`}>
-              <div className="absolute inset-0 rounded-3xl bg-white/20 blur-xl"></div>
+      <div className="w-full px-0 relative z-10">
+        <div className="text-left mb-8 px-4">
+          <div className="flex items-center gap-4 mb-4">
+            <div className={`p-4 rounded-2xl ${accentColor} shadow-xl`}>
               <div className="relative">{icon}</div>
             </div>
-            <h2 className={`text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-4 tracking-tight ${isTamil ? 'tamil-text' : ''}`}>
+            <h2 className={`text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent tracking-tight ${isTamil ? 'tamil-text' : ''}`}>
               {typeof title === 'string' ? title : title}
             </h2>
-            <p className={`text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
-              {typeof description === 'string' ? description : description}
-            </p>
-          </div>
-          <div className="flex justify-center items-center gap-2 mb-4">
-            <div className="w-8 h-1 bg-gradient-to-r from-primary to-emerald-400 rounded-full"></div>
-            <div className="w-16 h-2 bg-gradient-to-r from-primary via-emerald-400 to-primary rounded-full"></div>
-            <div className="w-8 h-1 bg-gradient-to-r from-emerald-400 to-primary rounded-full"></div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6 mb-16">
-          {(showAll ? products : products.slice(0, 8)).map((product, index) => (
-            <div 
-              key={product.id} 
-              className="animate-fade-in-up"
-              style={{ animationDelay: `${index * 150}ms` }}
-            >
-              <ProductCard product={product} reviewStats={reviewStats} />
-            </div>
-          ))}
+        <div className="overflow-hidden mb-16 w-full">
+          <div className="flex gap-4 animate-scroll-interval">
+            {products.slice(0, 12).concat(products.slice(0, 12)).map((product, index) => (
+              <div 
+                key={`${product.id}-${index}`} 
+                className="flex-shrink-0 w-64"
+              >
+                <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 bg-white rounded-2xl">
+                  <div className="relative overflow-hidden bg-gradient-to-br from-red-50 via-white to-red-50">
+                    <Link to={`/product/${product.id}`} className="block cursor-pointer">
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="w-full h-40 object-contain group-hover:scale-105 transition-all duration-300 p-4"
+                      />
+                    </Link>
+                  </div>
+                  
+                  <CardContent className="p-4 bg-white">
+                    <Link to={`/product/${product.id}`}>
+                      <h3 className="font-bold text-sm mb-2 group-hover:text-red-600 transition-colors line-clamp-2 min-h-[2.5rem] leading-tight">
+                        {filterPriceFromName(product.name)}
+                      </h3>
+                    </Link>
+                    
+                    <StarRating 
+                      rating={reviewStats[product.id]?.average || 0} 
+                      count={reviewStats[product.id]?.count || 0} 
+                      size="sm" 
+                      showCount={false} 
+                    />
+                    
+                    <div className="mb-3">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-lg font-black text-green-600">
+                          {product.priceRange || formatPrice(product.price)}
+                        </span>
+                        {product.originalPrice && (
+                          <span className="text-xs text-gray-400 line-through">
+                            {formatPrice(product.originalPrice)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          // Add to cart logic here
+                        }}
+                      >
+                        <ShoppingCart className="w-3 h-3 mr-1" />
+                        Add to Cart
+                      </Button>
+                      
+                      <Button 
+                        className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium"
+                        onClick={() => navigate(`/product/${product.id}`)}
+                      >
+                        Buy Now
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="text-center">
+        <div className="text-center px-4">
           {products.length > 8 && !showAll ? (
             <Button 
               size="lg" 
@@ -488,6 +539,873 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
   );
 };
 
+// Special Trending Products Component with Carousel Layout
+const TrendingProductsSection = () => {
+  const [products, setProducts] = useState([]);
+  const [reviewStats, setReviewStats] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [userType, setUserType] = useState('customer');
+  const { user } = useAuth();
+  const { translate, language } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserType = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          const timestamp = new Date().getTime();
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.attributes) {
+              setUserType(result.data.attributes.userType || 'customer');
+              return;
+            }
+          }
+        }
+        setUserType('customer');
+      } catch (error) {
+        setUserType('customer');
+      }
+    };
+    fetchUserType();
+  }, []);
+
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        setLoading(true);
+        const timestamp = new Date().getTime();
+        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[type][$eq]=trending&filters[status][$eq]=true&pagination[pageSize]=8&timestamp=${timestamp}`);
+        
+        if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
+        
+        const data = await response.json();
+        let productList = Array.isArray(data) ? data : (data?.data || []);
+        
+        const formattedProducts = productList.map(item => {
+          const attributes = item.attributes || item;
+          const currentUserType = userType || 'customer';
+          
+          let price = getPriceByUserType(attributes, currentUserType);
+          let priceRange = null;
+          
+          if (attributes.isVariableProduct && attributes.variations) {
+            try {
+              const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
+              const prices = variations.map(variation => getPriceByUserType(variation, currentUserType));
+              
+              if (prices.length > 0) {
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                price = minPrice;
+                priceRange = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+              }
+            } catch (e) {
+              // Keep default price
+            }
+          }
+          
+          return {
+            id: item.id || Math.random().toString(),
+            name: attributes.Name || attributes.name || 'Product',
+            tamil: attributes.tamil || null,
+            price: price,
+            priceRange: priceRange,
+            image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
+            originalPrice: attributes.originalPrice || null,
+            category: attributes.category,
+            skuid: attributes.skuid || attributes.SKUID,
+            isVariableProduct: attributes.isVariableProduct,
+            variations: attributes.variations,
+            userType: userType || 'customer'
+          };
+        });
+        
+        setProducts(formattedProducts);
+        
+        const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
+        if (productIds.length > 0) {
+          try {
+            const stats = await getBulkProductReviewStats(productIds);
+            setReviewStats(stats);
+          } catch (reviewError) {
+            // Handle error
+          }
+        }
+      } catch (err) {
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrending();
+  }, [userType]);
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-blue-100">
+        <div className="container mx-auto px-4 text-center">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-64 mx-auto mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-96 mx-auto"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (products.length === 0) return null;
+
+  return (
+    <section className="py-16 bg-gradient-to-br from-green-50 via-white to-emerald-100 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-20 left-20 w-40 h-40 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-br from-teal-400 to-green-500 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 mb-6">
+            <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl">
+              <TrendingUp className="w-8 h-8 text-white" />
+            </div>
+            <h2 className={`text-3xl md:text-4xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('blocks.trendingProducts')}
+            </h2>
+          </div>
+          <p className={`text-lg text-gray-600 max-w-2xl mx-auto ${isTamil ? 'tamil-text' : ''}`}>
+            {translate('blocks.trendingDescription')}
+          </p>
+        </div>
+
+        {/* 4 Column 2 Row Layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
+          {products.slice(0, 8).map((product, index) => (
+            <div 
+              key={product.id} 
+              className="transform transition-all duration-500 hover:scale-105"
+              style={{ animationDelay: `${index * 150}ms` }}
+            >
+              <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden border border-green-100 hover:border-green-200 bg-white rounded-2xl animate-fade-in-up">
+                <div className="relative overflow-hidden bg-gradient-to-br from-green-50 via-white to-green-50">
+                  <Link to={`/product/${product.id}`} className="block cursor-pointer">
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="w-full h-32 object-contain group-hover:scale-105 transition-all duration-300 p-3"
+                    />
+                  </Link>
+                </div>
+                
+                <CardContent className="p-3 bg-white">
+                  <Link to={`/product/${product.id}`}>
+                    <h3 className={`font-bold text-xs mb-2 group-hover:text-green-600 transition-colors line-clamp-2 min-h-[2rem] leading-tight ${isTamil ? 'tamil-text' : ''}`}>
+                      {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
+                    </h3>
+                  </Link>
+                  
+                  <StarRating 
+                    rating={reviewStats[product.id]?.average || 0} 
+                    count={reviewStats[product.id]?.count || 0} 
+                    size="sm" 
+                    showCount={false} 
+                  />
+                  
+                  <div className="mb-2">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-sm font-black text-green-600">
+                        {product.priceRange || formatPrice(product.price)}
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-xs text-gray-400 line-through">
+                          {formatPrice(product.originalPrice)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-1">
+                    <Button 
+                      className={`flex-1 bg-green-500 hover:bg-green-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text' : ''}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Add to cart logic here
+                      }}
+                    >
+                      <ShoppingCart className="w-2 h-2 mr-1" />
+                      {translate('blocks.add')}
+                    </Button>
+                    
+                    <Button 
+                      className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text' : ''}`}
+                      onClick={() => navigate(`/product/${product.id}`)}
+                    >
+                      {translate('blocks.buy')}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+        </div>
+
+        {/* View All Button */}
+        <div className="text-center mt-8">
+          <Link to="/products?type=trending">
+            <Button className={`bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('blocks.viewAllTrendingProducts')}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Special Deals of the Day Component with Beautiful Layout
+const DealsOfTheDaySection = () => {
+  const [products, setProducts] = useState([]);
+  const [reviewStats, setReviewStats] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [userType, setUserType] = useState('customer');
+  const { user } = useAuth();
+  const { translate, language } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserType = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          const timestamp = new Date().getTime();
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.attributes) {
+              setUserType(result.data.attributes.userType || 'customer');
+              return;
+            }
+          }
+        }
+        setUserType('customer');
+      } catch (error) {
+        setUserType('customer');
+      }
+    };
+    fetchUserType();
+  }, []);
+
+  useEffect(() => {
+    const fetchDeals = async () => {
+      try {
+        setLoading(true);
+        const timestamp = new Date().getTime();
+        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[type][$eq]=deals&filters[status][$eq]=true&pagination[pageSize]=10&timestamp=${timestamp}`);
+        
+        if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
+        
+        const data = await response.json();
+        let productList = Array.isArray(data) ? data : (data?.data || []);
+        
+        const formattedProducts = productList.map(item => {
+          const attributes = item.attributes || item;
+          const currentUserType = userType || 'customer';
+          
+          let price = getPriceByUserType(attributes, currentUserType);
+          let priceRange = null;
+          
+          if (attributes.isVariableProduct && attributes.variations) {
+            try {
+              const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
+              const prices = variations.map(variation => getPriceByUserType(variation, currentUserType));
+              
+              if (prices.length > 0) {
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                price = minPrice;
+                priceRange = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+              }
+            } catch (e) {
+              // Keep default price
+            }
+          }
+          
+          return {
+            id: item.id || Math.random().toString(),
+            name: attributes.Name || attributes.name || 'Product',
+            tamil: attributes.tamil || null,
+            price: price,
+            priceRange: priceRange,
+            image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
+            originalPrice: attributes.originalPrice || null,
+            category: attributes.category,
+            skuid: attributes.skuid || attributes.SKUID,
+            isVariableProduct: attributes.isVariableProduct,
+            variations: attributes.variations,
+            userType: userType || 'customer'
+          };
+        });
+        
+        setProducts(formattedProducts);
+        
+        const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
+        if (productIds.length > 0) {
+          try {
+            const stats = await getBulkProductReviewStats(productIds);
+            setReviewStats(stats);
+          } catch (reviewError) {
+            // Handle error
+          }
+        }
+      } catch (err) {
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDeals();
+  }, [userType]);
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
+        <div className="container mx-auto px-4 text-center">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-64 mx-auto mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-96 mx-auto"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (products.length === 0) return null;
+
+  // Shuffle products and pick random featured deal
+  const shuffledProducts = [...products].sort(() => Math.random() - 0.5);
+  const featuredDeal = shuffledProducts[0];
+  const bottomDeals = shuffledProducts.slice(1, 3);
+  const sideDeals = shuffledProducts.slice(3, 7);
+
+  return (
+    <section className="py-16 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-orange-400 to-red-500 rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 mb-6">
+            <div className="p-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl shadow-xl animate-bounce">
+              <Tag className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 bg-clip-text text-transparent">
+              {translate('blocks.dealsOfTheDay')}
+            </h2>
+          </div>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            {translate('blocks.dealsDescription')}
+          </p>
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <div className="w-12 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
+            <div className="w-20 h-2 bg-gradient-to-r from-red-500 to-pink-500 rounded-full"></div>
+            <div className="w-12 h-1 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
+          </div>
+        </div>
+
+        {/* Main Layout */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Left Side - Featured Deal + Bottom Cards */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Featured Deal - Large Card */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <Card className="relative bg-white rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2">
+                <div className="grid md:grid-cols-2 h-full">
+                  {/* Image Side */}
+                  <div className="relative bg-gradient-to-br from-orange-100 to-red-100 p-8 flex items-center justify-center">
+                    <div className={`absolute top-4 left-4 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-2xl font-bold text-sm shadow-lg animate-pulse ${isTamil ? 'tamil-text' : ''}`}>
+                      🔥 {translate('blocks.megaDeal')}
+                    </div>
+                    <Link to={`/product/${featuredDeal.id}`}>
+                      <img 
+                        src={featuredDeal.image} 
+                        alt={featuredDeal.name}
+                        className="w-full max-w-xs h-64 object-contain group-hover:scale-110 transition-transform duration-500"
+                      />
+                    </Link>
+                  </div>
+                  
+                  {/* Content Side */}
+                  <div className="p-8 flex flex-col justify-center">
+                    <div className="mb-4">
+                      <span className={`inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-bold mb-3 ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('blocks.limitedTime')}
+                      </span>
+                      <Link to={`/product/${featuredDeal.id}`}>
+                        <h3 className={`text-2xl font-black text-gray-800 mb-3 hover:text-red-600 transition-colors line-clamp-2 ${isTamil ? 'tamil-text' : ''}`}>
+                          {isTamil && featuredDeal.tamil ? filterPriceFromName(featuredDeal.tamil) : filterPriceFromName(featuredDeal.name)}
+                        </h3>
+                      </Link>
+                      <StarRating 
+                        rating={reviewStats[featuredDeal.id]?.average || 0} 
+                        count={reviewStats[featuredDeal.id]?.count || 0} 
+                        size="sm" 
+                        showCount={true} 
+                      />
+                    </div>
+                    
+                    <div className="mb-6">
+                      <div className="flex items-baseline gap-3 mb-2">
+                        <span className="text-3xl font-black text-red-600">
+                          {featuredDeal.priceRange || formatPrice(featuredDeal.price)}
+                        </span>
+                        {featuredDeal.originalPrice && (
+                          <span className="text-lg text-gray-400 line-through">
+                            {formatPrice(featuredDeal.originalPrice)}
+                          </span>
+                        )}
+                      </div>
+                      {featuredDeal.originalPrice && (
+                        <span className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-bold">
+                          Save {Math.round(((featuredDeal.originalPrice - featuredDeal.price) / featuredDeal.originalPrice) * 100)}%
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="flex gap-3">
+                      <Button 
+                        className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl py-3 font-bold ${isTamil ? 'tamil-text' : ''}`}
+                        onClick={() => navigate(`/product/${featuredDeal.id}`)}
+                      >
+                        {translate('blocks.viewDeal')}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Bottom Two Cards */}
+            <div className="grid md:grid-cols-2 gap-4">
+              {bottomDeals.map((deal, index) => (
+                <Card key={deal.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden bg-white rounded-2xl border border-gray-100 hover:border-red-200">
+                  <div className="p-4">
+                    <div className="relative mb-4">
+                      <Link to={`/product/${deal.id}`}>
+                        <img 
+                          src={deal.image} 
+                          alt={deal.name}
+                          className="w-full h-32 object-contain bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </Link>
+                    </div>
+                    <Link to={`/product/${deal.id}`}>
+                      <h4 className={`font-bold text-sm text-gray-800 group-hover:text-red-600 transition-colors line-clamp-2 mb-2 ${isTamil ? 'tamil-text' : ''}`}>
+                        {isTamil && deal.tamil ? filterPriceFromName(deal.tamil) : filterPriceFromName(deal.name)}
+                      </h4>
+                    </Link>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-lg font-black text-red-600">
+                          {deal.priceRange || formatPrice(deal.price)}
+                        </span>
+                        {deal.originalPrice && (
+                          <div className="text-xs text-gray-400 line-through">
+                            {formatPrice(deal.originalPrice)}
+                          </div>
+                        )}
+                      </div>
+                      <Button 
+                        size="sm"
+                        className={`bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl px-3 py-1 text-xs font-bold ${isTamil ? 'tamil-text' : ''}`}
+                        onClick={() => navigate(`/product/${deal.id}`)}
+                      >
+                        {translate('blocks.view')}
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Side - More Deals */}
+          <div className="flex flex-col h-full">
+            <h3 className={`text-xl font-bold text-gray-800 mb-4 text-center ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('blocks.moreHotDeals')}
+            </h3>
+            <div className="flex-1 space-y-4">
+              {sideDeals.map((deal, index) => (
+                <Card key={deal.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden bg-white rounded-2xl border border-gray-100 hover:border-red-200">
+                  <div className="flex items-center p-4">
+                    <div className="relative flex-shrink-0 mr-4">
+                      <Link to={`/product/${deal.id}`}>
+                        <img 
+                          src={deal.image} 
+                          alt={deal.name}
+                          className="w-16 h-16 object-contain bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-2 group-hover:scale-110 transition-transform duration-300"
+                        />
+                      </Link>
+                      <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                        {index + 4}
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <Link to={`/product/${deal.id}`}>
+                        <h4 className={`font-bold text-sm text-gray-800 group-hover:text-red-600 transition-colors line-clamp-2 mb-1 ${isTamil ? 'tamil-text' : ''}`}>
+                          {isTamil && deal.tamil ? filterPriceFromName(deal.tamil) : filterPriceFromName(deal.name)}
+                        </h4>
+                      </Link>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-black text-red-600">
+                          {deal.priceRange || formatPrice(deal.price)}
+                        </span>
+                        {deal.originalPrice && (
+                          <span className="text-xs text-gray-400 line-through">
+                            {formatPrice(deal.originalPrice)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      size="sm"
+                      className={`bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-xl px-3 py-1 text-xs font-bold shadow-md ${isTamil ? 'tamil-text' : ''}`}
+                      onClick={() => navigate(`/product/${deal.id}`)}
+                    >
+                      {translate('blocks.view')}
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+            
+            {/* View All Deals Button */}
+            <Link to="/products?type=deals" className="block mt-4">
+              <Button className={`w-full bg-gradient-to-r from-gray-800 to-gray-900 hover:from-red-600 hover:to-pink-600 text-white rounded-2xl py-3 font-bold shadow-lg hover:shadow-xl transition-all duration-300 ${isTamil ? 'tamil-text' : ''}`}>
+                {translate('blocks.viewAllDeals')}
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Banner Section Component
+const BannerSection = () => {
+  const navigate = useNavigate();
+  const { translate, language } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
+  
+  return (
+    <section className="py-8 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+            <img 
+              src="https://api.dharaniherbbals.com/uploads/chembaruthi_shampoo_560498fde2.jpg" 
+              alt="Chembaruthi Shampoo"
+              className="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-700"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+              <Button 
+                className={`bg-white text-black hover:bg-gray-100 font-bold px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ${isTamil ? 'tamil-text' : ''}`}
+                onClick={() => navigate('/products')}
+              >
+                {translate('blocks.shopNow')}
+              </Button>
+            </div>
+          </div>
+          <div className="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+            <img 
+              src="https://api.dharaniherbbals.com/uploads/vettiver_shampoo_7c1e9441da.jpg" 
+              alt="Vettiver Shampoo"
+              className="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-700"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+              <Button 
+                className={`bg-white text-black hover:bg-gray-100 font-bold px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ${isTamil ? 'tamil-text' : ''}`}
+                onClick={() => navigate('/products')}
+              >
+                {translate('blocks.shopNow')}
+              </Button>
+            </div>
+          </div>
+          <div className="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+            <img 
+              src="https://api.dharaniherbbals.com/uploads/Aloe_vera_shampoo_1c6082e683.jpg" 
+              alt="Aloe Vera Shampoo"
+              className="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-700"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+              <Button 
+                className={`bg-white text-black hover:bg-gray-100 font-bold px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 ${isTamil ? 'tamil-text' : ''}`}
+                onClick={() => navigate('/products')}
+              >
+                {translate('blocks.shopNow')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Popular Choices Section with Masonry Layout
+const PopularChoicesSection = () => {
+  const [products, setProducts] = useState([]);
+  const [reviewStats, setReviewStats] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [userType, setUserType] = useState('customer');
+  const { user } = useAuth();
+  const { translate, language } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserType = async () => {
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          const timestamp = new Date().getTime();
+          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.data && result.data.attributes) {
+              setUserType(result.data.attributes.userType || 'customer');
+              return;
+            }
+          }
+        }
+        setUserType('customer');
+      } catch (error) {
+        setUserType('customer');
+      }
+    };
+    fetchUserType();
+  }, []);
+
+  useEffect(() => {
+    const fetchPopular = async () => {
+      try {
+        setLoading(true);
+        const timestamp = new Date().getTime();
+        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[type][$eq]=popular&filters[status][$eq]=true&pagination[pageSize]=8&timestamp=${timestamp}`);
+        
+        if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
+        
+        const data = await response.json();
+        let productList = Array.isArray(data) ? data : (data?.data || []);
+        
+        const formattedProducts = productList.map(item => {
+          const attributes = item.attributes || item;
+          const currentUserType = userType || 'customer';
+          
+          let price = getPriceByUserType(attributes, currentUserType);
+          let priceRange = null;
+          
+          if (attributes.isVariableProduct && attributes.variations) {
+            try {
+              const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
+              const prices = variations.map(variation => getPriceByUserType(variation, currentUserType));
+              
+              if (prices.length > 0) {
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                price = minPrice;
+                priceRange = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+              }
+            } catch (e) {
+              // Keep default price
+            }
+          }
+          
+          return {
+            id: item.id || Math.random().toString(),
+            name: attributes.Name || attributes.name || 'Product',
+            tamil: attributes.tamil || null,
+            price: price,
+            priceRange: priceRange,
+            image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
+            originalPrice: attributes.originalPrice || null,
+            category: attributes.category,
+            skuid: attributes.skuid || attributes.SKUID,
+            isVariableProduct: attributes.isVariableProduct,
+            variations: attributes.variations,
+            userType: userType || 'customer'
+          };
+        });
+        
+        setProducts(formattedProducts);
+        
+        const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
+        if (productIds.length > 0) {
+          try {
+            const stats = await getBulkProductReviewStats(productIds);
+            setReviewStats(stats);
+          } catch (reviewError) {
+            // Handle error
+          }
+        }
+      } catch (err) {
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPopular();
+  }, [userType]);
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-purple-50 via-white to-purple-100">
+        <div className="container mx-auto px-4 text-center">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-64 mx-auto mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-96 mx-auto"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (products.length === 0) return null;
+
+
+
+  return (
+    <section className="py-16 bg-gradient-to-br from-green-50 via-white to-green-100 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-20 left-20 w-40 h-40 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-br from-teal-400 to-green-500 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
+      </div>
+
+      <div className="w-full max-w-7xl mx-auto px-2 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 mb-6">
+            <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl">
+              <Zap className="w-8 h-8 text-white" />
+            </div>
+            <h2 className={`text-3xl md:text-4xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('blocks.popularChoices')}
+            </h2>
+          </div>
+          <p className={`text-lg text-gray-600 max-w-2xl mx-auto ${isTamil ? 'tamil-text' : ''}`}>
+            {translate('blocks.popularDescription')}
+          </p>
+        </div>
+
+        {/* 4 Column Grid Layout */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {products.slice(0, 8).map((product, index) => (
+            <div key={product.id}>
+              <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden border border-green-100 hover:border-green-200 bg-white rounded-2xl">
+                <div className="relative overflow-hidden bg-gradient-to-br from-green-50 via-white to-green-50">
+                  <Link to={`/product/${product.id}`} className="block cursor-pointer">
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="w-full h-32 object-contain group-hover:scale-105 transition-transform duration-300 p-3"
+                    />
+                  </Link>
+                </div>
+                
+                <CardContent className="p-3 bg-white">
+                  <Link to={`/product/${product.id}`}>
+                    <h3 className={`font-bold text-xs mb-2 group-hover:text-green-600 transition-colors line-clamp-2 min-h-[2rem] ${isTamil ? 'tamil-text' : ''}`}>
+                      {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
+                    </h3>
+                  </Link>
+                  
+                  <StarRating 
+                    rating={reviewStats[product.id]?.average || 0} 
+                    count={reviewStats[product.id]?.count || 0} 
+                    size="sm" 
+                    showCount={false} 
+                  />
+                  
+                  <div className="mb-2">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-sm font-black text-green-600">
+                        {product.priceRange || formatPrice(product.price)}
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-xs text-gray-400 line-through">
+                          {formatPrice(product.originalPrice)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-1">
+                    <Button 
+                      className={`flex-1 bg-green-500 hover:bg-green-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-xs font-medium ${isTamil ? 'tamil-text' : ''}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Add to cart logic here
+                      }}
+                    >
+                      <ShoppingCart className="w-2 h-2 mr-1" />
+                      {translate('blocks.add')}
+                    </Button>
+                    
+                    <Button 
+                      className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-xs font-medium ${isTamil ? 'tamil-text' : ''}`}
+                      onClick={() => navigate(`/product/${product.id}`)}
+                    >
+                      {translate('blocks.buy')}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+        </div>
+
+        {/* View All Button */}
+        <div className="text-center mt-12">
+          <Link to="/products?type=popular">
+            <Button className={`bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('blocks.viewAllPopularProducts')}
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // Main Component with all Product Blocks
 const ProductBlocks = () => {
   const { translate } = useTranslation();
@@ -504,8 +1422,25 @@ const ProductBlocks = () => {
             transform: translateY(0);
           }
         }
+        @keyframes scroll-interval {
+          0%, 16.66% {
+            transform: translateX(0);
+          }
+          33.33%, 50% {
+            transform: translateX(-272px);
+          }
+          66.66%, 83.33% {
+            transform: translateX(-544px);
+          }
+          100% {
+            transform: translateX(-816px);
+          }
+        }
         .animate-fade-in-up {
           animation: fade-in-up 0.6s ease-out forwards;
+        }
+        .animate-scroll-interval {
+          animation: scroll-interval 12s ease-in-out infinite;
         }
         .line-clamp-2 {
           display: -webkit-box;
@@ -515,23 +1450,11 @@ const ProductBlocks = () => {
         }
       `}</style>
       
-      <ProductBlock 
-        type="deals"
-        title={translate('blocks.dealsOfTheDay')} 
-        description={translate('blocks.dealsDescription')}
-        icon={<Tag className="w-8 h-8 text-white" />}
-        bgColor="bg-gradient-to-br from-purple-50 via-white to-purple-100"
-        accentColor="bg-gradient-to-r from-purple-500 to-purple-600"
-      />
+      <DealsOfTheDaySection />
       
-      <ProductBlock 
-        type="trending"
-        title={translate('blocks.trendingProducts')} 
-        description={translate('blocks.trendingDescription')}
-        icon={<TrendingUp className="w-8 h-8 text-white" />}
-        bgColor="bg-gradient-to-br from-blue-50 via-white to-blue-100"
-        accentColor="bg-gradient-to-r from-blue-500 to-blue-600"
-      />
+      <TrendingProductsSection />
+      
+      <BannerSection />
       
       <ProductBlock 
         type="hot"
@@ -542,14 +1465,7 @@ const ProductBlocks = () => {
         accentColor="bg-gradient-to-r from-red-500 to-red-600"
       />
       
-      <ProductBlock 
-        type="popular"
-        title={translate('blocks.popularChoices')} 
-        description={translate('blocks.popularDescription')}
-        icon={<Zap className="w-8 h-8 text-white" />}
-        bgColor="bg-gradient-to-br from-green-50 via-white to-green-100"
-        accentColor="bg-gradient-to-r from-green-500 to-green-600"
-      />
+      <PopularChoicesSection />
     </>
   );
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, ExternalLink } from 'lucide-react';
+import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 interface SimpleGoogleReviewsProps {
   businessName: string;
@@ -14,6 +15,8 @@ const SimpleGoogleReviews: React.FC<SimpleGoogleReviewsProps> = ({
   rating = 4.8,
   reviewCount = 150
 }) => {
+  const { translate, language } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
@@ -28,8 +31,8 @@ const SimpleGoogleReviews: React.FC<SimpleGoogleReviewsProps> = ({
   return (
     <div className="w-full px-4">
       <div className="text-center mb-8">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-          Our Valuable Customer Reviews
+        <h2 className={`text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+          {translate('home.ourValuableCustomerReviews')}
         </h2>
         
         {/* Google Rating Display */}
@@ -45,8 +48,8 @@ const SimpleGoogleReviews: React.FC<SimpleGoogleReviewsProps> = ({
                 <span className="text-2xl font-bold text-gray-900">{rating}</span>
                 <div className="flex">{renderStars(rating)}</div>
               </div>
-              <p className="text-gray-600 text-sm">
-                Based on {reviewCount}+ Google reviews
+              <p className={`text-gray-600 text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                {translate('home.basedOnReviews').replace('{count}', reviewCount.toString())}
               </p>
             </div>
           </div>
@@ -55,10 +58,10 @@ const SimpleGoogleReviews: React.FC<SimpleGoogleReviewsProps> = ({
             href="https://search.google.com/local/writereview?placeid=ChIJ250X1r3hqDsRovG6bJOBLwg"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-4 md:px-6 py-2 md:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base"
+            className={`inline-flex items-center px-4 md:px-6 py-2 md:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base ${isTamil ? 'tamil-text' : ''}`}
           >
             <ExternalLink className="w-4 h-4 mr-2" />
-            Write a Review
+            {translate('home.writeReview')}
           </a>
           
 
@@ -107,10 +110,10 @@ const SimpleGoogleReviews: React.FC<SimpleGoogleReviewsProps> = ({
             href="https://www.google.com/maps/place/Dharani+Herbbals/@11.3580785,77.1641708,17z/data=!4m8!3m7!1s0x3ba8e1bdd6179ddb:0x82f81936cbaf1a2!8m2!3d11.3580361!4d77.166633!9m1!1b1!16s%2Fg%2F11c6f588fq!5m1!1e1?entry=ttu&g_ep=EgoyMDI1MDkwMy4wIKXMDSoASAFQAw%3D%3D"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+            className={`inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium ${isTamil ? 'tamil-text' : ''}`}
           >
             <Star className="w-4 h-4 mr-2" />
-            View All Google Reviews
+            {translate('home.viewAllReviews')}
           </a>
         </div>
         

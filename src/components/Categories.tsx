@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { getProductCategories } from '@/services/categories';
+import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const Categories = () => {
+  const { translate, language } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -48,7 +51,7 @@ const Categories = () => {
         // Show categories without counts for faster loading
         const categoriesWithGenericCounts = formattedCategories.map(category => ({
           ...category,
-          count: 'View products'
+          count: translate('home.viewProducts')
         }));
         
         setCategories(categoriesWithGenericCounts);
@@ -72,12 +75,11 @@ const Categories = () => {
       <div className="w-full px-4 relative z-10">
         {/* Enhanced header section */}
         <div className="text-center mb-8">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
-            Shop by Category
+          <h2 className={`text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
+            {translate('home.shopByCategory')}
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Discover our carefully curated collection of natural and organic herbal products, 
-            each category designed to support your wellness journey
+          <p className={`text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
+            {translate('home.categoryDescription')}
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-green-500 to-emerald-500 mx-auto mt-6 rounded-full"></div>
         </div>
@@ -89,7 +91,7 @@ const Categories = () => {
               <div className="w-4 h-4 bg-emerald-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
               <div className="w-4 h-4 bg-teal-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
             </div>
-            <p className="mt-4 text-gray-600">Loading categories...</p>
+            <p className={`mt-4 text-gray-600 ${isTamil ? 'tamil-text' : ''}`}>{translate('home.loadingCategories')}</p>
           </div>
         ) : (
           <div className="relative">
@@ -146,17 +148,17 @@ const Categories = () => {
                         </div>
                         
                         {/* Enhanced text content */}
-                        <h3 className="font-bold text-base mb-2 text-gray-800 group-hover:text-green-700 transition-colors duration-300 relative z-10">
+                        <h3 className={`font-bold text-base mb-2 text-gray-800 group-hover:text-green-700 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
                           {category.name}
                         </h3>
-                        <p className="text-sm text-gray-500 group-hover:text-green-600 transition-colors duration-300 relative z-10">
+                        <p className={`text-sm text-gray-500 group-hover:text-green-600 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
                           {category.count}
                         </p>
                         
                         {/* Subtle arrow indicator */}
                         <div className="mt-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 relative z-10">
-                          <div className="inline-flex items-center text-green-600 text-sm font-medium">
-                            Explore
+                          <div className={`inline-flex items-center text-green-600 text-sm font-medium ${isTamil ? 'tamil-text' : ''}`}>
+                            {translate('home.explore')}
                             <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
@@ -189,9 +191,9 @@ const Categories = () => {
         <div className="text-center mt-12">
           <Link 
             to="/products" 
-            className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-full hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            className={`inline-flex items-center px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-full hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 ${isTamil ? 'tamil-text' : ''}`}
           >
-            View All Products
+            {translate('home.viewAllProducts')}
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>

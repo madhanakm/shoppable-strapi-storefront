@@ -287,7 +287,46 @@ const enTranslations = {
   'about.differentDesc': 'Our commitment to excellence sets us apart in the herbal wellness industry',
   'about.naturalIngredientsDesc': 'We source only the finest natural herbs and ingredients, ensuring purity and potency in every product.',
   'about.qualityAssuranceDesc': 'Every product undergoes rigorous testing and quality checks to meet the highest safety standards.',
-  'about.traditionalWisdomDesc': 'Our formulations are based on ancient Ayurvedic principles, refined through generations of knowledge.'
+  'about.traditionalWisdomDesc': 'Our formulations are based on ancient Ayurvedic principles, refined through generations of knowledge.',
+  
+  // Home Page Content
+  'home.shopByCategory': 'Shop by Category',
+  'home.categoryDescription': 'Discover our carefully curated collection of natural and organic herbal products, each category designed to support your wellness journey',
+  'home.ourValuableCustomerReviews': 'Our Valuable Customer Reviews',
+  'home.basedOnReviews': 'Based on {count}+ Google reviews',
+  'home.writeReview': 'Write a Review',
+  'home.viewAllReviews': 'View All Google Reviews',
+  'home.loadingCategories': 'Loading categories...',
+  'home.viewProducts': 'View products',
+  'home.explore': 'Explore',
+  'home.viewAllProducts': 'View All Products',
+  
+  // Product Blocks Additional Content
+  'blocks.megaDeal': 'MEGA DEAL',
+  'blocks.limitedTime': 'LIMITED TIME',
+  'blocks.viewDeal': 'View Deal',
+  'blocks.moreHotDeals': 'More Hot Deals',
+  'blocks.viewAllDeals': 'View All Deals',
+  'blocks.shopNow': 'Shop Now',
+  'blocks.viewAllTrendingProducts': 'View All Trending Products',
+  'blocks.viewAllPopularProducts': 'View All Popular Products',
+  'blocks.add': 'Add',
+  'blocks.buy': 'Buy',
+  'blocks.view': 'View',
+  'blocks.save': 'Save',
+  
+  // Footer Content
+  'footer.stayUpdated': 'Stay Updated with Natural Wellness',
+  'footer.updatesDescription': 'Get the latest updates on herbal products, health tips, and exclusive offers via WhatsApp',
+  'footer.whatsappPlaceholder': 'Enter your WhatsApp number',
+  'footer.subscribe': 'Subscribe',
+  'footer.subscribing': 'Subscribing...',
+  'footer.whatsappUpdates': 'I want to receive WhatsApp updates',
+  'footer.enterNumber': 'Please enter your WhatsApp number',
+  'footer.invalidNumber': 'Please enter a valid 10-digit Indian mobile number',
+  'footer.subscribeSuccess': 'Successfully subscribed for WhatsApp updates!',
+  'footer.subscribeError': 'Failed to subscribe. Please try again.',
+  'footer.alreadySubscribed': 'This number is already subscribed for updates'
 };
 
 // Tamil translations
@@ -563,7 +602,46 @@ const taTranslations = {
   'about.differentDesc': 'சிறப்புக்கான எங்கள் உறுதிப்பாடு மூலிகை நலவாழ்வு துறையில் எங்களை தனித்துவப்படுத்துகிறது',
   'about.naturalIngredientsDesc': 'நாங்கள் சிறந்த இயற்கை மூலிகைகள் மற்றும் பொருட்களை மட்டுமே பெறுகிறோம்.',
   'about.qualityAssuranceDesc': 'ஒவ்வொரு தயாரிப்பும் கடுமையான சோதனை மற்றும் தர சோதனைகளுக்கு உட்படுத்தப்படுகின்றது.',
-  'about.traditionalWisdomDesc': 'எங்கள் சூத்திரங்கள் பண்டைய ஆயுர்வேத கொள்கைகளை அடிப்படையாகக் கொண்டவை.'
+  'about.traditionalWisdomDesc': 'எங்கள் சூத்திரங்கள் பண்டைய ஆயுர்வேத கொள்கைகளை அடிப்படையாகக் கொண்டவை.',
+  
+  // Home Page Content
+  'home.shopByCategory': 'வகை வாரியாக வாங்குங்கள்',
+  'home.categoryDescription': 'உங்கள் நலவாழ்வு பயணத்தை ஆதரிக்க வடிவமைக்கப்பட்ட ஒவ்வொரு வகையும், இயற்கை மற்றும் ஆர்கானிக் மூலிகை தயாரிப்புகளின் எங்கள் கவனமாக தேர்ந்தெடுக்கப்பட்ட தொகுப்பைக் கண்டறியுங்கள்',
+  'home.ourValuableCustomerReviews': 'எங்கள் மதிப்புமிக்க வாடிக்கையாளர் விமர்சனங்கள்',
+  'home.basedOnReviews': '{count}+ கூகுள் விமர்சனங்களின் அடிப்படையில்',
+  'home.writeReview': 'விமர்சனம் எழுதுங்கள்',
+  'home.viewAllReviews': 'அனைத்து கூகுள் விமர்சனங்களையும் பார்க்கவும்',
+  'home.loadingCategories': 'வகைகளை ஏற்றுகிறது...',
+  'home.viewProducts': 'தயாரிப்புகளைப் பார்க்கவும்',
+  'home.explore': 'ஆராயுங்கள்',
+  'home.viewAllProducts': 'அனைத்து தயாரிப்புகளையும் பார்க்கவும்',
+  
+  // Product Blocks Additional Content
+  'blocks.megaDeal': 'மெகா டீல்',
+  'blocks.limitedTime': 'வரையறுக்கப்பட்ட நேரம்',
+  'blocks.viewDeal': 'டீலைப் பார்க்கவும்',
+  'blocks.moreHotDeals': 'மேலும் சூடான டீல்கள்',
+  'blocks.viewAllDeals': 'அனைத்து டீல்களையும் பார்க்கவும்',
+  'blocks.shopNow': 'இப்போது வாங்குங்கள்',
+  'blocks.viewAllTrendingProducts': 'அனைத்து டிரெண்டிங் தயாரிப்புகளையும் பார்க்கவும்',
+  'blocks.viewAllPopularProducts': 'அனைத்து பிரபலமான தயாரிப்புகளையும் பார்க்கவும்',
+  'blocks.add': 'சேர்',
+  'blocks.buy': 'வாங்கு',
+  'blocks.view': 'பார்க்கவும்',
+  'blocks.save': 'சேமி',
+  
+  // Footer Content
+  'footer.stayUpdated': 'இயற்கை நலவாழ்வுடன் அப்டேட் இருங்கள்',
+  'footer.updatesDescription': 'வாட்ஸ்ஆப் வழியாக மூலிகை தயாரிப்புகள், ஆரோக்கிய குறிப்புகள் மற்றும் பிரத்யேக சலுகைகளின் செய்திகளை பெறுங்கள்',
+  'footer.whatsappPlaceholder': 'உங்கள் வாட்ஸ்ஆப் எண்ணை உள்ளிடவும்',
+  'footer.subscribe': 'சந்தா பெறுங்கள்',
+  'footer.subscribing': 'சந்தா பெறுகிறோம்...',
+  'footer.whatsappUpdates': 'நான் வாட்ஸ்ஆப் அப்டேட்களை பெற விரும்புகிறேன்',
+  'footer.enterNumber': 'தயவு செய்து உங்கள் வாட்ஸ்ஆப் எண்ணை உள்ளிடவும்',
+  'footer.invalidNumber': 'தயவு செய்து சரியான 10 இலக்க இந்திய மொபைல் எண்ணை உள்ளிடவும்',
+  'footer.subscribeSuccess': 'வாட்ஸ்ஆப் அப்டேட்களுக்காக வெற்றிகரமாக சந்தா பெற்றீர்கள்!',
+  'footer.subscribeError': 'சந்தா பெற முடியவில்லை. தயவு செய்து மீண்டும் முயற்சி செய்யவும்.',
+  'footer.alreadySubscribed': 'இந்த எண் ஏற்கனவே அப்டேட்களுக்காக சந்தா பெற்றுள்ளது'
 };
 
 // Translation provider component

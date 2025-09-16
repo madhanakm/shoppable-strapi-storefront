@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Facebook, Instagram, Youtube, Leaf, Phone, Mail, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { Facebook, Instagram, Youtube, Leaf, Phone, Mail, MapPin, Clock, ArrowRight, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const Footer = () => {
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState('');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [whatsappUpdate, setWhatsappUpdate] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState(''); // 'success' or 'error'
   
   useEffect(() => {
     // Fetch brands from API
@@ -44,11 +49,71 @@ const Footer = () => {
       });
   }, []);
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const validateIndianMobile = (number: string) => {
+    const cleanNumber = number.replace(/\D/g, '');
+    return /^[6-9]\d{9}$/.test(cleanNumber);
+  };
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle newsletter subscription
+    const cleanNumber = whatsappNumber.trim().replace(/\D/g, '');
     
-    setEmail('');
+    if (!cleanNumber) {
+      setMessage(translate('footer.enterNumber'));
+      setMessageType('error');
+      return;
+    }
+    
+    if (!validateIndianMobile(cleanNumber)) {
+      setMessage(translate('footer.invalidNumber'));
+      setMessageType('error');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setMessage('');
+    
+    try {
+      // Check if number already exists
+      const checkResponse = await fetch(`https://api.dharaniherbbals.com/api/subscribers?filters[whatsappNumber][$eq]=${cleanNumber}`);
+      const checkResult = await checkResponse.json();
+      
+      if (checkResult.data && checkResult.data.length > 0) {
+        setMessage(translate('footer.alreadySubscribed'));
+        setMessageType('error');
+        return;
+      }
+      
+      // Create new subscription
+      const response = await fetch('https://api.dharaniherbbals.com/api/subscribers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: {
+            whatsappNumber: cleanNumber,
+            whatsappUpdate: whatsappUpdate
+          }
+        })
+      });
+      
+      if (response.ok) {
+        setWhatsappNumber('');
+        setWhatsappUpdate(true);
+        setMessage(translate('footer.subscribeSuccess'));
+        setMessageType('success');
+      } else {
+        setMessage(translate('footer.subscribeError'));
+        setMessageType('error');
+      }
+    } catch (error) {
+      setMessage(translate('footer.subscribeError'));
+      setMessageType('error');
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setMessage(''), 5000);
+    }
   };
   
   return (
@@ -57,26 +122,52 @@ const Footer = () => {
       <div className="bg-gradient-to-r from-primary to-green-600 py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h3 className="text-2xl md:text-3xl font-bold mb-4">Stay Updated with Natural Wellness</h3>
-            <p className="text-lg mb-8 opacity-90">
-              Get the latest updates on herbal products, health tips, and exclusive offers
+            <h3 className={`text-2xl md:text-3xl font-bold mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('footer.stayUpdated')}
+            </h3>
+            <p className={`text-lg mb-8 opacity-90 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('footer.updatesDescription')}
             </p>
-            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <Input
-                type="email"
-                placeholder="Enter your email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="flex-1 h-12 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:bg-white/30"
-              />
-              <Button 
-                type="submit" 
-                className="bg-white text-primary hover:bg-gray-100 h-12 px-6 font-semibold"
-              >
-                Subscribe
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
+            <form onSubmit={handleNewsletterSubmit} className="max-w-md mx-auto space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Input
+                  type="tel"
+                  placeholder={translate('footer.whatsappPlaceholder')}
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  maxLength={10}
+                  className="flex-1 h-12 bg-white/20 border-white/30 text-white placeholder:text-white/70 focus:bg-white/30"
+                />
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="bg-white text-primary hover:bg-gray-100 h-12 px-6 font-semibold disabled:opacity-50"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  {isSubmitting ? translate('footer.subscribing') : translate('footer.subscribe')}
+                </Button>
+              </div>
+              
+              {message && (
+                <div className={`text-center p-3 rounded-lg ${messageType === 'success' ? 'bg-green-500/20 text-green-100 border border-green-400/30' : 'bg-red-500/20 text-red-100 border border-red-400/30'} ${isTamil ? 'tamil-text' : ''}`}>
+                  {message}
+                </div>
+              )}
+              
+              <div className="flex items-center space-x-2 justify-center">
+                <Checkbox 
+                  id="whatsapp-updates"
+                  checked={whatsappUpdate}
+                  onCheckedChange={setWhatsappUpdate}
+                  className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-primary"
+                />
+                <label 
+                  htmlFor="whatsapp-updates" 
+                  className={`text-sm text-white/90 cursor-pointer ${isTamil ? 'tamil-text' : ''}`}
+                >
+                  {translate('footer.whatsappUpdates')}
+                </label>
+              </div>
             </form>
           </div>
         </div>
