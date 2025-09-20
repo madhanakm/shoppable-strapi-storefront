@@ -221,7 +221,8 @@ const Checkout = () => {
             name: item.name,
             price: item.price,
             quantity: item.quantity,
-            skuid: item.originalSkuid || item.skuid || item.id
+            skuid: item.skuid || item.id,
+            productId: item.originalProductId || item.id
           })),
           total: total,
           shippingCharges: shippingCharges,
@@ -253,7 +254,8 @@ const Checkout = () => {
             name: item.name,
             price: item.price,
             quantity: item.quantity,
-            skuid: item.originalSkuid || item.skuid || item.id
+            skuid: item.skuid || item.id,
+            productId: item.originalProductId || item.id
           })),
           total: total,
           shippingCharges: shippingCharges,
@@ -297,7 +299,8 @@ const Checkout = () => {
             name: item.name,
             price: item.price,
             quantity: item.quantity,
-            skuid: item.originalSkuid || item.skuid || item.id
+            skuid: item.skuid || item.id,
+            productId: item.originalProductId || item.id
           })),
           total: total,
           shippingCharges: shippingCharges,
@@ -353,8 +356,8 @@ const Checkout = () => {
             billingAddress: shippingAddr,
             Name: cartItems.map(item => item.name).join(' | '),
             price: cartItems.map(item => `${item.name}: ${formatPrice(item.price)} x ${item.quantity}`).join(' | '),
-            skuid: cartItems.map(item => item.originalSkuid || item.skuid || item.id).join(' | '),
-            prodid: cartItems.map(item => item.id).join(' | '),
+            skuid: cartItems.map(item => item.skuid || item.id).join(' | '),
+            prodid: cartItems.map(item => item.originalProductId || item.id).join(' | '),
             remarks: formData.notes || 'No special notes',
             quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0))
           }

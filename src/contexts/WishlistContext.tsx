@@ -2,10 +2,10 @@ import React, { createContext, useContext, ReactNode, useState, useEffect } from
 import { useWishlist } from '@/hooks/useWishlist';
 
 interface WishlistContextType {
-  wishlistSkuIds: string[];
-  addToWishlist: (skuid: string) => void;
-  removeFromWishlist: (skuid: string) => void;
-  isInWishlist: (skuid: string) => boolean;
+  wishlistProductIds: string[];
+  addToWishlist: (productId: string) => void;
+  removeFromWishlist: (productId: string) => void;
+  isInWishlist: (productId: string) => boolean;
   clearWishlist: () => void;
   wishlistCount: number;
   loading: boolean;

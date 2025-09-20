@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getPriceByUserType } from '@/lib/pricing';
 
 interface CartItem {
-  skuid: string;
+  productId: string;
   quantity: number;
   id: string;
 }
@@ -37,8 +37,8 @@ export const useCartProducts = (cartItems: CartItem[]) => {
 
       const productPromises = cartItems.map(async (cartItem) => {
         try {
-          // First try to find by exact SKU match
-          let response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[skuid][$eq]=${cartItem.skuid}`, {
+          // Try to find by product ID first
+          let response = await fetch(`https://api.dharaniherbbals.com/api/product-masters/${cartItem.productId}`, {
             headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
           });
           
@@ -47,20 +47,20 @@ export const useCartProducts = (cartItems: CartItem[]) => {
           
           if (response.ok) {
             const data = await response.json();
-            if (data.data && data.data.length > 0) {
-              product = data.data[0];
-            }
+            product = data.data || data;
           }
           
-          // If not found by SKU, try to find by product ID
-          if (!product && cartItem.id) {
-            response = await fetch(`https://api.dharaniherbbals.com/api/product-masters/${cartItem.id}`, {
+          // Fallback: try to find by SKU if productId doesn't work (backward compatibility)
+          if (!product) {
+            response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[skuid][$eq]=${cartItem.productId}`, {
               headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
             });
             
             if (response.ok) {
               const data = await response.json();
-              product = data.data || data;
+              if (data.data && data.data.length > 0) {
+                product = data.data[0];
+              }
             }
           }
           
@@ -78,8 +78,8 @@ export const useCartProducts = (cartItems: CartItem[]) => {
               try {
                 const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
                 
-                // Find the specific variation by SKU
-                selectedVariation = variations.find(v => v.skuid === cartItem.skuid);
+                // Find the specific variation by SKU (for variable products, we still use SKU for variations)
+                selectedVariation = variations.find(v => v.skuid === cartItem.id);
                 
                 if (selectedVariation) {
                   price = getPriceByUserType(selectedVariation, userType);
@@ -103,7 +103,7 @@ export const useCartProducts = (cartItems: CartItem[]) => {
             return {
               id: product.id,
               skuid: attrs.skuid || product.id,
-              originalSkuid: cartItem.skuid,
+              originalProductId: cartItem.productId,
               name: productName,
               price,
               image: productImage,
@@ -123,15 +123,15 @@ export const useCartProducts = (cartItems: CartItem[]) => {
       const validProducts = results.filter(Boolean);
       
       // Remove inactive products from cart
-      const validSkuids = validProducts.map(p => p.originalSkuid);
-      const invalidSkuids = cartItems.filter(item => !validSkuids.includes(item.skuid)).map(item => item.skuid);
+      const validProductIds = validProducts.map(p => p.originalProductId);
+      const invalidProductIds = cartItems.filter(item => !validProductIds.includes(item.productId)).map(item => item.productId);
       
-      if (invalidSkuids.length > 0) {
+      if (invalidProductIds.length > 0) {
         // Auto-remove inactive products from cart
         const { removeFromCart } = require('@/contexts/CartContext');
-        invalidSkuids.forEach(skuid => {
+        invalidProductIds.forEach(productId => {
           try {
-            removeFromCart(skuid);
+            removeFromCart(productId);
           } catch (e) {}
         });
       }

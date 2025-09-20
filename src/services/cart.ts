@@ -1,5 +1,5 @@
 interface CartItem {
-  skuid: string;
+  productId: string;
   quantity: number;
   id: string;
 }
@@ -20,7 +20,7 @@ export const saveCartToAPI = async (userId: number, cartItems: CartItem[]): Prom
     const cartData = {
       user: userId,
       items: JSON.stringify(cartItems.map(item => ({
-        skuid: item.skuid,
+        productId: item.productId,
         quantity: item.quantity,
         id: item.id
       })))
@@ -95,13 +95,13 @@ export const loadCartFromAPI = async (userId: number): Promise<CartItem[]> => {
         // Validate cart items structure
         const validItems = items.filter((item: any) => 
           item && 
-          typeof item.skuid === 'string' && 
+          (typeof item.productId === 'string' || typeof item.skuid === 'string') && 
           typeof item.quantity === 'number' && 
           item.quantity > 0
         ).map((item: any) => ({
-          skuid: item.skuid,
+          productId: item.productId || item.skuid, // Support both for backward compatibility
           quantity: item.quantity,
-          id: item.id || item.skuid
+          id: item.id || item.productId || item.skuid
         }));
         
         return validItems;

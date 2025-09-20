@@ -3,16 +3,16 @@ import { useAuth } from './AuthContext';
 import { saveCartToAPI, loadCartFromAPI } from '@/services/cart';
 
 interface CartItem {
-  skuid: string;
+  productId: string;
   quantity: number;
   id: string;
 }
 
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (skuid: string, id: string, quantity?: number) => void;
-  removeFromCart: (skuid: string) => void;
-  updateQuantity: (skuid: string, quantity: number) => void;
+  addToCart: (productId: string, id: string, quantity?: number) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   cartCount: number;
   syncCart: () => void;
@@ -87,32 +87,32 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   };
 
-  const addToCart = (skuid: string, id: string, quantity: number = 1) => {
+  const addToCart = (productId: string, id: string, quantity: number = 1) => {
     setCartItems(prev => {
-      const existingItem = prev.find(item => item.skuid === skuid);
+      const existingItem = prev.find(item => item.productId === productId);
       if (existingItem) {
         return prev.map(item =>
-          item.skuid === skuid
+          item.productId === productId
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prev, { skuid, id, quantity }];
+      return [...prev, { productId, id, quantity }];
     });
   };
 
-  const removeFromCart = (skuid: string) => {
-    setCartItems(prev => prev.filter(item => item.skuid !== skuid));
+  const removeFromCart = (productId: string) => {
+    setCartItems(prev => prev.filter(item => item.productId !== productId));
   };
 
-  const updateQuantity = (skuid: string, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(skuid);
+      removeFromCart(productId);
       return;
     }
     setCartItems(prev =>
       prev.map(item =>
-        item.skuid === skuid ? { ...item, quantity } : item
+        item.productId === productId ? { ...item, quantity } : item
       )
     );
   };

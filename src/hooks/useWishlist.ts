@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { saveWishlistToAPI, loadWishlistFromAPI } from '@/services/wishlist';
 
 export const useWishlist = () => {
-  const [wishlistSkuIds, setWishlistSkuIds] = useState<string[]>([]);
+  const [wishlistProductIds, setWishlistProductIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const { user, isAuthenticated } = useAuth();
 
@@ -13,21 +13,21 @@ export const useWishlist = () => {
 
   useEffect(() => {
     if (isAuthenticated && user?.id) {
-      saveWishlistToAPI(user.id, wishlistSkuIds);
+      saveWishlistToAPI(user.id, wishlistProductIds);
     } else {
-      localStorage.setItem('wishlist', JSON.stringify(wishlistSkuIds));
+      localStorage.setItem('wishlist', JSON.stringify(wishlistProductIds));
     }
-  }, [wishlistSkuIds, isAuthenticated, user?.id]);
+  }, [wishlistProductIds, isAuthenticated, user?.id]);
 
   const loadWishlist = async () => {
     setLoading(true);
     try {
       if (isAuthenticated && user?.id) {
         const apiWishlist = await loadWishlistFromAPI(user.id);
-        setWishlistSkuIds(apiWishlist);
+        setWishlistProductIds(apiWishlist);
       } else {
         // Clear wishlist when not authenticated
-        setWishlistSkuIds([]);
+        setWishlistProductIds([]);
       }
     } catch (error) {
       console.error('Error loading wishlist:', error);
@@ -36,31 +36,31 @@ export const useWishlist = () => {
     }
   };
 
-  const addToWishlist = (skuid: string) => {
-    setWishlistSkuIds(prev => 
-      prev.includes(skuid) ? prev : [...prev, skuid]
+  const addToWishlist = (productId: string) => {
+    setWishlistProductIds(prev => 
+      prev.includes(productId) ? prev : [...prev, productId]
     );
   };
 
-  const removeFromWishlist = (skuid: string) => {
-    setWishlistSkuIds(prev => prev.filter(id => id !== skuid));
+  const removeFromWishlist = (productId: string) => {
+    setWishlistProductIds(prev => prev.filter(id => id !== productId));
   };
 
-  const isInWishlist = (skuid: string) => {
-    return wishlistSkuIds.includes(skuid);
+  const isInWishlist = (productId: string) => {
+    return wishlistProductIds.includes(productId);
   };
 
   const clearWishlist = () => {
-    setWishlistSkuIds([]);
+    setWishlistProductIds([]);
   };
 
   return {
-    wishlistSkuIds,
+    wishlistProductIds,
     addToWishlist,
     removeFromWishlist,
     isInWishlist,
     clearWishlist,
-    wishlistCount: wishlistSkuIds.length,
+    wishlistCount: wishlistProductIds.length,
     loading
   };
 };

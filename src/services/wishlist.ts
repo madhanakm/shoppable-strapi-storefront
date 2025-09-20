@@ -1,11 +1,11 @@
-export const saveWishlistToAPI = async (userId: number, skuIds: string[]): Promise<void> => {
+export const saveWishlistToAPI = async (userId: number, productIds: string[]): Promise<void> => {
   try {
     const timestamp = new Date().getTime();
     const response = await fetch(`https://api.dharaniherbbals.com/api/user-wishlists?filters[user][id][$eq]=${userId}&timestamp=${timestamp}`);
     
     const wishlistData = {
       user: userId,
-      items: JSON.stringify(skuIds)
+      items: JSON.stringify(productIds)
     };
 
     if (response.ok) {

@@ -210,30 +210,12 @@ const AllProducts = () => {
   const displayedProducts = products;
 
   const handleWishlistToggle = (product) => {
-    const attrs = product.attributes || product;
-    let skuid;
-    
-    // For variable products, use first variation's SKU
-    if (attrs.isVariableProduct && attrs.variations) {
-      try {
-        const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
-        if (variations && variations.length > 0) {
-          const firstVariation = variations[0];
-          skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-        } else {
-          skuid = attrs.skuid || attrs.SKUID || product.id.toString();
-        }
-      } catch (e) {
-        skuid = attrs.skuid || attrs.SKUID || product.id.toString();
-      }
-    } else {
-      skuid = attrs.skuid || attrs.SKUID || product.id.toString();
-    }
+    const productId = product.id.toString();
 
-    if (isInWishlist(skuid)) {
-      removeFromWishlist(skuid);
+    if (isInWishlist(productId)) {
+      removeFromWishlist(productId);
     } else {
-      addToWishlist(skuid);
+      addToWishlist(productId);
     }
   };
 
@@ -520,25 +502,7 @@ const AllProducts = () => {
                           className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity rounded-full shadow-lg"
                           onClick={() => handleWishlistToggle(product)}
                         >
-                          <Heart className={`w-4 h-4 ${(() => {
-                            let checkSkuid;
-                            if (attrs.isVariableProduct && attrs.variations) {
-                              try {
-                                const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
-                                if (variations && variations.length > 0) {
-                                  const firstVariation = variations[0];
-                                  checkSkuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-                                } else {
-                                  checkSkuid = attrs.skuid || attrs.SKUID || product.id.toString();
-                                }
-                              } catch (e) {
-                                checkSkuid = attrs.skuid || attrs.SKUID || product.id.toString();
-                              }
-                            } else {
-                              checkSkuid = attrs.skuid || attrs.SKUID || product.id.toString();
-                            }
-                            return isInWishlist(checkSkuid) ? 'fill-red-500 text-red-500' : '';
-                          })()} `} />
+                          <Heart className={`w-4 h-4 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
                         </Button>
 
                         {/* Product Type Badge */}
@@ -601,24 +565,8 @@ const AllProducts = () => {
                             <Button 
                               className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1 md:py-1.5 text-[10px] md:text-xs font-medium" 
                               onClick={() => {
-                                // For variable products, use the first variation
-                                if (attrs.isVariableProduct && attrs.variations) {
-                                  try {
-                                    const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
-                                    if (variations && variations.length > 0) {
-                                      const firstVariation = variations[0];
-                                      const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-                                      addToCart(skuid, product.id.toString(), 1);
-                                      return;
-                                    }
-                                  } catch (e) {
-                                    
-                                  }
-                                }
-                                
-                                // For regular products
-                                const skuid = attrs.skuid || attrs.SKUID || product.id.toString();
-                                addToCart(skuid, product.id.toString(), 1);
+                                const productId = product.id.toString();
+                                addToCart(productId, productId, 1);
                               }}
                             >
                               <ShoppingCart className="w-2.5 h-2.5 md:w-3 md:h-3 mr-0.5 md:mr-1" />

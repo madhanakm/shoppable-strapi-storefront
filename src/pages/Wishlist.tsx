@@ -12,15 +12,15 @@ import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const Wishlist = () => {
-  const { wishlistSkuIds, removeFromWishlist, wishlistCount } = useWishlistContext();
-  const { products, loading } = useWishlistProducts(wishlistSkuIds);
+  const { wishlistProductIds, removeFromWishlist, wishlistCount } = useWishlistContext();
+  const { products, loading } = useWishlistProducts(wishlistProductIds);
   const { addToCart } = useCart();
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
 
   const handleAddToCart = (item: any) => {
-    const skuid = item.originalSkuid || item.skuid || item.id.toString();
-    addToCart(skuid, item.id.toString(), 1);
+    const productId = item.originalProductId || item.id.toString();
+    addToCart(productId, item.id.toString(), 1);
   };
 
   if (wishlistCount === 0) {
@@ -78,7 +78,7 @@ const Wishlist = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((item) => (
-              <Card key={`${item.id}-${item.originalSkuid}`} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-lg hover:-translate-y-2">
+              <Card key={`${item.id}-${item.originalProductId}`} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-lg hover:-translate-y-2">
                 <div className="relative overflow-hidden">
                   <img 
                     src={item.image} 
@@ -95,7 +95,7 @@ const Wishlist = () => {
                       size="sm" 
                       variant="secondary" 
                       className="rounded-full shadow-lg bg-white/90 hover:bg-white"
-                      onClick={() => removeFromWishlist(item.originalSkuid || item.skuid)}
+                      onClick={() => removeFromWishlist(item.originalProductId || item.id.toString())}
                     >
                       <Heart className="w-4 h-4 fill-red-500 text-red-500" />
                     </Button>
@@ -128,7 +128,7 @@ const Wishlist = () => {
                     <Button 
                       variant="destructive" 
                       size="sm"
-                      onClick={() => removeFromWishlist(item.originalSkuid || item.skuid)}
+                      onClick={() => removeFromWishlist(item.originalProductId || item.id.toString())}
                       className="px-3"
                     >
                       <Trash2 className="w-4 h-4" />

@@ -2,18 +2,18 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPriceByUserType } from '@/lib/pricing';
 
-export const useWishlistProducts = (skuIds: string[]) => {
+export const useWishlistProducts = (productIds: string[]) => {
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (skuIds.length > 0) {
+    if (productIds.length > 0) {
       fetchProducts();
     } else {
       setProducts([]);
     }
-  }, [skuIds, user?.userType]);
+  }, [productIds, user?.userType]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -29,10 +29,10 @@ export const useWishlistProducts = (skuIds: string[]) => {
         }
       }
 
-      const productPromises = skuIds.map(async (originalSkuid) => {
+      const productPromises = productIds.map(async (productId) => {
         try {
-          // First try exact SKU match
-          let response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[skuid][$eq]=${originalSkuid}`, {
+          // Try to find by product ID first
+          let response = await fetch(`https://api.dharaniherbbals.com/api/product-masters/${productId}`, {
             headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
           });
           
@@ -41,33 +41,19 @@ export const useWishlistProducts = (skuIds: string[]) => {
           
           if (response.ok) {
             const data = await response.json();
-            if (data.data && data.data.length > 0) {
-              product = data.data[0];
-            }
+            product = data.data || data;
           }
           
-          // If not found by exact SKU, search all products and check variations
+          // Fallback: try to find by SKU if productId doesn't work (backward compatibility)
           if (!product) {
-            response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[status][$eq]=true&pagination[pageSize]=100`, {
+            response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[skuid][$eq]=${productId}`, {
               headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
             });
             
             if (response.ok) {
               const data = await response.json();
-              const products = data.data || [];
-              
-              // Find product with matching variation SKU
-              for (const prod of products) {
-                const attrs = prod.attributes;
-                if (attrs.isVariableProduct && attrs.variations) {
-                  try {
-                    const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
-                    if (variations.some(v => v.skuid === originalSkuid)) {
-                      product = prod;
-                      break;
-                    }
-                  } catch (e) {}
-                }
+              if (data.data && data.data.length > 0) {
+                product = data.data[0];
               }
             }
           }
@@ -87,8 +73,8 @@ export const useWishlistProducts = (skuIds: string[]) => {
               try {
                 const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
                 
-                // Find specific variation by SKU
-                selectedVariation = variations.find(v => v.skuid === originalSkuid);
+                // For variable products, show the base product without specific variation
+                selectedVariation = null;
                 
                 if (selectedVariation) {
                   price = getPriceByUserType(selectedVariation, userType);
@@ -115,7 +101,7 @@ export const useWishlistProducts = (skuIds: string[]) => {
             return {
               id: product.id,
               skuid: attrs.skuid || product.id,
-              originalSkuid: originalSkuid,
+              originalProductId: productId,
               name: productName,
               price,
               priceRange,

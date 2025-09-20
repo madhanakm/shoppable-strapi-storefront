@@ -311,17 +311,8 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (product) {
-      let skuid, productId;
-      
-      if (product.isVariableProduct && selectedVariation) {
-        skuid = selectedVariation.skuid || `${product.id}-${selectedVariation.value || selectedVariation.attributeValue}`;
-        productId = product.id.toString();
-      } else {
-        skuid = product.skuid || product.SKUID || product.id.toString();
-        productId = product.id.toString();
-      }
-      
-      addToCart(skuid, productId, quantity);
+      const productId = product.id.toString();
+      addToCart(productId, productId, quantity);
     }
   };
   
@@ -368,12 +359,12 @@ const ProductDetail = () => {
   const handleWishlistToggle = () => {
     if (!product) return;
     
-    const skuid = (selectedVariation?.skuid || product.skuid || product.SKUID || product.id).toString();
+    const productId = product.id.toString();
 
-    if (isInWishlist(skuid)) {
-      removeFromWishlist(skuid);
+    if (isInWishlist(productId)) {
+      removeFromWishlist(productId);
     } else {
-      addToWishlist(skuid);
+      addToWishlist(productId);
     }
   };
 
@@ -927,9 +918,9 @@ const ProductDetail = () => {
                     className="w-full border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 shadow-md hover:shadow-lg transition-all duration-300 py-3 text-base font-medium rounded-xl"
                     onClick={handleWishlistToggle}
                   >
-                    <Heart className={`mr-2 h-5 w-5 ${isInWishlist((selectedVariation?.skuid || product.skuid || product.SKUID || product.id).toString()) ? 'fill-red-500 text-red-500' : ''}`} />
+                    <Heart className={`mr-2 h-5 w-5 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
                     <span className={`${isTamil ? 'tamil-text' : ''}`}>
-                      {isInWishlist((selectedVariation?.skuid || product.skuid || product.SKUID || product.id).toString()) ? translate('product.removeFromWishlist') : translate('product.addToWishlist')}
+                      {isInWishlist(product.id.toString()) ? translate('product.removeFromWishlist') : translate('product.addToWishlist')}
                     </span>
                   </Button>
                 </div>

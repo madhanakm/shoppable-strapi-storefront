@@ -163,18 +163,18 @@ const TrendingProducts = () => {
   }, [userType]);
 
   const handleWishlistToggle = (product) => {
-    const skuid = product.skuId || product.id.toString();
+    const productId = product.id.toString();
 
-    if (isInWishlist(skuid)) {
-      removeFromWishlist(skuid);
+    if (isInWishlist(productId)) {
+      removeFromWishlist(productId);
     } else {
-      addToWishlist(skuid);
+      addToWishlist(productId);
     }
   };
 
   const handleAddToCart = (product) => {
-    const skuid = product.skuId || product.id.toString();
-    addToCart(skuid, product.id.toString(), 1);
+    const productId = product.id.toString();
+    addToCart(productId, productId, 1);
   };
 
 
@@ -244,7 +244,7 @@ const TrendingProducts = () => {
                   className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={() => handleWishlistToggle(product)}
                 >
-                  <Heart className={`w-4 h-4 ${isInWishlist(product.skuId || product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
+                  <Heart className={`w-4 h-4 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
               </div>
               
