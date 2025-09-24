@@ -273,6 +273,9 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
   const { user } = useAuth();
   const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { setQuickCheckoutItem } = useQuickCheckout();
 
   // Always fetch fresh user type from API - exactly like AllProducts page
   useEffect(() => {
@@ -491,7 +494,25 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          // Add to cart logic here
+                          
+                          // For variable products, use the first variation
+                          if (product.isVariableProduct && product.variations) {
+                            try {
+                              const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+                              if (variations && variations.length > 0) {
+                                const firstVariation = variations[0];
+                                const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+                                addToCart(skuid, product.id.toString(), 1);
+                                return;
+                              }
+                            } catch (e) {
+                              console.error('Error parsing variations:', e);
+                            }
+                          }
+                          
+                          // For regular products
+                          const skuid = product.skuid || product.id.toString();
+                          addToCart(skuid, product.id.toString(), 1);
                         }}
                       >
                         <ShoppingCart className="w-3 h-3 mr-1" />
@@ -500,7 +521,52 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                       
                       <Button 
                         className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium"
-                        onClick={() => navigate(`/product/${product.id}`)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          
+                          // For variable products, use the first variation
+                          if (product.isVariableProduct && product.variations) {
+                            try {
+                              const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+                              if (variations && variations.length > 0) {
+                                const firstVariation = variations[0];
+                                const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+                                const variationName = firstVariation.value || firstVariation.attributeValue || Object.values(firstVariation)[0];
+                                
+                                setQuickCheckoutItem({
+                                  id: product.id.toString(),
+                                  skuid: skuid,
+                                  name: `${product.name} - ${variationName}`,
+                                  tamil: product.tamil ? `${product.tamil} - ${variationName}` : null,
+                                  price: getPriceByUserType(firstVariation, product.userType || 'customer'),
+                                  image: product.image,
+                                  category: product.category,
+                                  variation: variationName,
+                                  quantity: 1
+                                });
+                                navigate('/checkout');
+                                return;
+                              }
+                            } catch (e) {
+                              console.error('Error parsing variations:', e);
+                            }
+                          }
+                          
+                          // For regular products
+                          const skuid = product.skuid || product.id.toString();
+                          setQuickCheckoutItem({
+                            id: product.id.toString(),
+                            skuid: skuid,
+                            name: product.name,
+                            tamil: product.tamil || null,
+                            price: product.price,
+                            image: product.image,
+                            category: product.category,
+                            quantity: 1
+                          });
+                          navigate('/checkout');
+                        }}
                       >
                         Buy Now
                       </Button>
@@ -549,6 +615,8 @@ const TrendingProductsSection = () => {
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { setQuickCheckoutItem } = useQuickCheckout();
 
   useEffect(() => {
     const fetchUserType = async () => {
@@ -737,7 +805,25 @@ const TrendingProductsSection = () => {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        // Add to cart logic here
+                        
+                        // For variable products, use the first variation
+                        if (product.isVariableProduct && product.variations) {
+                          try {
+                            const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+                            if (variations && variations.length > 0) {
+                              const firstVariation = variations[0];
+                              const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+                              addToCart(skuid, product.id.toString(), 1);
+                              return;
+                            }
+                          } catch (e) {
+                            console.error('Error parsing variations:', e);
+                          }
+                        }
+                        
+                        // For regular products
+                        const skuid = product.skuid || product.id.toString();
+                        addToCart(skuid, product.id.toString(), 1);
                       }}
                     >
                       <ShoppingCart className="w-2 h-2 mr-1" />
@@ -746,7 +832,52 @@ const TrendingProductsSection = () => {
                     
                     <Button 
                       className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text' : ''}`}
-                      onClick={() => navigate(`/product/${product.id}`)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // For variable products, use the first variation
+                        if (product.isVariableProduct && product.variations) {
+                          try {
+                            const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+                            if (variations && variations.length > 0) {
+                              const firstVariation = variations[0];
+                              const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+                              const variationName = firstVariation.value || firstVariation.attributeValue || Object.values(firstVariation)[0];
+                              
+                              setQuickCheckoutItem({
+                                id: product.id.toString(),
+                                skuid: skuid,
+                                name: `${product.name} - ${variationName}`,
+                                tamil: product.tamil ? `${product.tamil} - ${variationName}` : null,
+                                price: getPriceByUserType(firstVariation, product.userType || 'customer'),
+                                image: product.image,
+                                category: product.category,
+                                variation: variationName,
+                                quantity: 1
+                              });
+                              navigate('/checkout');
+                              return;
+                            }
+                          } catch (e) {
+                            console.error('Error parsing variations:', e);
+                          }
+                        }
+                        
+                        // For regular products
+                        const skuid = product.skuid || product.id.toString();
+                        setQuickCheckoutItem({
+                          id: product.id.toString(),
+                          skuid: skuid,
+                          name: product.name,
+                          tamil: product.tamil || null,
+                          price: product.price,
+                          image: product.image,
+                          category: product.category,
+                          quantity: 1
+                        });
+                        navigate('/checkout');
+                      }}
                     >
                       {translate('blocks.buy')}
                     </Button>
@@ -1186,6 +1317,8 @@ const PopularChoicesSection = () => {
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { setQuickCheckoutItem } = useQuickCheckout();
 
   useEffect(() => {
     const fetchUserType = async () => {
@@ -1372,7 +1505,25 @@ const PopularChoicesSection = () => {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        // Add to cart logic here
+                        
+                        // For variable products, use the first variation
+                        if (product.isVariableProduct && product.variations) {
+                          try {
+                            const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+                            if (variations && variations.length > 0) {
+                              const firstVariation = variations[0];
+                              const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+                              addToCart(skuid, product.id.toString(), 1);
+                              return;
+                            }
+                          } catch (e) {
+                            console.error('Error parsing variations:', e);
+                          }
+                        }
+                        
+                        // For regular products
+                        const skuid = product.skuid || product.id.toString();
+                        addToCart(skuid, product.id.toString(), 1);
                       }}
                     >
                       <ShoppingCart className="w-2 h-2 mr-1" />
@@ -1381,7 +1532,52 @@ const PopularChoicesSection = () => {
                     
                     <Button 
                       className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-xs font-medium ${isTamil ? 'tamil-text' : ''}`}
-                      onClick={() => navigate(`/product/${product.id}`)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        // For variable products, use the first variation
+                        if (product.isVariableProduct && product.variations) {
+                          try {
+                            const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+                            if (variations && variations.length > 0) {
+                              const firstVariation = variations[0];
+                              const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+                              const variationName = firstVariation.value || firstVariation.attributeValue || Object.values(firstVariation)[0];
+                              
+                              setQuickCheckoutItem({
+                                id: product.id.toString(),
+                                skuid: skuid,
+                                name: `${product.name} - ${variationName}`,
+                                tamil: product.tamil ? `${product.tamil} - ${variationName}` : null,
+                                price: getPriceByUserType(firstVariation, product.userType || 'customer'),
+                                image: product.image,
+                                category: product.category,
+                                variation: variationName,
+                                quantity: 1
+                              });
+                              navigate('/checkout');
+                              return;
+                            }
+                          } catch (e) {
+                            console.error('Error parsing variations:', e);
+                          }
+                        }
+                        
+                        // For regular products
+                        const skuid = product.skuid || product.id.toString();
+                        setQuickCheckoutItem({
+                          id: product.id.toString(),
+                          skuid: skuid,
+                          name: product.name,
+                          tamil: product.tamil || null,
+                          price: product.price,
+                          image: product.image,
+                          category: product.category,
+                          quantity: 1
+                        });
+                        navigate('/checkout');
+                      }}
                     >
                       {translate('blocks.buy')}
                     </Button>
