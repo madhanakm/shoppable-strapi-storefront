@@ -31,32 +31,14 @@ export const useWishlistProducts = (productIds: string[]) => {
 
       const productPromises = productIds.map(async (productId) => {
         try {
-          // Try to find by product ID first
-          let response = await fetch(`https://api.dharaniherbbals.com/api/product-masters/${productId}`, {
+          const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters/${productId}`, {
             headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
           });
           
-          let product = null;
-          let selectedVariation = null;
+          if (!response.ok) return null;
           
-          if (response.ok) {
-            const data = await response.json();
-            product = data.data || data;
-          }
-          
-          // Fallback: try to find by SKU if productId doesn't work (backward compatibility)
-          if (!product) {
-            response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[skuid][$eq]=${productId}`, {
-              headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              if (data.data && data.data.length > 0) {
-                product = data.data[0];
-              }
-            }
-          }
+          const data = await response.json();
+          const product = data.data || data;
           
           if (product) {
             const attrs = product.attributes;
@@ -68,30 +50,16 @@ export const useWishlistProducts = (productIds: string[]) => {
             let productImage = attrs.photo || attrs.image;
             let priceRange = null;
             
-            // Handle variable products
+            // Handle variable products - show price range
             if (attrs.isVariableProduct && attrs.variations) {
               try {
                 const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
-                
-                // For variable products, show the base product without specific variation
-                selectedVariation = null;
-                
-                if (selectedVariation) {
-                  price = getPriceByUserType(selectedVariation, userType);
-                  const variationName = selectedVariation.value || selectedVariation.attributeValue || Object.values(selectedVariation)[0];
-                  productName = `${productName} - ${variationName}`;
-                  if (selectedVariation.image) {
-                    productImage = selectedVariation.image;
-                  }
-                } else {
-                  // Show price range for variable products
-                  const prices = variations.map(v => getPriceByUserType(v, userType));
-                  if (prices.length > 0) {
-                    const minPrice = Math.min(...prices);
-                    const maxPrice = Math.max(...prices);
-                    price = minPrice;
-                    priceRange = minPrice === maxPrice ? null : `${minPrice} - ${maxPrice}`;
-                  }
+                const prices = variations.map(v => getPriceByUserType(v, userType));
+                if (prices.length > 0) {
+                  const minPrice = Math.min(...prices);
+                  const maxPrice = Math.max(...prices);
+                  price = minPrice;
+                  priceRange = minPrice === maxPrice ? null : `${minPrice} - ${maxPrice}`;
                 }
               } catch (e) {
                 console.error('Error parsing variations:', e);
@@ -107,8 +75,7 @@ export const useWishlistProducts = (productIds: string[]) => {
               priceRange,
               image: productImage,
               category: attrs.category,
-              tamil: attrs.tamil,
-              variation: selectedVariation
+              tamil: attrs.tamil
             };
           }
         } catch (e) {

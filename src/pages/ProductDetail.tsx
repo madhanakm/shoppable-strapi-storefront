@@ -311,8 +311,19 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (product) {
-      const productId = product.id.toString();
-      addToCart(productId, productId, quantity);
+      let productId, skuid;
+      
+      if (product.isVariableProduct && selectedVariation && selectedVariation.skuid) {
+        // For variable products: skuid = variation skuid, id = base product id
+        skuid = selectedVariation.skuid.toString();
+        productId = product.id.toString();
+      } else {
+        // For simple products, use the base product ID
+        productId = product.id.toString();
+        skuid = product.skuid || product.SKUID || productId;
+      }
+      
+      addToCart(skuid, productId, quantity); // Use skuid as unique identifier
     }
   };
   
@@ -918,7 +929,7 @@ const ProductDetail = () => {
                     className="w-full border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 shadow-md hover:shadow-lg transition-all duration-300 py-3 text-base font-medium rounded-xl"
                     onClick={handleWishlistToggle}
                   >
-                    <Heart className={`mr-2 h-5 w-5 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
+                    <Heart className={`mr-2 h-5 w-5 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''} `} />
                     <span className={`${isTamil ? 'tamil-text' : ''}`}>
                       {isInWishlist(product.id.toString()) ? translate('product.removeFromWishlist') : translate('product.addToWishlist')}
                     </span>

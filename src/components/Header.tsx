@@ -18,7 +18,12 @@ const Header = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const searchParam = urlParams.get('search');
-    setSearchQuery(searchParam || '');
+    // Only sync search query on products page or when there's a search param
+    if (location.pathname === '/products' || searchParam) {
+      setSearchQuery(searchParam || '');
+    } else {
+      setSearchQuery('');
+    }
   }, [location.search, location.pathname]);
   
   const clearSearch = () => {

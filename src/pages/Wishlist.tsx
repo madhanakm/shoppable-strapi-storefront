@@ -19,8 +19,8 @@ const Wishlist = () => {
   const isTamil = language === LANGUAGES.TAMIL;
 
   const handleAddToCart = (item: any) => {
-    const productId = item.originalProductId || item.id.toString();
-    addToCart(productId, item.id.toString(), 1);
+    const productId = item.id.toString();
+    addToCart(productId, productId, 1);
   };
 
   if (wishlistCount === 0) {

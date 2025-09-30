@@ -37,30 +37,24 @@ export const useCartProducts = (cartItems: CartItem[]) => {
 
       const productPromises = cartItems.map(async (cartItem) => {
         try {
-          // Try to find by product ID first
-          let response = await fetch(`https://api.dharaniherbbals.com/api/product-masters/${cartItem.productId}`, {
-            headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
-          });
-          
           let product = null;
           let selectedVariation = null;
+          
+          // Try to find by base product ID (cartItem.id)
+          let response = await fetch(`https://api.dharaniherbbals.com/api/product-masters/${cartItem.id}`, {
+            headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
+          });
           
           if (response.ok) {
             const data = await response.json();
             product = data.data || data;
-          }
-          
-          // Fallback: try to find by SKU if productId doesn't work (backward compatibility)
-          if (!product) {
-            response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[skuid][$eq]=${cartItem.productId}`, {
-              headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
-            });
             
-            if (response.ok) {
-              const data = await response.json();
-              if (data.data && data.data.length > 0) {
-                product = data.data[0];
-              }
+            // If product is variable and has skuid, find the specific variation
+            if (product && product.attributes?.isVariableProduct && product.attributes?.variations && cartItem.productId !== cartItem.id) {
+              try {
+                const variations = typeof product.attributes.variations === 'string' ? JSON.parse(product.attributes.variations) : product.attributes.variations;
+                selectedVariation = variations.find(v => v.skuid && v.skuid.toString() === cartItem.productId);
+              } catch (e) {}
             }
           }
           
@@ -74,12 +68,12 @@ export const useCartProducts = (cartItems: CartItem[]) => {
             let productImage = attrs.photo || attrs.image;
             
             // Handle variable products
-            if (attrs.isVariableProduct && attrs.variations) {
+            if (attrs.isVariableProduct && attrs.variations && !selectedVariation) {
               try {
                 const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
                 
-                // Find the specific variation by SKU (for variable products, we still use SKU for variations)
-                selectedVariation = variations.find(v => v.skuid === cartItem.id);
+                // Find the specific variation by SKU
+                selectedVariation = variations.find(v => v.skuid && v.skuid.toString() === cartItem.productId);
                 
                 if (selectedVariation) {
                   price = getPriceByUserType(selectedVariation, userType);
@@ -98,11 +92,19 @@ export const useCartProducts = (cartItems: CartItem[]) => {
               } catch (e) {
                 console.error('Error parsing variations:', e);
               }
+            } else if (selectedVariation) {
+              // Use the already found variation
+              price = getPriceByUserType(selectedVariation, userType);
+              const variationName = selectedVariation.value || selectedVariation.attributeValue || Object.values(selectedVariation)[0];
+              productName = `${productName} - ${variationName}`;
+              if (selectedVariation.image) {
+                productImage = selectedVariation.image;
+              }
             }
             
             return {
               id: product.id,
-              skuid: attrs.skuid || product.id,
+              skuid: selectedVariation ? selectedVariation.skuid : (attrs.skuid || product.id),
               originalProductId: cartItem.productId,
               name: productName,
               price,
