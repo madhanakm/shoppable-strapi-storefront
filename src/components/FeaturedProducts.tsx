@@ -260,7 +260,7 @@ const FeaturedProducts = () => {
               </div>
               
               <CardContent className="p-6">
-                <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>
+                <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors uppercase ${isTamil ? 'tamil-text' : ''}`}>
                   {isTamil && product.tamilName ? filterPriceFromName(product.tamilName) : filterPriceFromName(product.name)}
                 </h3>
                 

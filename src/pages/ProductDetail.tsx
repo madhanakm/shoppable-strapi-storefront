@@ -821,7 +821,7 @@ const ProductDetail = () => {
           <div className="lg:w-1/2">
             <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 md:p-10">
               <div className="mb-6">
-                <h1 className={`text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight ${isTamil ? 'tamil-text' : ''}`}>
+                <h1 className={`text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight uppercase ${isTamil ? 'tamil-text' : ''}`}>
                   {isTamil && product.tamil ? product.tamil : (product.Name || product.name || product.title || 'Product')}
                 </h1>
                 
@@ -1099,7 +1099,7 @@ const ProductDetail = () => {
                             <div className="absolute top-2 right-2 w-8 h-8 bg-primary/10 rounded-full blur-lg group-hover:w-12 group-hover:h-12 transition-all duration-500"></div>
                           </div>
                           <div className="p-6 relative z-20">
-                            <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 ${isTamil ? 'tamil-text' : ''}`}>
+                            <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 uppercase ${isTamil ? 'tamil-text' : ''}`}>
                               {isTamil && relatedProduct.attributes?.tamil ? relatedProduct.attributes.tamil : (relatedProduct.attributes?.Name || 'Product')}
                             </h3>
                             <div className="flex items-center justify-between">

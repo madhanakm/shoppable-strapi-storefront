@@ -520,7 +520,7 @@ const AllProducts = () => {
                       
                       <CardContent className="p-4 md:p-6 bg-gradient-to-b from-white to-gray-50">
                         <Link to={`/product/${product.id}`}>
-                          <h3 className={`font-semibold text-xs md:text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 leading-tight ${isTamil ? 'tamil-text' : ''}`}>
+                          <h3 className={`font-semibold text-xs md:text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 leading-tight uppercase ${isTamil ? 'tamil-text' : ''}`}>
                             {isTamil && attrs.tamil ? attrs.tamil : (attrs.Name || attrs.name || 'Product')}
                           </h3>
                         </Link>

@@ -249,7 +249,7 @@ const TrendingProducts = () => {
               </div>
               
               <CardContent className="p-6">
-                <h3 className={`font-semibold text-lg mb-2 group-hover:text-primary transition-colors ${isTamil ? 'tamil-text' : ''}`}>
+                <h3 className={`font-semibold text-lg mb-2 group-hover:text-primary transition-colors uppercase ${isTamil ? 'tamil-text' : ''}`}>
                   {filterPriceFromName(product.name)}
                 </h3>
                 

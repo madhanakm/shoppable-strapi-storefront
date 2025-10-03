@@ -202,7 +202,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
       
       <CardContent className="p-6 bg-white">
         <Link to={`/product/${product.id}`}>
-          <h3 className={`font-bold text-base mb-3 group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem] leading-tight ${isTamil ? 'tamil-text' : ''}`}>
+          <h3 className={`font-bold text-base mb-3 group-hover:text-primary transition-colors line-clamp-2 min-h-[3rem] leading-tight uppercase ${isTamil ? 'tamil-text' : ''}`}>
             {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
           </h3>
         </Link>
@@ -463,7 +463,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                   
                   <CardContent className="p-4 bg-white">
                     <Link to={`/product/${product.id}`}>
-                      <h3 className="font-bold text-sm mb-2 group-hover:text-red-600 transition-colors line-clamp-2 min-h-[2.5rem] leading-tight">
+                      <h3 className="font-bold text-sm mb-2 group-hover:text-red-600 transition-colors line-clamp-2 min-h-[2.5rem] leading-tight uppercase">
                         {filterPriceFromName(product.name)}
                       </h3>
                     </Link>
@@ -774,7 +774,7 @@ const TrendingProductsSection = () => {
                 
                 <CardContent className="p-3 bg-white">
                   <Link to={`/product/${product.id}`}>
-                    <h3 className={`font-bold text-xs mb-2 group-hover:text-green-600 transition-colors line-clamp-2 min-h-[2rem] leading-tight ${isTamil ? 'tamil-text' : ''}`}>
+                    <h3 className={`font-bold text-xs mb-2 group-hover:text-green-600 transition-colors line-clamp-2 min-h-[2rem] leading-tight uppercase ${isTamil ? 'tamil-text' : ''}`}>
                       {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
                     </h3>
                   </Link>
@@ -1090,7 +1090,7 @@ const DealsOfTheDaySection = () => {
                         {translate('blocks.limitedTime')}
                       </span>
                       <Link to={`/product/${featuredDeal.id}`}>
-                        <h3 className={`text-2xl font-black text-gray-800 mb-3 hover:text-red-600 transition-colors line-clamp-2 ${isTamil ? 'tamil-text' : ''}`}>
+                        <h3 className={`text-2xl font-black text-gray-800 mb-3 hover:text-red-600 transition-colors line-clamp-2 uppercase ${isTamil ? 'tamil-text' : ''}`}>
                           {isTamil && featuredDeal.tamil ? filterPriceFromName(featuredDeal.tamil) : filterPriceFromName(featuredDeal.name)}
                         </h3>
                       </Link>
@@ -1148,7 +1148,7 @@ const DealsOfTheDaySection = () => {
                       </Link>
                     </div>
                     <Link to={`/product/${deal.id}`}>
-                      <h4 className={`font-bold text-sm text-gray-800 group-hover:text-red-600 transition-colors line-clamp-2 mb-2 ${isTamil ? 'tamil-text' : ''}`}>
+                      <h4 className={`font-bold text-sm text-gray-800 group-hover:text-red-600 transition-colors line-clamp-2 mb-2 uppercase ${isTamil ? 'tamil-text' : ''}`}>
                         {isTamil && deal.tamil ? filterPriceFromName(deal.tamil) : filterPriceFromName(deal.name)}
                       </h4>
                     </Link>
@@ -1201,7 +1201,7 @@ const DealsOfTheDaySection = () => {
                     
                     <div className="flex-1 min-w-0">
                       <Link to={`/product/${deal.id}`}>
-                        <h4 className={`font-bold text-sm text-gray-800 group-hover:text-red-600 transition-colors line-clamp-2 mb-1 ${isTamil ? 'tamil-text' : ''}`}>
+                        <h4 className={`font-bold text-sm text-gray-800 group-hover:text-red-600 transition-colors line-clamp-2 mb-1 uppercase ${isTamil ? 'tamil-text' : ''}`}>
                           {isTamil && deal.tamil ? filterPriceFromName(deal.tamil) : filterPriceFromName(deal.name)}
                         </h4>
                       </Link>
@@ -1474,7 +1474,7 @@ const PopularChoicesSection = () => {
                 
                 <CardContent className="p-3 bg-white">
                   <Link to={`/product/${product.id}`}>
-                    <h3 className={`font-bold text-xs mb-2 group-hover:text-green-600 transition-colors line-clamp-2 min-h-[2rem] ${isTamil ? 'tamil-text' : ''}`}>
+                    <h3 className={`font-bold text-xs mb-2 group-hover:text-green-600 transition-colors line-clamp-2 min-h-[2rem] uppercase ${isTamil ? 'tamil-text' : ''}`}>
                       {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
                     </h3>
                   </Link>

@@ -183,7 +183,7 @@ const HotSellingProducts = () => {
               </div>
               
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">{product.name}</h3>
+                <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors uppercase">{product.name}</h3>
                 
                 <div className="flex items-center mb-3">
                   <StarRating 
