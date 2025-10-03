@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Package, ArrowRight, Home } from 'lucide-react';
@@ -9,6 +10,11 @@ import { CheckCircle, Package, ArrowRight, Home } from 'lucide-react';
 const OrderSuccess = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
+      <SEOHead 
+        title="Order Successful"
+        description="Your order has been placed successfully! Thank you for shopping with Dharani Herbbals."
+        url="/order-success"
+      />
       <Header />
       <main className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-2xl mx-auto text-center">

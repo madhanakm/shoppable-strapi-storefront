@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -79,6 +80,11 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <SEOHead 
+        title="Shopping Cart"
+        description="Review your selected items and proceed to checkout. Secure shopping cart with easy quantity management."
+        url="/cart"
+      />
       <Header />
       <main className="container mx-auto px-4 py-8 md:py-16">
         <div className="max-w-7xl mx-auto">

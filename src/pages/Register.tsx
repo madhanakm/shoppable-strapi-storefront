@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -150,6 +151,11 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
+      <SEOHead 
+        title="Create Account"
+        description="Join Dharani Herbbals and create your account to access exclusive offers, track orders, and enjoy personalized shopping."
+        url="/register"
+      />
       <Header />
       <main className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-md mx-auto">

@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   Leaf, 
@@ -61,6 +62,11 @@ const AboutUs = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
+      <SEOHead 
+        title="About Us"
+        description="Learn about Dharani Herbbals - 15+ years of excellence in natural and herbal products. Our mission, values, and commitment to your wellness."
+        url="/about"
+      />
       <Header />
       
       {/* Hero Section */}

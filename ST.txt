@@ -1,0 +1,138 @@
+API Instructions for SRC’s Customer Consignment Booking
+ST COURIER PRIVATE LIMITED
+API Instructions for
+SRC’s Customer Consignment Booking
+CIS Technologies 1
+API Instructions for SRC’s Customer Consignment Booking
+1. Overview
+2. Requests
+3. URL
+4. Data Structure
+5. Request Data
+6. Errors
+7. Sample Code
+CIS Technologies 2
+API Instructions for SRC’s Customer Consignment Booking
+1. Overview
+Integrate our platform with your favorite application using our restful API.
+All API requests follow REST rules in terms of resource naming convention,
+use HTTP method as action description.
+2. Requests
+All requests to the API must be made via HTTP / HTTPS. The Web API is
+completely RESTful and accepts POST request only.
+3. URL
+Our API url has some specific structure to make it easy to use, this structure
+will help us to identify the action and format that you expect without any
+additional parameter, the response will be in the JSON format, structure as
+follows,
+Demo URL:
+https://erpstcourier.com/ecom/demo‐bookings.php
+Live URL:
+https://erpstcourier.com/ecom/cust‐bookings.php
+CIS Technologies 3
+API Instructions for SRC’s Customer Consignment Booking
+4. Data Structure
+Every request made to booking endpoint will require a request body
+formatted in JSON containing your booking content and metadata. This will
+include information such as the AWB number, your ref. no, consignee and
+consigner details and etc.
+[{
+"awbno":"",
+"refno":"",
+"orginsrc":"",
+"custkey":"",
+"frmname":"",
+"frmadd1":"",
+"frmadd2":"",
+"frmpincode":"",
+"frmphone":"",
+"toname":"",
+"toadd1":"",
+"toadd2":"",
+"toarea":"",
+"topincode":"",
+"tophone":"",
+"goodsname":"",
+"goodsvalue":"",
+"doctype":"",
+"transmode":"",
+"qty":"",
+"weight":"",
+"volweight":"",
+" codamt ":""
+}]
+CIS Technologies 4
+API Instructions for SRC’s Customer Consignment Booking
+All above red color parameters are mandatory.
+5. Request Data
+Below section describes the request parameters in detail.
+awbno : Airway Bill Number (AWB No) as given by company and its contain
+11 digit.
+refno : This is contain your reference number and accept any alpha numeric
+text and max. of 20 character.
+orginsrc : This is your 5 digit service center / customer code
+custkey: This is a customer’s booking key (IT team will be share your key)
+frmname, frmadd1, frmadd2, frmpincode, frmphone : Sender name and
+address details
+toname, toadd1, toadd2, toarea, topincode, tophone : Receiver name and
+address details
+goodsname, goodsvalue : Goods name and goods value
+doctype : Type of document. (D – Document, N – Non Document)
+transmode : Transport mode (S – Surface, A – Air)
+qty : Number quantity send
+weight : Consignment Weight in Kgs
+volweight : Consignment Volumetric weight in Kgs
+codamt : Cash on Delivery Amount
+CIS Technologies 5
+API Instructions for SRC’s Customer Consignment Booking
+6. Sample Code (PHP curl Request)
+url = 'https://erpstcourier.com/ecom/ demo‐bookings.php';
+$ch = curl_init($url);
+$data = array(
+'awbno' => '52472512676',
+'refno' => '123456',
+'orginsrc' => 'TNPVM',
+'custkey' => '1QWakFo3VuLyW9bBWiW17k70kjlwpXlD',
+'frmname' => 'raja',
+'frmadd1' => 'address1',
+'frmadd2' => 'address2',
+'frmpincode' => '600001',
+'frmphone' => '9876543210',
+'toname' => 'kumar',
+'toadd1' => 'to address1',
+'toadd2' => 'to address2',
+'toarea' => 'near postoffice',
+'topincode' => '641007',
+'tophone' => '0123456789',
+'goodsname' => 'kayboard',
+'goodsvalue' => '800',
+'doctype' => 'N',
+'transmode' => 'S',
+'qty' => '1',
+'weight' => '0.450',
+'volweight' => '0.370',
+'codamt' => '100'
+);
+$bkdata = json_encode(array("booking" => $data));
+curl_setopt($ch, CURLOPT_POSTFIELDS, $bkdata);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content‐Type:application/json'));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+echo $result = curl_exec($ch);
+curl_close($ch);
+CIS Technologies 6
+API Instructions for SRC’s Customer Consignment Booking
+API Responses
+7.1 Successful API request responses
+{
+"status" : "1",
+"result" : "Success, Ref. ID 123"
+}
+7.2 Errors
+Following is the list of all possible parameter level errors that you may
+receive while making an API request
+1. Empty Records
+2. Already Booked
+3. Invalid Origin Service Center
+4. Invalid AWB Number
+5. If any DB Error
+CIS Technologies 7

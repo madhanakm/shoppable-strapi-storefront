@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -254,6 +255,11 @@ const AllProducts = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-x-hidden">
+      <SEOHead 
+        title={searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
+        description={searchQuery ? `Found ${totalProducts} herbal products matching "${searchQuery}". Browse natural remedies and wellness products.` : 'Browse our complete collection of natural and herbal products. Premium quality Ayurvedic remedies and wellness solutions.'}
+        url={searchQuery ? `/products?search=${encodeURIComponent(searchQuery)}` : '/products'}
+      />
       <Header />
       <main className="container mx-auto px-4 py-8 md:py-16 max-w-full">
         {/* Page Header */}

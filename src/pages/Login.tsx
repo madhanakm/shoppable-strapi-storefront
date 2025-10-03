@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -156,6 +157,11 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-white to-green-50">
+      <SEOHead 
+        title="Login"
+        description="Sign in to your Dharani Herbbals account to access your orders, wishlist, and personalized shopping experience."
+        url="/login"
+      />
       <Header />
       <main className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-md mx-auto">

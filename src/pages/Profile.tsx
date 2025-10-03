@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -257,6 +258,11 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <SEOHead 
+        title="My Profile"
+        description="Manage your account, view order history, update addresses and personal information."
+        url="/profile"
+      />
       <Header />
       <main className="container mx-auto px-4 py-8 md:py-16">
         <div className="max-w-6xl mx-auto">

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, ShoppingCart, Trash2, ShoppingBag } from 'lucide-react';
@@ -26,6 +27,11 @@ const Wishlist = () => {
   if (wishlistCount === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-red-50">
+        <SEOHead 
+          title="My Wishlist"
+          description="Your saved favorite products. Easily manage and shop from your wishlist of herbal and natural products."
+          url="/wishlist"
+        />
         <Header />
         <main className="container mx-auto px-4 py-16 md:py-24">
           <div className="max-w-2xl mx-auto text-center">
@@ -53,6 +59,11 @@ const Wishlist = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-red-50">
+      <SEOHead 
+        title="My Wishlist"
+        description="Your saved favorite products. Easily manage and shop from your wishlist of herbal and natural products."
+        url="/wishlist"
+      />
       <Header />
       <main className="container mx-auto px-4 py-8 md:py-16">
         <div className="max-w-7xl mx-auto">
