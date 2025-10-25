@@ -18,13 +18,9 @@ const Header = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const searchParam = urlParams.get('search');
-    // Only sync search query on products page or when there's a search param
-    if (location.pathname === '/products' || searchParam) {
-      setSearchQuery(searchParam || '');
-    } else {
-      setSearchQuery('');
-    }
-  }, [location.search, location.pathname]);
+    // Update search query based on URL parameter
+    setSearchQuery(searchParam || '');
+  }, [location.search]);
   
   const clearSearch = () => {
     setSearchQuery('');
@@ -76,7 +72,6 @@ const Header = () => {
               <div className="flex flex-1 max-w-xs mx-4">
                 <form onSubmit={onSearchSubmit} className="relative w-full">
                   <Input
-                    key={location.search}
                     type="text"
                     placeholder="Search products..."
                     value={searchQuery}
@@ -246,7 +241,6 @@ const Header = () => {
           <div className="md:hidden pb-4">
             <form onSubmit={onSearchSubmit} className="relative">
               <Input
-                key={location.search}
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}

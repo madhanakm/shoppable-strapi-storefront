@@ -369,10 +369,22 @@ const Profile = () => {
                                       <div className="mb-4">
                                         <h4 className="font-semibold text-gray-700 mb-2">Customer: {attrs.customername}</h4>
                                         <p className="text-sm text-gray-600">Phone: {attrs.phoneNum}</p>
-                                        <p className="text-sm text-gray-600">Quantity: {attrs.quantity} items</p>
+                                        <p className="text-sm text-gray-600">Quantity: {
+                                          (() => {
+                                            const dataField = attrs.price || attrs.Name;
+                                            if (!dataField) return '0';
+                                            // Extract quantities from product strings and sum them
+                                            return dataField.split('|').reduce((sum, product) => {
+                                              const qtyMatch = product.trim().match(/x\s*(\d+)/i);
+                                              const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+                                              return sum + qty;
+                                            }, 0);
+                                          })()
+                                        } items</p>
                                         {attrs.Name && (
                                           <div className="mt-2">
                                             <p className="text-sm font-medium text-gray-700">Items:</p>
+
                                             <div className="mt-2 border rounded-md overflow-hidden">
                                               <table className="w-full">
                                                 <thead className="bg-gray-50">
@@ -382,13 +394,17 @@ const Profile = () => {
                                                   </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-100">
-                                                  {attrs.Name.split('|').map((product, index) => {
-                                                    const quantities = attrs.quantity ? String(attrs.quantity).split('|') : [];
-                                                    const qty = quantities[index] || '1';
+                                                  {(attrs.price || attrs.Name).split('|').map((product, index) => {
+                                                    const productStr = product.trim();
+                                                    // Extract quantity from price field format: "PRODUCT: ₹price x quantity"
+                                                    const qtyMatch = productStr.match(/x\s*(\d+)/i);
+                                                    const qty = qtyMatch ? qtyMatch[1] : '1';
+                                                    // Extract product name (everything before the colon)
+                                                    const productName = productStr.split(':')[0].trim();
                                                     return (
                                                       <tr key={index} className="hover:bg-gray-50">
-                                                        <td className="px-3 py-2 text-sm text-gray-600">{product.trim()}</td>
-                                                        <td className="px-3 py-2 text-sm text-gray-600 text-right">{qty.trim()}</td>
+                                                        <td className="px-3 py-2 text-sm text-gray-600">{productName}</td>
+                                                        <td className="px-3 py-2 text-sm text-gray-600 text-right">{qty}</td>
                                                       </tr>
                                                     );
                                                   })}
