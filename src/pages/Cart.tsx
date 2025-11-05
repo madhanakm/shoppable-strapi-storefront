@@ -14,6 +14,7 @@ import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-settings';
 import { calculateShipping } from '@/lib/shipping';
 
+
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, cartCount } = useCart();
   const { products, loading, cartTotal } = useCartProducts(cartItems);

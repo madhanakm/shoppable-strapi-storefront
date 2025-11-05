@@ -5,6 +5,7 @@
 export interface EcommerceSettings {
   cod: boolean;
   onlinePay: boolean;
+  creditPayment: boolean;
   tamilNaduShipping: string;
   otherStateShipping: string;
   tamilNaduFreeShipping: string;
@@ -43,6 +44,7 @@ export const getEcommerceSettings = async (): Promise<EcommerceSettings> => {
     const result = {
       cod: settings.cod === true,
       onlinePay: settings.onlinePay === true,
+      creditPayment: settings.creditPayment === true,
       tamilNaduShipping: settings.tamilNaduShipping || '50',
       otherStateShipping: settings.otherStateShipping || '150',
       tamilNaduFreeShipping: settings.tamilNaduFreeShipping || '750',
@@ -57,6 +59,7 @@ export const getEcommerceSettings = async (): Promise<EcommerceSettings> => {
     return {
       cod: true,
       onlinePay: true,
+      creditPayment: true,
       tamilNaduShipping: '50',
       otherStateShipping: '150',
       tamilNaduFreeShipping: '750',

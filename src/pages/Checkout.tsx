@@ -23,6 +23,8 @@ import { calculateShipping } from '@/lib/shipping';
 import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package, Plus } from 'lucide-react';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { recoverPendingPayments } from '@/services/payment-recovery';
+import { canPlaceCreditOrder, placeCreditOrder } from '@/services/credit-orders';
+import { UserType } from '@/types/strapi';
 
 const Checkout = () => {
   const { cartItems: regularCartItems, clearCart } = useCart();
@@ -52,7 +54,7 @@ const Checkout = () => {
   const [differentBillingAddress, setDifferentBillingAddress] = useState(false);
   const [useManualAddress, setUseManualAddress] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
-  const [ecomSettings, setEcomSettings] = useState<EcommerceSettings>({ cod: true, onlinePay: true, minimumOrderValueTamilNadu: '0', minimumOrderValueOtherState: '0' });
+  const [ecomSettings, setEcomSettings] = useState<EcommerceSettings>({ cod: true, onlinePay: true, creditPayment: true, minimumOrderValueTamilNadu: '0', minimumOrderValueOtherState: '0' });
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   
   const [formData, setFormData] = useState({
@@ -290,6 +292,82 @@ const Checkout = () => {
           }
           throw new Error(paymentError.message || 'Payment failed');
         }
+      } else if (formData.paymentMethod === 'credit') {
+        // Credit Order - Direct order creation
+        const invoiceNumber = await generateInvoiceNumber();
+        
+        const orderPayload = {
+          data: {
+            ordernum: orderNumber,
+            invoicenum: invoiceNumber,
+            totalValue: total,
+            total: total,
+            shippingCharges: shippingCharges,
+            customername: formData.fullName,
+            phoneNum: formData.phone,
+            email: formData.email,
+            communication: 'website',
+            payment: 'Credit',
+            shippingAddress: shippingAddr,
+            billingAddress: shippingAddr,
+            Name: cartItems.map(item => item.name).join(' | '),
+            price: cartItems.map(item => `${item.name}: ${formatPrice(item.price)} x ${item.quantity}`).join(' | '),
+            skuid: cartItems.map(item => item.skuid || item.id).join(' | '),
+            prodid: cartItems.map(item => item.originalProductId || item.id).join(' | '),
+            remarks: formData.notes || `Credit order by ${user?.userType}`,
+            quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0)),
+            creditOrder: true
+          }
+        };
+
+        const response = await fetch('https://api.dharaniherbbals.com/api/orders', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(orderPayload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to place credit order: ${response.status}`);
+        }
+        
+        // Send order confirmation SMS and WhatsApp message for credit orders
+        try {
+          const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
+          
+          // Send SMS
+          fetch('https://api.dharaniherbbals.com/api/order-sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: {
+                mobile: cleanPhone,
+                orderNumber: orderNumber,
+                amount: total
+              }
+            })
+          });
+          
+          // Send WhatsApp message
+          fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              mobile: cleanPhone,
+              orderNumber: orderNumber,
+              amount: total
+            })
+          });
+        } catch (error) {
+          console.error('Error sending notifications:', error);
+        }
+        
+        toast({
+          title: "Credit Order Placed Successfully!",
+          description: `Order #${orderNumber} placed on credit. You will receive confirmation shortly.`,
+        });
       } else {
         // COD Order - Create pending order first (without invoice number), then store
         const pendingOrderData: PendingOrderData = {
@@ -912,6 +990,26 @@ const Checkout = () => {
                           </div>
                         )}
                         
+                        {ecomSettings.creditPayment && user?.userType && user.userType.toLowerCase() !== 'customer' && (
+                          <div className="flex items-center space-x-3 p-4 border-2 border-purple-200 rounded-lg bg-purple-50">
+                            <input
+                              type="radio"
+                              id="credit"
+                              name="paymentMethod"
+                              value="credit"
+                              checked={formData.paymentMethod === 'credit'}
+                              onChange={handleInputChange}
+                              className="w-4 h-4 text-purple-600"
+                            />
+                            <label htmlFor="credit" className="flex-1 cursor-pointer">
+                              <div className="font-semibold text-purple-800">Credit Payment</div>
+                              <div className="text-sm text-purple-600">Pay later - Available for dealers & distributors</div>
+                            </label>
+                          </div>
+                        )}
+                        
+
+                        
                         {!ecomSettings.cod && !ecomSettings.onlinePay && (
                           <div className="p-4 border-2 border-red-200 rounded-lg bg-red-50 text-center">
                             <p className="text-red-600">No payment methods are currently available. Please try again later.</p>
@@ -1012,7 +1110,7 @@ const Checkout = () => {
                     </div>
 
                     {/* Place Order Button - Only show if at least one payment method is active */}
-                    {(ecomSettings.cod || ecomSettings.onlinePay) && (
+                    {(ecomSettings.cod || ecomSettings.onlinePay || canPlaceCreditOrder(user?.userType as UserType)) && (
                       <Button
                         type="submit"
                         disabled={isLoading || !isMinimumOrderMet}

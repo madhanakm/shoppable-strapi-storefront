@@ -1,10 +1,13 @@
 import { post, get, put } from './api';
 
+import { UserType } from '@/types/strapi';
+
 export interface EcomUser {
   name: string;
   email: string;
   phone: string;
   password: string;
+  userType?: UserType;
   otp?: string;
   otpExpiresAt?: string;
   isVerified?: boolean;

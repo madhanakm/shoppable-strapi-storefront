@@ -169,7 +169,7 @@ const AllProducts = () => {
       
       const sortOptions = { sortBy };
       
-      const productsData = await getProducts(page, itemsPerPage, filters, sortOptions);
+      const productsData = await getProducts(page, itemsPerPage, filters, { ...sortOptions, random: true });
       const productList = Array.isArray(productsData) ? productsData : productsData.data || [];
       
       if (page === 1) {

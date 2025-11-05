@@ -47,10 +47,19 @@ export interface Product {
   };
 }
 
+export enum UserType {
+  CUSTOMER = 'customer',
+  DEALER = 'dealer',
+  DISTRIBUTOR = 'distributor',
+  ADMIN = 'admin'
+}
+
 export interface User {
   id: number;
   username: string;
   email: string;
+  phone?: string;
+  userType?: UserType;
   provider: string;
   confirmed: boolean;
   blocked: boolean;
