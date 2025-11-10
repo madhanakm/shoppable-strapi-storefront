@@ -294,44 +294,73 @@ const Checkout = () => {
         }
       } else if (formData.paymentMethod === 'credit') {
         // Credit Order - Direct order creation
+        
+        // Validate required fields for credit orders
+        if (!formData.fullName || !formData.email || !formData.phone || !shippingAddr) {
+          throw new Error('Missing required customer information for credit order');
+        }
+        
+        // Generate invoice number for credit orders
         const invoiceNumber = await generateInvoiceNumber();
         
         const orderPayload = {
           data: {
+            customername: formData.fullName,
+            total: total,
+            totalValue: total,
+            payment: 'Credit',
             ordernum: orderNumber,
             invoicenum: invoiceNumber,
-            totalValue: total,
-            total: total,
-            shippingCharges: shippingCharges,
-            customername: formData.fullName,
             phoneNum: formData.phone,
             email: formData.email,
             communication: 'website',
-            payment: 'Credit',
             shippingAddress: shippingAddr,
             billingAddress: shippingAddr,
             Name: cartItems.map(item => item.name).join(' | '),
             price: cartItems.map(item => `${item.name}: ${formatPrice(item.price)} x ${item.quantity}`).join(' | '),
             skuid: cartItems.map(item => item.skuid || item.id).join(' | '),
             prodid: cartItems.map(item => item.originalProductId || item.id).join(' | '),
-            remarks: formData.notes || `Credit order by ${user?.userType}`,
             quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0)),
-            creditOrder: true
+            remarks: formData.notes || `Credit order by ${user?.userType}`,
+            shippingRate: shippingCharges
           }
         };
 
-        const response = await fetch('https://api.dharaniherbbals.com/api/orders', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(orderPayload)
-        });
+        console.log('Credit order payload:', orderPayload);
+        
+        let response: Response;
+        let responseText: string;
+        
+        try {
+          response = await fetch('https://api.dharaniherbbals.com/api/orders', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(orderPayload)
+          });
 
-        if (!response.ok) {
-          throw new Error(`Failed to place credit order: ${response.status}`);
+          responseText = await response.text();
+          
+          if (!response.ok) {
+            console.error('Credit order API error:', response.status, responseText);
+            throw new Error(`Failed to place credit order: ${response.status} - ${responseText}`);
+          }
+        } catch (fetchError) {
+          console.error('Network error during credit order:', fetchError);
+          throw new Error(`Network error while placing credit order: ${fetchError.message}`);
         }
+        
+        let result;
+        try {
+          result = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('Invalid response format:', responseText);
+          throw new Error('Invalid response from server');
+        }
+
+
         
         // Send order confirmation SMS and WhatsApp message for credit orders
         try {
@@ -420,25 +449,24 @@ const Checkout = () => {
         
         const orderPayload = {
           data: {
+            customername: formData.fullName,
+            total: total,
+            totalValue: total,
+            payment: 'COD',
             ordernum: orderNumber,
             invoicenum: invoiceNumber,
-            totalValue: total,
-            total: total,
-            shippingCharges: shippingCharges,
-            shippingRate: shippingCharges, // Adding shipping rate as a separate field
-            customername: formData.fullName,
             phoneNum: formData.phone,
             email: formData.email,
             communication: 'website',
-            payment: 'COD',
             shippingAddress: shippingAddr,
             billingAddress: shippingAddr,
             Name: cartItems.map(item => item.name).join(' | '),
             price: cartItems.map(item => `${item.name}: ${formatPrice(item.price)} x ${item.quantity}`).join(' | '),
             skuid: cartItems.map(item => item.skuid || item.id).join(' | '),
             prodid: cartItems.map(item => item.originalProductId || item.id).join(' | '),
+            quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0)),
             remarks: formData.notes || 'No special notes',
-            quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0))
+            shippingRate: shippingCharges
           }
         };
 
