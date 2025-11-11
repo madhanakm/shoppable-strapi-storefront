@@ -25,6 +25,7 @@ import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { recoverPendingPayments } from '@/services/payment-recovery';
 import { canPlaceCreditOrder, placeCreditOrder } from '@/services/credit-orders';
 import { UserType } from '@/types/strapi';
+import { useOrderFulfillment } from '@/hooks/useOrderFulfillment';
 
 const Checkout = () => {
   const { cartItems: regularCartItems, clearCart } = useCart();
@@ -46,6 +47,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
+  const { processOrder: fulfillOrder } = useOrderFulfillment();
   
   const [isLoading, setIsLoading] = useState(false);
   const [addresses, setAddresses] = useState([]);
@@ -360,7 +362,13 @@ const Checkout = () => {
           throw new Error('Invalid response from server');
         }
 
-
+        // Process order fulfillment after successful order creation
+        try {
+          await fulfillOrder(result);
+        } catch (fulfillmentError) {
+          console.error('Order fulfillment failed:', fulfillmentError);
+          // Don't fail the entire order if fulfillment fails
+        }
         
         // Send order confirmation SMS and WhatsApp message for credit orders
         try {
@@ -516,6 +524,14 @@ const Checkout = () => {
         const updateSuccess = await completePendingOrder(orderNumber);
         if (!updateSuccess) {
           console.warn('Failed to update pending order status to completed');
+        }
+        
+        // Process order fulfillment after successful COD order creation
+        try {
+          await fulfillOrder(result);
+        } catch (fulfillmentError) {
+          console.error('Order fulfillment failed:', fulfillmentError);
+          // Don't fail the entire order if fulfillment fails
         }
         
         // Send order confirmation SMS and WhatsApp message

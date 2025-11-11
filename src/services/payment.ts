@@ -1,4 +1,5 @@
 import { createPendingOrder, updatePendingOrderStatus, updatePendingOrderRazorpayId, updatePendingOrderPaymentDetails, PendingOrderData } from './pending-orders';
+import { fulfillOrder } from './order-fulfillment';
 
 declare global {
   interface Window {
@@ -315,6 +316,14 @@ const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumb
   }
 
   const result = await response.json();
+  
+  // Process order fulfillment after successful online payment order creation
+  try {
+    await fulfillOrder(result);
+  } catch (fulfillmentError) {
+    console.error('Order fulfillment failed for online payment:', fulfillmentError);
+    // Don't fail the entire order if fulfillment fails
+  }
   
   // Send order confirmation SMS and WhatsApp message
   try {
