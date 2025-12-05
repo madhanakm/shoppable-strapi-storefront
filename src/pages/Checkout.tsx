@@ -288,7 +288,8 @@ const Checkout = () => {
             city: formData.shippingCity || selectedShippingAddress?.attributes?.city || selectedShippingAddress?.city || '',
             state: formData.shippingState || selectedShippingAddress?.attributes?.state || selectedShippingAddress?.state || '',
             pincode: formData.shippingPincode || selectedShippingAddress?.attributes?.pincode || selectedShippingAddress?.pincode || ''
-          }
+          },
+          publishedAt: new Date().toISOString()
         };
 
         // Initiating payment
@@ -325,32 +326,48 @@ const Checkout = () => {
         }
         
         // Generate invoice number for credit orders
-        const invoiceNumber = await generateInvoiceNumber();
+        let invoiceNumber = await generateInvoiceNumber();
+        let currentOrderNumber = orderNumber;
+        
+        // Check if order number already exists and generate new one if needed
+        try {
+          const existingOrderCheck = await fetch(`https://api.dharaniherbbals.com/api/orders?filters[ordernum][$eq]=${encodeURIComponent(currentOrderNumber)}`);
+          if (existingOrderCheck.ok) {
+            const existingData = await existingOrderCheck.json();
+            if (existingData.data && existingData.data.length > 0) {
+              currentOrderNumber = await generateOrderNumber();
+              invoiceNumber = await generateInvoiceNumber();
+            }
+          }
+        } catch (error) {
+          console.warn('Could not check for existing order:', error);
+        }
         
         const orderPayload = {
           data: {
             customername: formData.fullName,
-            total: total,
-            totalValue: total,
+            total: Number(total),
+            totalValue: Number(total),
             payment: 'Credit',
-            ordernum: orderNumber,
+            ordernum: currentOrderNumber,
             invoicenum: invoiceNumber,
             phoneNum: formData.phone,
             email: formData.email,
             communication: 'website',
             shippingAddress: shippingAddr,
             billingAddress: shippingAddr,
-            Name: cartItems.map(item => item.name).join(' | '),
-            price: cartItems.map(item => `${item.name}: ${formatPrice(item.price)} x ${item.quantity}`).join(' | '),
+            Name: cartItems.map(item => item.name.replace(/\t/g, '').trim()).join(' | '),
+            price: cartItems.map(item => `${item.name.replace(/\t/g, '').trim()}: ${formatPrice(item.price)} x ${item.quantity}`).join(' | '),
             skuid: cartItems.map(item => item.skuid || item.id).join(' | '),
             prodid: cartItems.map(item => item.originalProductId || item.id).join(' | '),
             quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0)),
-            remarks: formData.notes || `Credit order by ${user?.userType}`,
-            shippingRate: shippingCharges
+            remarks: formData.notes || `Credit order by ${ecomUser?.userType || 'user'}`,
+            shippingRate: Number(shippingCharges),
+            publishedAt: new Date().toISOString()
           }
         };
 
-        console.log('Credit order payload:', orderPayload);
+        console.log('Credit order payload:', JSON.stringify(orderPayload, null, 2));
         
         let response: Response;
         let responseText: string;
@@ -369,6 +386,7 @@ const Checkout = () => {
           
           if (!response.ok) {
             console.error('Credit order API error:', response.status, responseText);
+            console.error('Request payload was:', JSON.stringify(orderPayload, null, 2));
             throw new Error(`Failed to place credit order: ${response.status} - ${responseText}`);
           }
         } catch (fetchError) {
@@ -475,28 +493,46 @@ const Checkout = () => {
         }
         
         // Generate invoice number for COD orders
-        const invoiceNumber = await generateInvoiceNumber();
+        let invoiceNumber = await generateInvoiceNumber();
+        let currentOrderNumber = orderNumber;
+        
+        // Check if order number already exists and generate new one if needed
+        try {
+          const existingOrderCheck = await fetch(`https://api.dharaniherbbals.com/api/orders?filters[ordernum][$eq]=${encodeURIComponent(currentOrderNumber)}`);
+          if (existingOrderCheck.ok) {
+            const existingData = await existingOrderCheck.json();
+            if (existingData.data && existingData.data.length > 0) {
+              currentOrderNumber = await generateOrderNumber();
+              invoiceNumber = await generateInvoiceNumber();
+            }
+          }
+        } catch (error) {
+          console.warn('Could not check for existing COD order:', error);
+        }
         
         const orderPayload = {
           data: {
-            customername: formData.fullName,
-            total: total,
-            totalValue: total,
-            payment: 'COD',
-            ordernum: orderNumber,
+            ordernum: currentOrderNumber,
             invoicenum: invoiceNumber,
+            totalValue: total,
+            total: total,
+            shippingCharges: shippingCharges,
+            shippingRate: shippingCharges,
+            customername: formData.fullName,
             phoneNum: formData.phone,
             email: formData.email,
             communication: 'website',
+            payment: 'COD',
             shippingAddress: shippingAddr,
             billingAddress: shippingAddr,
-            Name: cartItems.map(item => item.name).join(' | '),
-            price: cartItems.map(item => `${item.name}: ${formatPrice(item.price)} x ${item.quantity}`).join(' | '),
+            Name: cartItems.map(item => item.name.replace(/[\t\r\n\f\v]/g, '').trim()).join(' | '),
+            price: cartItems.map(item => `${item.name.replace(/[\t\r\n\f\v]/g, '').trim()}: ${item.price} x ${item.quantity}`).join(' | '),
             skuid: cartItems.map(item => item.skuid || item.id).join(' | '),
-            prodid: cartItems.map(item => item.originalProductId || item.id).join(' | '),
-            quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0)),
+            prodid: cartItems.map(item => item.id).join(' | '),
             remarks: formData.notes || 'No special notes',
-            shippingRate: shippingCharges
+            notes: `COD Order - ${currentOrderNumber}`,
+            quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0)),
+            publishedAt: new Date().toISOString()
           }
         };
 
@@ -507,6 +543,11 @@ const Checkout = () => {
         }
         
         // Invoice number already generated above
+        
+        // Debug product names
+        console.log('Raw product names:', cartItems.map(item => ({ name: item.name, cleaned: item.name.replace(/[\t\r\n\f\v]/g, '').trim() })));
+        
+        console.log('COD order payload:', JSON.stringify(orderPayload, null, 2));
         
         // Placing COD order
         let response: Response;
