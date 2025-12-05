@@ -8,6 +8,8 @@ export interface EcomUser {
   phone: string;
   password: string;
   userType?: UserType;
+  creditPayment?: boolean;
+  creditLimit?: string;
   otp?: string;
   otpExpiresAt?: string;
   isVerified?: boolean;

@@ -26,6 +26,7 @@ import { recoverPendingPayments } from '@/services/payment-recovery';
 import { canPlaceCreditOrder, placeCreditOrder } from '@/services/credit-orders';
 import { UserType } from '@/types/strapi';
 import { useOrderFulfillment } from '@/hooks/useOrderFulfillment';
+import { getEcomUserByPhone, EcomUser } from '@/services/ecom-users';
 
 const Checkout = () => {
   const { cartItems: regularCartItems, clearCart } = useCart();
@@ -58,6 +59,7 @@ const Checkout = () => {
   const [currentUserId, setCurrentUserId] = useState(null);
   const [ecomSettings, setEcomSettings] = useState<EcommerceSettings>({ cod: true, onlinePay: true, creditPayment: true, minimumOrderValueTamilNadu: '0', minimumOrderValueOtherState: '0' });
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+  const [ecomUser, setEcomUser] = useState<EcomUser | null>(null);
   
   const [formData, setFormData] = useState({
     // Billing Info
@@ -104,6 +106,7 @@ const Checkout = () => {
     }
     
     loadAddresses();
+    loadEcomUser();
   }, [user?.id, isAuthenticated, navigate, loading, currentUserId]);
   
   // Fetch ecommerce settings
@@ -132,6 +135,19 @@ const Checkout = () => {
     
     fetchSettings();
   }, []);
+  
+  const loadEcomUser = async () => {
+    if (user?.phone) {
+      try {
+        const response = await getEcomUserByPhone(user.phone);
+        if (response.data && response.data.length > 0) {
+          setEcomUser(response.data[0].attributes);
+        }
+      } catch (error) {
+        console.error('Failed to load ecom user:', error);
+      }
+    }
+  };
   
   const loadAddresses = async () => {
     if (user?.id) {
@@ -300,6 +316,12 @@ const Checkout = () => {
         // Validate required fields for credit orders
         if (!formData.fullName || !formData.email || !formData.phone || !shippingAddr) {
           throw new Error('Missing required customer information for credit order');
+        }
+        
+        // Validate credit limit
+        const creditLimit = parseFloat(ecomUser?.creditLimit || '0');
+        if (creditLimit > 0 && total > creditLimit) {
+          throw new Error(`Order amount ₹${total} exceeds your credit limit of ₹${creditLimit}`);
         }
         
         // Generate invoice number for credit orders
@@ -1034,7 +1056,7 @@ const Checkout = () => {
                           </div>
                         )}
                         
-                        {ecomSettings.creditPayment && user?.userType && user.userType.toLowerCase() !== 'customer' && (
+                        {ecomUser?.userType && ecomUser.userType.toLowerCase() !== 'customer' && ecomUser?.creditPayment && (
                           <div className="flex items-center space-x-3 p-4 border-2 border-purple-200 rounded-lg bg-purple-50">
                             <input
                               type="radio"
@@ -1153,33 +1175,66 @@ const Checkout = () => {
                       </div>
                     </div>
 
+                    {/* Credit Limit Warning */}
+                    {formData.paymentMethod === 'credit' && ecomUser?.creditLimit && (
+                      (() => {
+                        const creditLimit = parseFloat(ecomUser.creditLimit);
+                        const isOverLimit = creditLimit > 0 && total > creditLimit;
+                        return isOverLimit ? (
+                          <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
+                            <p className="text-sm text-red-600 font-medium">
+                              Credit limit exceeded!
+                            </p>
+                            <p className="text-xs text-red-500 mt-1">
+                              Order total: {formatPrice(total)} | Credit limit: {formatPrice(creditLimit)}
+                            </p>
+                            <p className="text-xs text-red-500 mt-1">
+                              Contact us for more information
+                            </p>
+                          </div>
+                        ) : null;
+                      })()
+                    )}
+
                     {/* Place Order Button - Only show if at least one payment method is active */}
-                    {(ecomSettings.cod || ecomSettings.onlinePay || canPlaceCreditOrder(user?.userType as UserType)) && (
-                      <Button
-                        type="submit"
-                        disabled={isLoading || !isMinimumOrderMet}
-                        className={`w-full shadow-lg py-2 md:py-3 text-base md:text-lg font-semibold ${
-                          isMinimumOrderMet 
-                            ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' 
-                            : 'bg-gray-400 cursor-not-allowed'
-                        }`}
-                      >
-                        {isLoading ? (
-                          <>
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                            Processing Order...
-                          </>
-                        ) : !isMinimumOrderMet ? (
-                          <>
-                            Minimum Order Not Met
-                          </>
-                        ) : (
-                          <>
-                            Place Order
-                            <ArrowRight className="w-5 h-5 ml-2" />
-                          </>
-                        )}
-                      </Button>
+                    {(ecomSettings.cod || ecomSettings.onlinePay || (ecomUser?.userType && ecomUser.userType.toLowerCase() !== 'customer' && ecomUser?.creditPayment)) && (
+                      (() => {
+                        const creditLimit = parseFloat(ecomUser?.creditLimit || '0');
+                        const isCreditOverLimit = formData.paymentMethod === 'credit' && creditLimit > 0 && total > creditLimit;
+                        const isDisabled = isLoading || !isMinimumOrderMet || isCreditOverLimit;
+                        
+                        return (
+                          <Button
+                            type="submit"
+                            disabled={isDisabled}
+                            className={`w-full shadow-lg py-2 md:py-3 text-base md:text-lg font-semibold ${
+                              !isDisabled 
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600' 
+                                : 'bg-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            {isLoading ? (
+                              <>
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                Processing Order...
+                              </>
+                            ) : !isMinimumOrderMet ? (
+                              <>
+                                Minimum Order Not Met
+                              </>
+                            ) : isCreditOverLimit ? (
+                              <>
+                                Credit Limit Exceeded
+                              </>
+                            ) : (
+                              <>
+                                Place Order
+                                <ArrowRight className="w-5 h-5 ml-2" />
+                              </>
+                            )}
+                          </Button>
+                        );
+                      })()
                     )}
 
                     {/* Security Badge */}

@@ -95,7 +95,7 @@ const AboutUs = () => {
                 <p className={isTamil ? 'tamil-text' : ''}>
                   {isTamil ? 
                     'தரணி ஹெர்பல்ஸ் 2004 ஆம் ஆண்டில் சித்தா மற்றும் ஆயுர்வேதத்தில் ஆராய்ச்சி செய்வதற்காக உருவாக்கப்பட்டது. இதன் விளைவாக, தரணி ஹெர்பல்ஸ் 2007 இல் நிறுவப்பட்டது. ராம்கேர் செம்பருத்தி மூலிகை தலைமுடி எண்ணெய், ராம்கேர் மூடகத்ரன் மூலிகை வலி நிவாரண எண்ணெய், ராம்கேர் லக்ஸ்னா மூலிகை தோல் எண்ணெய் - பிராண்ட் காப்புரிமை பெறாத மருந்துகள் உருவாக்கப்பட்டன.' :
-                    'Dharani Herbbals was formed in the year 2004 to do researches in Siddha & Ayurveda. As a result, Dharani herbals was founded in 2007. Ramcare Chemparuthi herbal hair oil, Ramcare Moodakattran herbal pain reliever oil, Ramcare Luxsna herbal skin oil- Brand Non patented medicines were developed.'
+                    'Dharani Herbbals commenced research initiatives in Siddha and Ayurveda in 2004, culminating in the company\'s formal incorporation in 2007. Ramcare Chemparuthi herbal hair oil, Ramcare Moodakattran herbal pain reliever oil, Ramcare Luxsna herbal skin oil- Brand Non patented medicines were developed.'
                   }
                 </p>
                 <p className={isTamil ? 'tamil-text' : ''}>
