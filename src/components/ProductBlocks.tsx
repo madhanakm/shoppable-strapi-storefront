@@ -143,7 +143,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
           <img 
             src={product.image} 
             alt={product.name}
-            className="w-full h-56 object-contain group-hover:scale-105 transition-all duration-300 p-6"
+            className="w-full h-56 object-cover group-hover:scale-105 transition-all duration-300"
             onError={(e) => {
               e.target.src = 'https://via.placeholder.com/300x300?text=Product';
             }}
@@ -456,7 +456,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                       <img 
                         src={product.image} 
                         alt={product.name}
-                        className="w-full h-40 object-contain group-hover:scale-105 transition-all duration-300 p-4"
+                        className="w-full h-40 object-cover group-hover:scale-105 transition-all duration-300"
                       />
                     </Link>
                   </div>
@@ -767,7 +767,7 @@ const TrendingProductsSection = () => {
                     <img 
                       src={product.image} 
                       alt={product.name}
-                      className="w-full h-32 object-contain group-hover:scale-105 transition-all duration-300 p-3"
+                      className="w-full h-32 object-cover group-hover:scale-105 transition-all duration-300"
                     />
                   </Link>
                 </div>
@@ -1078,7 +1078,7 @@ const DealsOfTheDaySection = () => {
                       <img 
                         src={featuredDeal.image} 
                         alt={featuredDeal.name}
-                        className="w-full max-w-xs h-64 object-contain group-hover:scale-110 transition-transform duration-500"
+                        className="w-full max-w-xs h-64 object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </Link>
                   </div>
@@ -1143,7 +1143,7 @@ const DealsOfTheDaySection = () => {
                         <img 
                           src={deal.image} 
                           alt={deal.name}
-                          className="w-full h-32 object-contain bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-32 object-cover bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl group-hover:scale-105 transition-transform duration-300"
                         />
                       </Link>
                     </div>
@@ -1191,7 +1191,7 @@ const DealsOfTheDaySection = () => {
                         <img 
                           src={deal.image} 
                           alt={deal.name}
-                          className="w-16 h-16 object-contain bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-2 group-hover:scale-110 transition-transform duration-300"
+                          className="w-16 h-16 object-cover bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl group-hover:scale-110 transition-transform duration-300"
                         />
                       </Link>
                       <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">

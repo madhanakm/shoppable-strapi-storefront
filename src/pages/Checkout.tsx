@@ -19,8 +19,10 @@ import { generateOrderNumber, generateInvoiceNumber, initiatePayment, OrderData 
 import { createPendingOrder, completePendingOrder, failPendingOrder, PendingOrderData } from '@/services/pending-orders';
 import { sendOrderConfirmationSMS } from '@/services/order-sms';
 import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-settings';
-import { calculateShipping } from '@/lib/shipping';
-import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package, Plus } from 'lucide-react';
+import { calculateShipping, calculateShippingSync } from '@/lib/shipping';
+import { getStateShippingRates } from '@/services/state-shipping';
+import { deleteAddress } from '@/services/profile';
+import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package, Plus, Trash2 } from 'lucide-react';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { recoverPendingPayments } from '@/services/payment-recovery';
 import { canPlaceCreditOrder, placeCreditOrder } from '@/services/credit-orders';
@@ -57,9 +59,11 @@ const Checkout = () => {
   const [differentBillingAddress, setDifferentBillingAddress] = useState(false);
   const [useManualAddress, setUseManualAddress] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
-  const [ecomSettings, setEcomSettings] = useState<EcommerceSettings>({ cod: true, onlinePay: true, creditPayment: true, minimumOrderValueTamilNadu: '0', minimumOrderValueOtherState: '0' });
+  const [ecomSettings, setEcomSettings] = useState<EcommerceSettings>({ cod: true, onlinePay: true, creditPayment: true, minimumOrderValueTamilNadu: '0', minimumOrderValueOtherState: '0', tamilNaduShipping: '50', otherStateShipping: '150', tamilNaduFreeShipping: '750', otherStateFreeShipping: '1000' });
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [ecomUser, setEcomUser] = useState<EcomUser | null>(null);
+  const [stateRates, setStateRates] = useState([]);
+  const [shippingInfo, setShippingInfo] = useState({ charges: 0, isFree: false, isTamilNadu: false, freeShippingThreshold: 0, remainingForFreeShipping: 0 });
   
   const [formData, setFormData] = useState({
     // Billing Info
@@ -109,14 +113,18 @@ const Checkout = () => {
     loadEcomUser();
   }, [user?.id, isAuthenticated, navigate, loading, currentUserId]);
   
-  // Fetch ecommerce settings
+  // Fetch ecommerce settings and state rates
   useEffect(() => {
     const fetchSettings = async () => {
       setIsLoadingSettings(true);
       try {
-        const settings = await getEcommerceSettings();
+        const [settings, rates] = await Promise.all([
+          getEcommerceSettings(),
+          getStateShippingRates()
+        ]);
 
         setEcomSettings(settings);
+        setStateRates(rates);
         
         // Set default payment method based on available options
         if (!settings.cod && settings.onlinePay) {
@@ -135,6 +143,39 @@ const Checkout = () => {
     
     fetchSettings();
   }, []);
+  
+  // Calculate shipping charges when address or cart changes
+  useEffect(() => {
+    const updateShipping = async () => {
+      let state = '';
+      if (selectedShippingAddress && !useManualAddress) {
+        const attrs = selectedShippingAddress.attributes || selectedShippingAddress;
+        state = attrs.state || '';
+      } else {
+        state = formData.shippingState || '';
+      }
+      
+      if (state && stateRates.length > 0) {
+        const info = await calculateShipping({
+          cartTotal,
+          state,
+          ecomSettings,
+          stateRates
+        });
+        setShippingInfo(info);
+      } else {
+        // Fallback to sync calculation
+        const info = calculateShippingSync({
+          cartTotal,
+          state,
+          ecomSettings
+        });
+        setShippingInfo(info);
+      }
+    };
+    
+    updateShipping();
+  }, [cartTotal, selectedShippingAddress, useManualAddress, formData.shippingState, ecomSettings, stateRates]);
   
   const loadEcomUser = async () => {
     if (user?.phone) {
@@ -187,8 +228,27 @@ const Checkout = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Validate minimum order value (including shipping charges)
-    if (minimumOrderValue > 0 && total < minimumOrderValue) {
+    // Get current state for minimum order value calculation
+    const currentState = selectedShippingAddress && !useManualAddress 
+      ? (selectedShippingAddress.attributes || selectedShippingAddress).state || ''
+      : formData.shippingState || '';
+    
+    // Determine if current state is Tamil Nadu for minimum order value
+    const normalizedState = currentState.toLowerCase().replace(/\s+/g, '');
+    const isCurrentStateTamilNadu = normalizedState.includes('tamilnadu') || 
+                                   normalizedState === 'tn' ||
+                                   (normalizedState.includes('tamil') && normalizedState.includes('nadu'));
+    
+    // Get minimum order value from state shipping rates
+    const stateRate = stateRates.find(rate => {
+      const normalizedRateName = rate.stateName.toLowerCase().replace(/\s+/g, '');
+      return normalizedRateName === normalizedState || rate.stateCode === currentState.toUpperCase();
+    });
+    const minimumOrderValue = parseFloat(stateRate?.minimumOrderValue || '0');
+    
+    // Validate minimum order value (check against cart subtotal, not including shipping)
+    // Skip validation if minimumOrderValue is -1 (disabled)
+    if (minimumOrderValue > 0 && minimumOrderValue !== -1 && cartTotal < minimumOrderValue) {
       toast({
         title: "Minimum Order Value Not Met",
         description: `Minimum order value is ${formatPrice(minimumOrderValue)}. Please add more items to your cart.`,
@@ -695,31 +755,29 @@ const Checkout = () => {
   
 
 
-  // Calculate shipping charges based on state and cart total
-  const getShippingInfo = () => {
-    let state = '';
-    if (selectedShippingAddress && !useManualAddress) {
-      const attrs = selectedShippingAddress.attributes || selectedShippingAddress;
-      state = attrs.state || '';
-    } else {
-      state = formData.shippingState || '';
-    }
-    
-    return calculateShipping({
-      cartTotal,
-      state,
-      ecomSettings
-    });
-  };
-
-  // Get shipping information (recalculates when address changes)
-  const shippingInfo = getShippingInfo();
   const shippingCharges = shippingInfo.charges;
   const total = cartTotal + shippingCharges;
   
-  // Get minimum order value based on current shipping state
-  const minimumOrderValue = parseFloat(shippingInfo.isTamilNadu ? ecomSettings.minimumOrderValueTamilNadu : ecomSettings.minimumOrderValueOtherState || '0');
-  const isMinimumOrderMet = minimumOrderValue === 0 || total >= minimumOrderValue;
+  // Get current state for minimum order value calculation
+  const currentState = selectedShippingAddress && !useManualAddress 
+    ? (selectedShippingAddress.attributes || selectedShippingAddress).state || ''
+    : formData.shippingState || '';
+  
+  // Determine if current state is Tamil Nadu for minimum order value
+  const normalizedState = currentState.toLowerCase().replace(/\s+/g, '');
+  const isCurrentStateTamilNadu = normalizedState.includes('tamilnadu') || 
+                                 normalizedState === 'tn' ||
+                                 (normalizedState.includes('tamil') && normalizedState.includes('nadu'));
+  
+  // Get minimum order value from state shipping rates
+  const stateRate = stateRates.find(rate => {
+    const normalizedRateName = rate.stateName.toLowerCase().replace(/\s+/g, '');
+    return normalizedRateName === normalizedState || rate.stateCode === currentState.toUpperCase();
+  });
+  const minimumOrderValue = parseFloat(stateRate?.minimumOrderValue || '0');
+  const isMinimumOrderMet = minimumOrderValue === 0 || minimumOrderValue === -1 || cartTotal >= minimumOrderValue;
+  
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
@@ -854,6 +912,28 @@ const Checkout = () => {
                                       <p className="text-sm text-gray-600">{attrs.city}, {attrs.state} - {attrs.pincode}</p>
                                       <p className="text-sm text-gray-500">Phone: {attrs.phone}</p>
                                     </div>
+                                    <button
+                                      type="button"
+                                      onClick={async (e) => {
+                                        e.stopPropagation();
+                                        if (window.confirm('Delete this address?')) {
+                                          try {
+                                            const success = await deleteAddress(address.id);
+                                            if (success) {
+                                              loadAddresses();
+                                              toast({ title: "Address deleted successfully" });
+                                            } else {
+                                              toast({ title: "Failed to delete address", variant: "destructive" });
+                                            }
+                                          } catch (error) {
+                                            toast({ title: "Failed to delete address", variant: "destructive" });
+                                          }
+                                        }
+                                      }}
+                                      className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full min-w-[32px] h-8 flex items-center justify-center"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
                                   </div>
                                 </div>
                               );
@@ -891,14 +971,21 @@ const Checkout = () => {
                           </div>
                           <div>
                             <Label htmlFor="shippingState" className="text-sm font-medium text-gray-700">State</Label>
-                            <Input
+                            <select
                               id="shippingState"
                               name="shippingState"
                               value={formData.shippingState}
                               onChange={handleInputChange}
                               required
-                              className="mt-2 h-12 border-gray-200 focus:border-green-500"
-                            />
+                              className="mt-2 h-12 border-gray-200 focus:border-green-500 w-full rounded-md border px-3 py-2"
+                            >
+                              <option value="">Select State</option>
+                              {stateRates.map(state => (
+                                <option key={state.stateCode} value={state.stateName}>
+                                  {state.stateName}
+                                </option>
+                              ))}
+                            </select>
                           </div>
                           <div>
                             <Label htmlFor="shippingPincode" className="text-sm font-medium text-gray-700">Pincode</Label>
@@ -1017,14 +1104,21 @@ const Checkout = () => {
                               </div>
                               <div>
                                 <Label htmlFor="billingState" className="text-sm font-medium text-gray-700">State</Label>
-                                <Input
+                                <select
                                   id="billingState"
                                   name="billingState"
                                   value={formData.billingState}
                                   onChange={handleInputChange}
                                   required
-                                  className="mt-2 h-12 border-gray-200 focus:border-blue-500"
-                                />
+                                  className="mt-2 h-12 border-gray-200 focus:border-blue-500 w-full rounded-md border px-3 py-2"
+                                >
+                                  <option value="">Select State</option>
+                                  {stateRates.map(state => (
+                                    <option key={state.stateCode} value={state.stateName}>
+                                      {state.stateName}
+                                    </option>
+                                  ))}
+                                </select>
                               </div>
                               <div>
                                 <Label htmlFor="billingPincode" className="text-sm font-medium text-gray-700">Pincode</Label>
@@ -1183,13 +1277,13 @@ const Checkout = () => {
                         <span>{formatPrice(cartTotal)}</span>
                       </div>
                       {/* Minimum Order Value Warning */}
-                      {minimumOrderValue > 0 && total < minimumOrderValue && (
+                      {minimumOrderValue > 0 && minimumOrderValue !== -1 && cartTotal < minimumOrderValue && (
                         <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                           <p className="text-sm text-red-600">
                             Minimum order value: {formatPrice(minimumOrderValue)}
                           </p>
                           <p className="text-xs text-red-500 mt-1">
-                            Add {formatPrice(minimumOrderValue - total)} more to place order
+                            Add {formatPrice(minimumOrderValue - cartTotal)} more to place order
                           </p>
                         </div>
                       )}
@@ -1199,7 +1293,7 @@ const Checkout = () => {
                           {shippingInfo.isFree ? 'Free' : formatPrice(shippingCharges)}
                         </span>
                       </div>
-                      {!shippingInfo.isFree && shippingInfo.remainingForFreeShipping > 0 && (
+                      {!shippingInfo.isFree && shippingInfo.remainingForFreeShipping > 0 && shippingInfo.freeShippingThreshold !== -1 && (
                         <div className="text-sm text-green-600 mt-1">
                           Add {formatPrice(shippingInfo.remainingForFreeShipping)} more for free shipping!
                         </div>

@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { useToast } from '@/hooks/use-toast';
 import { updateProfile, changePassword, addAddress, getAddresses, updateAddress, deleteAddress } from '@/services/profile';
+import { getStateShippingRates } from '@/services/state-shipping';
 import { User, Lock, MapPin, Edit, Trash2, Plus, RefreshCw, Package, Calendar, CreditCard, Truck, FileText, Download, Clock, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatPrice } from '@/lib/utils';
@@ -62,6 +63,7 @@ const Profile = () => {
   // Address data
   const [addresses, setAddresses] = useState<any[]>([]);
   const [editingAddress, setEditingAddress] = useState<any>(null);
+  const [stateRates, setStateRates] = useState<any[]>([]);
   const [newAddress, setNewAddress] = useState({
     type: 'shipping',
     fullName: '',
@@ -75,9 +77,9 @@ const Profile = () => {
 
   useEffect(() => {
     if (user?.id) {
-
       loadAddresses();
       loadOrders();
+      loadStateRates();
     }
   }, [user]);
 
@@ -100,6 +102,15 @@ const Profile = () => {
       
     } finally {
       setLoadingOrders(false);
+    }
+  };
+
+  const loadStateRates = async () => {
+    try {
+      const rates = await getStateShippingRates();
+      setStateRates(rates);
+    } catch (error) {
+      console.error('Error loading state rates:', error);
     }
   };
   
@@ -621,13 +632,20 @@ const Profile = () => {
                         </div>
                         <div>
                           <Label htmlFor="state" className="text-sm font-medium text-gray-700">State</Label>
-                          <Input
+                          <select
                             id="state"
                             value={newAddress.state}
                             onChange={(e) => setNewAddress({...newAddress, state: e.target.value})}
                             required
-                            className="mt-2 h-12 border-gray-200 focus:border-primary"
-                          />
+                            className="mt-2 h-12 border-gray-200 focus:border-primary w-full rounded-md border px-3 py-2"
+                          >
+                            <option value="">Select State</option>
+                            {stateRates.map(state => (
+                              <option key={state.stateCode} value={state.stateName}>
+                                {state.stateName}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                         <div>
                           <Label htmlFor="pincode" className="text-sm font-medium text-gray-700">Pincode</Label>
@@ -640,9 +658,11 @@ const Profile = () => {
                           />
                         </div>
                       </div>
-                      <Button type="submit" disabled={isLoading} className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg">
-                        {isLoading ? (editingAddress ? 'Updating...' : 'Adding...') : (editingAddress ? 'Update Address' : 'Add Address')}
-                      </Button>
+                      <div className="pt-4">
+                        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg text-white font-semibold">
+                          {isLoading ? (editingAddress ? 'Updating...' : 'Adding...') : (editingAddress ? 'Update Address' : 'Add Address')}
+                        </Button>
+                      </div>
                     </form>
                   </CardContent>
                 </Card>

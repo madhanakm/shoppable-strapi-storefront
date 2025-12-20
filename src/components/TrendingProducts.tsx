@@ -226,7 +226,7 @@ const TrendingProducts = () => {
                 <img 
                   src={product.image} 
                   alt={product.name}
-                  className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => {
                     e.target.src = 'https://via.placeholder.com/300x300?text=Product';
                   }}

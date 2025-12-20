@@ -1,9 +1,11 @@
 import { EcommerceSettings } from '@/services/ecommerce-settings';
+import { StateShippingRate, getStateShippingRates, findStateShippingRate } from '@/services/state-shipping';
 
 export interface ShippingCalculationParams {
   cartTotal: number;
   state: string;
   ecomSettings: EcommerceSettings;
+  stateRates?: StateShippingRate[];
 }
 
 export interface ShippingResult {
@@ -12,50 +14,70 @@ export interface ShippingResult {
   isTamilNadu: boolean;
   freeShippingThreshold: number;
   remainingForFreeShipping: number;
+  stateName?: string;
 }
 
 /**
- * Calculate shipping charges based on cart total and delivery state
+ * Calculate shipping charges using database state rates
  */
-export const calculateShipping = ({
+export const calculateShipping = async ({
+  cartTotal,
+  state,
+  ecomSettings,
+  stateRates
+}: ShippingCalculationParams): Promise<ShippingResult> => {
+  const rates = stateRates || await getStateShippingRates();
+  const stateRate = findStateShippingRate(rates, state);
+  
+  if (stateRate && stateRate.isActive) {
+    const shippingCharges = parseInt(stateRate.shippingRate);
+    const freeThreshold = parseInt(stateRate.freeShippingThreshold);
+    const isFreeShippingDisabled = freeThreshold === -1;
+    const isFree = !isFreeShippingDisabled && cartTotal >= freeThreshold;
+    
+    return {
+      charges: isFree ? 0 : shippingCharges,
+      isFree,
+      isTamilNadu: stateRate.stateCode === 'TN',
+      freeShippingThreshold: freeThreshold,
+      remainingForFreeShipping: isFreeShippingDisabled ? 0 : Math.max(0, freeThreshold - cartTotal),
+      stateName: stateRate.stateName
+    };
+  }
+  
+  // Fallback to old logic
+  return calculateShippingSync({ cartTotal, state, ecomSettings });
+};
+
+/**
+ * Synchronous version for backward compatibility
+ */
+export const calculateShippingSync = ({
   cartTotal,
   state,
   ecomSettings
-}: ShippingCalculationParams): ShippingResult => {
-  // Normalize state name for flexible matching
+}: Omit<ShippingCalculationParams, 'stateRates'>): ShippingResult => {
   const normalizedState = state.toLowerCase().replace(/\s+/g, '');
-  
-  // Check if state is Tamil Nadu with flexible matching
   const isTamilNadu = normalizedState.includes('tamilnadu') || 
                      normalizedState === 'tn' ||
                      (normalizedState.includes('tamil') && normalizedState.includes('nadu'));
   
-  // Get shipping settings with defaults
   const tamilNaduShipping = parseInt(ecomSettings.tamilNaduShipping || '50');
   const otherStateShipping = parseInt(ecomSettings.otherStateShipping || '150');
   const tamilNaduFreeShipping = parseInt(ecomSettings.tamilNaduFreeShipping || '750');
   const otherStateFreeShipping = parseInt(ecomSettings.otherStateFreeShipping || '1000');
   
-  // Determine shipping charges and thresholds based on state
   const freeShippingThreshold = isTamilNadu ? tamilNaduFreeShipping : otherStateFreeShipping;
   const baseShippingCharges = isTamilNadu ? tamilNaduShipping : otherStateShipping;
-  
-  // Check if free shipping is disabled (-1 value)
   const isFreeShippingDisabled = freeShippingThreshold === -1;
-  
-  // Check if eligible for free shipping (only if not disabled)
   const isFree = !isFreeShippingDisabled && cartTotal >= freeShippingThreshold;
-  const charges = isFree ? 0 : baseShippingCharges;
-  
-  // Calculate remaining amount for free shipping (0 if disabled)
-  const remainingForFreeShipping = isFreeShippingDisabled ? 0 : Math.max(0, freeShippingThreshold - cartTotal);
   
   return {
-    charges,
+    charges: isFree ? 0 : baseShippingCharges,
     isFree,
     isTamilNadu,
     freeShippingThreshold,
-    remainingForFreeShipping
+    remainingForFreeShipping: isFreeShippingDisabled ? 0 : Math.max(0, freeShippingThreshold - cartTotal)
   };
 };
 

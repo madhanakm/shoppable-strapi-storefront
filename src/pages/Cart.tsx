@@ -12,7 +12,8 @@ import { useCartProducts } from '@/hooks/useCartProducts';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-settings';
-import { calculateShipping } from '@/lib/shipping';
+import { calculateShipping, calculateShippingSync } from '@/lib/shipping';
+import { getStateShippingRates } from '@/services/state-shipping';
 
 
 const Cart = () => {
@@ -28,15 +29,21 @@ const Cart = () => {
     tamilNaduFreeShipping: '750',
     otherStateFreeShipping: '1000'
   });
+  const [stateRates, setStateRates] = React.useState([]);
+  const [shippingInfo, setShippingInfo] = React.useState({ charges: 0, isFree: false, isTamilNadu: false, freeShippingThreshold: 0, remainingForFreeShipping: 0 });
   
-  // Fetch ecommerce settings
+  // Fetch ecommerce settings and state rates
   React.useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const settings = await getEcommerceSettings();
+        const [settings, rates] = await Promise.all([
+          getEcommerceSettings(),
+          getStateShippingRates()
+        ]);
         setEcomSettings(settings);
+        setStateRates(rates);
       } catch (error) {
-        console.error('Failed to fetch ecommerce settings:', error);
+        console.error('Failed to fetch settings:', error);
       }
     };
     
@@ -44,11 +51,28 @@ const Cart = () => {
   }, []);
   
   // Calculate shipping for Tamil Nadu (default state for cart preview)
-  const shippingInfo = calculateShipping({
-    cartTotal,
-    state: 'Tamil Nadu', // Default to Tamil Nadu for cart preview
-    ecomSettings
-  });
+  React.useEffect(() => {
+    const updateShipping = async () => {
+      if (stateRates.length > 0) {
+        const info = await calculateShipping({
+          cartTotal,
+          state: 'Tamil Nadu',
+          ecomSettings,
+          stateRates
+        });
+        setShippingInfo(info);
+      } else {
+        const info = calculateShippingSync({
+          cartTotal,
+          state: 'Tamil Nadu',
+          ecomSettings
+        });
+        setShippingInfo(info);
+      }
+    };
+    
+    updateShipping();
+  }, [cartTotal, ecomSettings, stateRates]);
 
 
   if (cartCount === 0) {
