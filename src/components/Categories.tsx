@@ -128,7 +128,7 @@ const Categories = () => {
                         <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         
                         {/* Enhanced icon container */}
-                        <div className={`relative w-20 h-20 ${category.color} rounded-2xl mx-auto mb-5 flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
+                        <div className={`relative w-24 h-24 ${category.color} rounded-2xl mx-auto mb-5 flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
                           <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors duration-300"></div>
                           {category.photo ? (
                             <img 

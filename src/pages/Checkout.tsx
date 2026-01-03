@@ -53,6 +53,8 @@ const Checkout = () => {
   const { processOrder: fulfillOrder } = useOrderFulfillment();
   
   const [isLoading, setIsLoading] = useState(false);
+  const [isPaymentInProgress, setIsPaymentInProgress] = useState(false);
+  const [showPaymentWarning, setShowPaymentWarning] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [selectedShippingAddress, setSelectedShippingAddress] = useState(null);
   const [selectedBillingAddress, setSelectedBillingAddress] = useState(null);
@@ -112,6 +114,20 @@ const Checkout = () => {
     loadAddresses();
     loadEcomUser();
   }, [user?.id, isAuthenticated, navigate, loading, currentUserId]);
+  
+  // Add payment warning when user tries to close tab during payment
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isPaymentInProgress) {
+        e.preventDefault();
+        e.returnValue = 'Payment is in progress. Closing this tab may cause your order to fail. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isPaymentInProgress]);
   
   // Fetch ecommerce settings and state rates
   useEffect(() => {
@@ -354,6 +370,8 @@ const Checkout = () => {
 
         // Initiating payment
         try {
+          setIsPaymentInProgress(true);
+          setShowPaymentWarning(true);
           // Generate invoice number only for successful payment
           const invoiceNumber = await generateInvoiceNumber();
           // Initiate Razorpay payment (handles order creation and completion internally)
@@ -370,6 +388,9 @@ const Checkout = () => {
             await failPendingOrder(orderNumber, paymentError.message || 'Payment failed');
           }
           throw new Error(paymentError.message || 'Payment failed');
+        } finally {
+          setIsPaymentInProgress(false);
+          setShowPaymentWarning(false);
         }
       } else if (formData.paymentMethod === 'credit') {
         // Credit Order - Direct order creation
@@ -1388,6 +1409,30 @@ const Checkout = () => {
           </form>
         </div>
       </main>
+      
+      {/* Payment Warning Modal */}
+      {showPaymentWarning && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CreditCard className="w-8 h-8 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Payment in Progress
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Please don't close this tab or navigate away. Your payment is being processed.
+              </p>
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-600"></div>
+                <span className="ml-2 text-sm text-gray-500">Processing...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Footer />
     </div>
   );

@@ -18,12 +18,14 @@ const Header = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const searchParam = urlParams.get('search');
-    // Update search query based on URL parameter
     setSearchQuery(searchParam || '');
   }, [location.search]);
   
   const clearSearch = () => {
     setSearchQuery('');
+    if (location.pathname === '/products') {
+      navigate('/products');
+    }
   };
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlistContext();
@@ -40,10 +42,12 @@ const Header = () => {
   const onSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedQuery = searchQuery.trim();
+    setIsMenuOpen(false);
+    
     if (trimmedQuery) {
-      // Navigate to products page with search query
       navigate(`/products?search=${encodeURIComponent(trimmedQuery)}`);
-      setIsMenuOpen(false);
+    } else {
+      navigate('/products');
     }
   };
 

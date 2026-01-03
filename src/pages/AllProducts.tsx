@@ -81,32 +81,41 @@ const AllProducts = () => {
     fetchUserType();
   }, []);
 
-  // Get URL parameters
+  // Get URL parameters and reset pagination when they change
   useEffect(() => {
     const categoryParam = searchParams.get('category');
     const typeParam = searchParams.get('type');
-    const searchParam = searchParams.get('search');
+    const searchParam = searchParams.get('search') || '';
     
-    if (categoryParam) setSelectedCategory(categoryParam);
-    if (typeParam) setSelectedType(typeParam);
+    let hasChanges = false;
     
-    // Always update search query based on URL param
-    setSearchQuery(searchParam || '');
+    if (categoryParam && categoryParam !== selectedCategory) {
+      setSelectedCategory(categoryParam);
+      hasChanges = true;
+    }
+    if (typeParam && typeParam !== selectedType) {
+      setSelectedType(typeParam);
+      hasChanges = true;
+    }
+    if (searchParam !== searchQuery) {
+      setSearchQuery(searchParam);
+      hasChanges = true;
+    }
     
-    // Reset pagination when URL params change
-    setPage(1);
-    setHasMore(true);
-  }, [searchParams]);
+    if (hasChanges) {
+      setPage(1);
+      setHasMore(true);
+    }
+  }, [searchParams.toString()]);
 
-  useEffect(() => {
-    // Reset pagination when filters change
-    setPage(1);
-    setHasMore(true);
-  }, [selectedCategory, selectedBrand, selectedType, sortBy, searchQuery]);
+
   
   useEffect(() => {
     if (userType !== null) {
-      loadData();
+      const timeoutId = setTimeout(() => {
+        loadData();
+      }, 100);
+      return () => clearTimeout(timeoutId);
     }
   }, [userType, page, selectedCategory, selectedBrand, selectedType, searchQuery, sortBy]);
 
@@ -494,7 +503,7 @@ const AllProducts = () => {
                           <img 
                             src={attrs.photo || attrs.image || '/placeholder.svg'} 
                             alt={attrs.Name || attrs.name || 'Product'} 
-                            className="w-full h-48 md:h-64 object-contain bg-white group-hover:scale-105 transition-transform duration-500 p-3 md:p-4"
+                            className="w-full aspect-square object-cover bg-white group-hover:scale-105 transition-transform duration-500"
                             onError={(e) => {
                               e.target.src = 'https://via.placeholder.com/300x300?text=Product';
                             }}
