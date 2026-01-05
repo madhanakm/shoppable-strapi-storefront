@@ -187,23 +187,25 @@ const AboutUs = () => {
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="mb-16">
-          <Card className="shadow-2xl border-0 bg-gradient-to-r from-primary to-green-600 text-white">
-            <CardContent className="p-8 md:p-12">
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
-                {stats.map((stat, index) => (
-                  <div key={index}>
-                    <div className="text-3xl md:text-4xl font-bold mb-2">{stat.number}</div>
-                    <div className={`text-sm md:text-base opacity-90 ${isTamil ? 'tamil-text' : ''}`}>
-                      {stat.label}
-                    </div>
-                  </div>
-                ))}
+      </main>
+      
+      {/* Stats - Full Width */}
+      <section className="bg-gradient-to-r from-primary to-green-600 text-white py-12 mb-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
+            {stats.map((stat, index) => (
+              <div key={index}>
+                <div className="text-3xl md:text-4xl font-bold mb-2">{stat.number}</div>
+                <div className={`text-sm md:text-base opacity-90 ${isTamil ? 'tamil-text' : ''}`}>
+                  {stat.label}
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </section>
+            ))}
+          </div>
+        </div>
+      </section>
+      
+      <main className="container mx-auto px-4 pb-16">
 
         {/* What Makes Us Different */}
         <section className="mb-16">
