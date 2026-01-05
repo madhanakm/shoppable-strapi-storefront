@@ -9,6 +9,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import ImageSlider from '@/components/ImageSlider';
 import ProductBlocks from '@/components/ProductBlocks';
 import SimpleGoogleReviews from '@/components/SimpleGoogleReviews';
+import FloatingCart from '@/components/FloatingCart';
 
 const Index = () => {
   const { translate, language } = useTranslation();
@@ -177,6 +178,7 @@ const Index = () => {
           </div>
         </section>
       </main>
+      <FloatingCart />
       <Footer />
     </div>
   );

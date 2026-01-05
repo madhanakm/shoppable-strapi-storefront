@@ -32,6 +32,7 @@ import AdminPendingOrders from "./pages/AdminPendingOrders";
 import WhatsAppFloat from "./components/WhatsAppFloat";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
+import FloatingCart from "@/components/FloatingCart";
 
 const queryClient = new QueryClient();
 

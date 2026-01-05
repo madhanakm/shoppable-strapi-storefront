@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 import SEOHead from '@/components/SEOHead';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Filter, Grid, List, Heart, Search, X } from 'lucide-react';
+import { ShoppingCart, Filter, Grid, List, Heart, Search, X, CreditCard } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
@@ -17,6 +17,7 @@ import StarRating from '@/components/StarRating';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPriceByUserType, getVariablePriceRange } from '@/lib/pricing';
 import { CompactLoadingStatus } from '@/components/ProductSkeleton';
+import FloatingCart from '@/components/FloatingCart';
 
 const AllProducts = () => {
   const { addToCart } = useCart();
@@ -556,7 +557,7 @@ const AllProducts = () => {
                           </span>
                         </div>
                         
-                        <div className="flex gap-2 md:gap-3">
+                        <div className="flex gap-1.5 md:gap-3">
                           <Button 
                             className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl py-2.5 md:py-3 text-xs md:text-sm font-semibold" 
                             onClick={() => {
@@ -564,8 +565,8 @@ const AllProducts = () => {
                               addToCart(productId, productId, 1);
                             }}
                           >
-                            <ShoppingCart className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5" />
-                            <span className={`${isTamil ? 'tamil-text text-[9px] md:text-[10px]' : 'text-xs md:text-sm'}`}>{translate('products.addToCart')}</span>
+                            <ShoppingCart className="w-4 h-4" />
+                            <span className={`hidden md:inline ml-1.5 ${isTamil ? 'tamil-text text-[9px] md:text-[10px]' : 'text-xs md:text-sm'}`}>{translate('products.addToCart')}</span>
                           </Button>
                           
                           <Button 
@@ -608,7 +609,8 @@ const AllProducts = () => {
                               navigate('/checkout');
                             }}
                           >
-                            <span className={`${isTamil ? 'tamil-text text-[8px] md:text-[9px]' : 'text-xs md:text-sm'}`}>{translate('product.buyNow')}</span>
+                            <CreditCard className="w-4 h-4" />
+                            <span className={`hidden md:inline ml-1.5 ${isTamil ? 'tamil-text text-[8px] md:text-[9px]' : 'text-xs md:text-sm'}`}>{translate('product.buyNow')}</span>
                           </Button>
                         </div>
                       </CardContent>
@@ -651,6 +653,7 @@ const AllProducts = () => {
           </div>
         </div>
       </main>
+      <FloatingCart />
       <Footer />
     </div>
   );
