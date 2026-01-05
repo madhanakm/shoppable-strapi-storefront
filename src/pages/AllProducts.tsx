@@ -262,7 +262,7 @@ const AllProducts = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 overflow-x-hidden">
+    <div className="bg-gradient-to-br from-emerald-50 via-white to-teal-50 overflow-x-hidden" style={{height: 'auto'}}>
       <SEOHead 
         title={searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
         description={searchQuery ? `Found ${totalProducts} herbal products matching "${searchQuery}". Browse natural remedies and wellness products.` : 'Browse our complete collection of natural and herbal products. Premium quality Ayurvedic remedies and wellness solutions.'}
@@ -317,7 +317,7 @@ const AllProducts = () => {
 
           {/* Sidebar Filters */}
           <div className={`w-full lg:w-80 flex-shrink-0 ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 sticky top-24 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 sticky top-20 overflow-hidden z-40">
               {/* Header */}
               <div className="bg-gradient-to-r from-primary to-green-600 p-6 text-white">
                 <div className="flex items-center justify-between">
@@ -676,9 +676,9 @@ const AllProducts = () => {
                     setTimeout(checkForNewProducts, 100);
                   }}
                   disabled={loadingMore}
-                  className="rounded-full bg-transparent border-2 border-primary text-primary hover:bg-primary/10 w-32 h-32 p-0 text-sm"
+                  className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  {loadingMore ? '...' : 'Load More'}
+                  {loadingMore ? 'Loading...' : 'Load More Products'}
                 </Button>
               </div>
             )}

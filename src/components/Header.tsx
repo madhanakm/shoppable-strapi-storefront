@@ -58,7 +58,7 @@ const Header = () => {
   return (
     <>
       {/* Top Bar */}
-      <div className="bg-gradient-to-r from-primary/90 to-green-600 text-white py-2 hidden md:block">
+      <div className="bg-gradient-to-r from-primary/90 to-green-600 text-white py-2 hidden md:block sticky top-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center text-sm">
             <div className="flex items-center space-x-6">
@@ -124,7 +124,7 @@ const Header = () => {
       </div>
 
       {/* Main Header */}
-      <header className="bg-white/95 backdrop-blur-md border-b-2 border-primary sticky top-0 z-50 shadow-lg">
+      <header className="bg-white border-b-2 border-primary sticky top-0 md:top-12 z-40 shadow-lg">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
