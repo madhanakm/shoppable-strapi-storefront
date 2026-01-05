@@ -108,7 +108,6 @@ const AllProducts = () => {
     }
   }, [searchParams.toString()]);
 
-
   
   useEffect(() => {
     if (userType !== null) {
@@ -263,33 +262,45 @@ const AllProducts = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 overflow-x-hidden">
       <SEOHead 
         title={searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
         description={searchQuery ? `Found ${totalProducts} herbal products matching "${searchQuery}". Browse natural remedies and wellness products.` : 'Browse our complete collection of natural and herbal products. Premium quality Ayurvedic remedies and wellness solutions.'}
         url={searchQuery ? `/products?search=${encodeURIComponent(searchQuery)}` : '/products'}
       />
       <Header />
-      <main className="container mx-auto px-4 py-8 md:py-16 max-w-full">
-        {/* Page Header */}
-        <div className="text-center mb-8 md:mb-12">
-          <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent mb-3 md:mb-4">
-            {searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
-          </h1>
-          <p className="text-gray-600 text-sm md:text-lg max-w-2xl mx-auto px-4">
-            {searchQuery ? `Found ${totalProducts} products matching your search` : 'Discover our complete range of natural and herbal products for your wellness journey'}
-          </p>
-          {searchQuery && (
-            <Button 
-              onClick={clearSearch} 
-              variant="outline" 
-              className="mt-3 md:mt-4 border-primary text-primary hover:bg-primary/10 text-sm"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Clear Search
-            </Button>
-          )}
+      
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 text-white py-8 md:py-12 overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4 leading-tight">
+              {searchQuery ? (
+                <>
+                  Search Results for <span className="text-yellow-300">"{searchQuery}"</span>
+                </>
+              ) : (
+                <>Natural Wellness <span className="text-yellow-300">Products</span></>
+              )}
+            </h1>
+            <p className="text-sm md:text-base text-emerald-100 mb-4 md:mb-6">
+              {searchQuery ? `Found ${totalProducts} products` : 'Authentic Ayurvedic remedies and natural wellness solutions'}
+            </p>
+            {searchQuery && (
+              <Button 
+                onClick={clearSearch} 
+                variant="secondary" 
+                className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30 transition-all duration-300 rounded-full px-4 py-2 text-sm"
+              >
+                <X className="w-3 h-3 mr-1" />
+                Clear Search
+              </Button>
+            )}
+          </div>
         </div>
+      </div>
+      
+      <main className="container mx-auto px-4 py-6 md:py-8 max-w-full">
 
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Mobile Filter Toggle */}
@@ -401,8 +412,6 @@ const AllProducts = () => {
                   </div>
                 </div>
 
-
-
                 {/* Product Types */}
                 <div>
                   <h3 className="font-bold text-lg mb-4 text-gray-800 border-b border-gray-200 pb-2">Product Types</h3>
@@ -442,8 +451,8 @@ const AllProducts = () => {
           {/* Products Section */}
           <div className="flex-1">
             {/* Toolbar */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 md:gap-4 mb-6 md:mb-8">
-              <div className="text-gray-600 text-sm md:text-base">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 md:mb-6">
+              <div className="text-gray-600 text-xs md:text-sm">
                 Showing {displayedProducts.length} of {totalProducts} products
               </div>
               
@@ -497,17 +506,20 @@ const AllProducts = () => {
                   // Force re-render with priceKey
                   const attrs = product.attributes || product;
                   return (
-                    <Card key={`${product.id}-${priceKey}`} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-lg hover:-translate-y-2 w-full max-w-full">
-                      <div className="relative overflow-hidden">
+                    <Card key={`${product.id}-${priceKey}`} className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-0 shadow-lg hover:-translate-y-3 w-full max-w-full bg-white rounded-3xl">
+                      <div className="relative overflow-hidden rounded-t-3xl">
                         <Link to={`/product/${product.id}`} className="block cursor-pointer">
-                          <img 
-                            src={attrs.photo || attrs.image || '/placeholder.svg'} 
-                            alt={attrs.Name || attrs.name || 'Product'} 
-                            className="w-full aspect-square object-cover bg-white group-hover:scale-105 transition-transform duration-500"
-                            onError={(e) => {
-                              e.target.src = 'https://via.placeholder.com/300x300?text=Product';
-                            }}
-                          />
+                          <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 to-teal-50">
+                            <img 
+                              src={attrs.photo || attrs.image || '/placeholder.svg'} 
+                              alt={attrs.Name || attrs.name || 'Product'} 
+                              className="w-full aspect-square object-cover bg-white group-hover:scale-110 transition-transform duration-700"
+                              onError={(e) => {
+                                e.target.src = 'https://via.placeholder.com/300x300?text=Product';
+                              }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                          </div>
                         </Link>
                         
                         {/* Wishlist Button */}
@@ -575,16 +587,16 @@ const AllProducts = () => {
                           </span>
                         </div>
                         
-                        <div className="flex gap-1.5 md:gap-2">
+                        <div className="flex gap-2 md:gap-3">
                           <Button 
-                            className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1 md:py-1.5 text-[10px] md:text-xs font-medium" 
+                            className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl py-2.5 md:py-3 text-xs md:text-sm font-semibold group" 
                             onClick={() => {
                               const productId = product.id.toString();
                               addToCart(productId, productId, 1);
                             }}
                           >
-                            <ShoppingCart className="w-2.5 h-2.5 md:w-3 md:h-3 mr-0.5 md:mr-1" />
-                            <span className={`${isTamil ? 'tamil-text text-[8px] md:text-[9px]' : 'text-[10px] md:text-xs'}`}>{translate('products.addToCart')}</span>
+                            <ShoppingCart className="w-3.5 h-3.5 md:w-4 md:h-4 mr-1.5 group-hover:scale-110 transition-transform duration-200" />
+                            <span className={`${isTamil ? 'tamil-text text-[9px] md:text-[10px]' : 'text-xs md:text-sm'}`}>{translate('products.addToCart')}</span>
                           </Button>
                           
                           <Button 
