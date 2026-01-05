@@ -49,15 +49,15 @@ const ImageSlider = () => {
   };
 
   if (loading) {
-    return <div className="h-[300px] sm:h-[400px] md:h-[550px] bg-gray-100 flex items-center justify-center">Loading slider...</div>;
+    return <div className="h-[400px] sm:h-[500px] md:h-[800px] bg-gray-100 flex items-center justify-center">Loading slider...</div>;
   }
 
   if (slides.length === 0) {
-    return <div className="h-[300px] sm:h-[400px] md:h-[550px] bg-gray-100 flex items-center justify-center">No slides available</div>;
+    return <div className="h-[400px] sm:h-[500px] md:h-[800px] bg-gray-100 flex items-center justify-center">No slides available</div>;
   }
 
   return (
-    <div className="relative w-full h-[300px] sm:h-[400px] md:h-[550px] overflow-hidden shadow-2xl isolate">
+    <div className="relative w-full h-[400px] sm:h-[500px] md:h-[800px] overflow-hidden shadow-2xl isolate">
       {/* Background overlay for better contrast */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10"></div>
       
