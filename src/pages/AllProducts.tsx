@@ -575,22 +575,20 @@ const AllProducts = () => {
                           </span>
                         </div>
                         
-                        <div className="flex flex-col gap-1.5 md:gap-2">
-                          <div className="flex gap-1.5 md:gap-2">
-                            <Button 
-                              className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1 md:py-1.5 text-[10px] md:text-xs font-medium" 
-                              onClick={() => {
-                                const productId = product.id.toString();
-                                addToCart(productId, productId, 1);
-                              }}
-                            >
-                              <ShoppingCart className="w-2.5 h-2.5 md:w-3 md:h-3 mr-0.5 md:mr-1" />
-                              <span className={`${isTamil ? 'tamil-text text-[8px] md:text-[9px]' : 'text-[10px] md:text-xs'}`}>{translate('products.addToCart')}</span>
-                            </Button>
-                          </div>
+                        <div className="flex gap-1.5 md:gap-2">
+                          <Button 
+                            className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1 md:py-1.5 text-[10px] md:text-xs font-medium" 
+                            onClick={() => {
+                              const productId = product.id.toString();
+                              addToCart(productId, productId, 1);
+                            }}
+                          >
+                            <ShoppingCart className="w-2.5 h-2.5 md:w-3 md:h-3 mr-0.5 md:mr-1" />
+                            <span className={`${isTamil ? 'tamil-text text-[8px] md:text-[9px]' : 'text-[10px] md:text-xs'}`}>{translate('products.addToCart')}</span>
+                          </Button>
                           
                           <Button 
-                            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1 md:py-1.5 text-[10px] md:text-xs font-medium" 
+                            className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1 md:py-1.5 text-[10px] md:text-xs font-medium" 
                             onClick={() => {
                               // For variable products, use the first variation
                               if (attrs.isVariableProduct && attrs.variations) {

@@ -171,6 +171,10 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
         name: 'Dharani Herbbals',
         description: `Order #${orderNumber}`,
         order_id: razorpayOrderId,
+        notes: {
+          order_number: orderNumber,
+          invoice_number: invoiceNumber
+        },
       prefill: {
         name: orderData.customerInfo.name,
         email: orderData.customerInfo.email,
@@ -181,43 +185,18 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
       },
       handler: async (response: any) => {
         try {
-          // First update pending order status to processing with payment ID
-          await updatePendingOrderStatus(orderNumber, 'processing', response.razorpay_payment_id);
-          
-          // Store the order in main orders collection
-          await storeOrder(orderData, orderNumber, invoiceNumber, response);
-          
-          // Mark as completed only after successful order storage
-          await updatePendingOrderStatus(orderNumber, 'completed', response.razorpay_payment_id);
-          
-          // Update pending order with invoice number
-          await fetch(`https://api.dharaniherbbals.com/api/pending-orders?filters[orderNumber][$eq]=${encodeURIComponent(orderNumber)}`, {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-          }).then(async (res) => {
-            if (res.ok) {
-              const data = await res.json();
-              if (data.data && data.data.length > 0) {
-                const pendingOrderId = data.data[0].id;
-                await fetch(`https://api.dharaniherbbals.com/api/pending-orders/${pendingOrderId}`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    data: {
-                      invoiceNumber,
-                      updatedAt: new Date().toISOString()
-                    }
-                  })
-                });
-              }
-            }
-          });
+          // Update pending order with payment details for webhook processing
+          await updatePendingOrderPaymentDetails(
+            orderNumber,
+            razorpayOrderId,
+            response.razorpay_payment_id,
+            'completed'
+          );
           
           localStorage.removeItem(`pendingOrder_${orderNumber}`);
           resolve(response);
         } catch (error) {
-          console.error('Order storage failed after successful payment:', error);
-          // Mark as payment_success_order_failed to handle later
+          console.error('Payment processing failed:', error);
           await updatePendingOrderStatus(orderNumber, 'payment_success_order_failed', response?.razorpay_payment_id, error.message);
           reject(error);
         }
@@ -252,114 +231,10 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
   });
 };
 
+// Note: Order creation, SMS, and WhatsApp notifications are now handled by webhook
+// This function is no longer used but kept for reference
 const storeOrder = async (orderData: OrderData, orderNumber: string, invoiceNumber: string, paymentResponse: any) => {
-  const shippingAddr = `${orderData.customerInfo.address}, ${orderData.customerInfo.city}, ${orderData.customerInfo.state} - ${orderData.customerInfo.pincode}`;
-  
-  // Use shipping charges from OrderData if available, otherwise calculate based on state
-  const calculateShippingRate = (state: string) => {
-    // Normalize state name for flexible matching
-    const normalizedState = state.toLowerCase().replace(/\s+/g, '');
-    
-    // Check if state is Tamil Nadu with flexible matching
-    const isTamilNadu = normalizedState.includes('tamilnadu') || 
-                       normalizedState === 'tn' ||
-                       normalizedState.includes('tamil') && normalizedState.includes('nadu');
-    
-    // Use default shipping prices
-    return isTamilNadu ? 50 : 150;
-  };
-
-  const shippingRate = orderData.shippingCharges || calculateShippingRate(orderData.customerInfo.state);
-  
-  const orderPayload = {
-    data: {
-      ordernum: orderNumber,
-      invoicenum: invoiceNumber,
-      totalValue: orderData.total,
-      total: orderData.total,
-      shippingCharges: shippingRate,
-      shippingRate: shippingRate, // Adding shipping rate as a separate field
-      customername: orderData.customerInfo.name,
-      phoneNum: orderData.customerInfo.phone,
-      email: orderData.customerInfo.email,
-      communication: 'website',
-      payment: 'Online Payment',
-      shippingAddress: shippingAddr,
-      billingAddress: shippingAddr,
-      Name: orderData.items.map(item => item.name).join(' | '),
-      price: orderData.items.map(item => `${item.name}: ${item.price} x ${item.quantity}`).join(' | '),
-      skuid: orderData.items.map(item => item.skuid || item.id).join(' | '),
-      prodid: orderData.items.map(item => item.id).join(' | '),
-      remarks: `Payment ID: ${paymentResponse.razorpay_payment_id}`,
-      notes: `Online Payment - ${paymentResponse.razorpay_payment_id}`,
-      quantity: String(orderData.items.reduce((sum, item) => sum + item.quantity, 0)),
-      publishedAt: new Date().toISOString()
-    }
-  };
-
-  console.log('Storing order with payload:', orderPayload);
-  
-  const response = await fetch('https://api.dharaniherbbals.com/api/orders', {
-    method: 'POST',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify(orderPayload)
-  });
-  
-  console.log('Order API response status:', response.status);
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    
-    throw new Error(`Failed to store order: ${response.status} - ${errorText}`);
-  }
-
-  const result = await response.json();
-  
-  // Process order fulfillment after successful online payment order creation
-  try {
-    await fulfillOrder(result);
-  } catch (fulfillmentError) {
-    console.error('Order fulfillment failed for online payment:', fulfillmentError);
-    // Don't fail the entire order if fulfillment fails
-  }
-  
-  // Send order confirmation SMS and WhatsApp message
-  try {
-    const cleanPhone = orderData.customerInfo.phone.replace(/[^0-9]/g, '');
-    
-    // Send SMS with error handling
-    fetch('https://api.dharaniherbbals.com/api/order-sms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        data: {
-          mobile: cleanPhone,
-          orderNumber: orderNumber,
-          amount: orderData.total
-        }
-      })
-    }).catch(error => {
-      console.error('Failed to send SMS notification:', error);
-    });
-    
-    // Send WhatsApp message with error handling
-    fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        mobile: cleanPhone,
-        orderNumber: orderNumber,
-        amount: orderData.total
-      })
-    }).catch(error => {
-      console.error('Failed to send WhatsApp notification:', error);
-    });
-  } catch (error) {
-    console.error('Error preparing notifications:', error);
-  }
-  
-  return result;
+  // This function is deprecated - webhook handles order creation now
+  console.log('storeOrder function called but order creation handled by webhook');
+  return { message: 'Order creation handled by webhook' };
 };
