@@ -561,8 +561,23 @@ const AllProducts = () => {
                           <Button 
                             className="flex-1 min-w-0 bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl py-2.5 md:py-3 text-xs md:text-sm font-semibold" 
                             onClick={() => {
+                              if (attrs.isVariableProduct && attrs.variations) {
+                                try {
+                                  const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+                                  if (variations && variations.length > 0) {
+                                    const firstVariation = variations[0];
+                                    const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+                                    addToCart(skuid, product.id.toString(), 1);
+                                    return;
+                                  }
+                                } catch (e) {
+                                  console.error('Error parsing variations:', e);
+                                }
+                              }
+                              
                               const productId = product.id.toString();
-                              addToCart(productId, productId, 1);
+                              const skuid = attrs.skuid || attrs.SKUID || productId;
+                              addToCart(skuid, productId, 1);
                             }}
                           >
                             <ShoppingCart className="w-3 h-3 md:w-4 md:h-4" />

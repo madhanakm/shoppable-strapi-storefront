@@ -60,7 +60,7 @@ export const generateOrderNumber = async (): Promise<string> => {
       fetch('https://api.dharaniherbbals.com/api/pending-orders?sort=orderNumber:desc&pagination[limit]=1')
     ]);
     
-    let maxNumber = 26; // Starting from 027 since current is 026
+    let maxNumber = 750; // Starting from 750
     
     // Check latest order from orders collection
     if (ordersResponse.ok) {

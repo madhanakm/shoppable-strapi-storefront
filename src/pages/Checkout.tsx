@@ -297,7 +297,8 @@ const Checkout = () => {
 
     try {
       // Generate order number only (invoice number generated only for successful orders)
-      const orderNumber = await generateOrderNumber();
+      const timestamp = Date.now().toString().slice(-3);
+      const orderNumber = formData.paymentMethod === 'credit' ? `DH-ECOM-${Math.max(750, parseInt(timestamp))}` : await generateOrderNumber();
       
       // Get address info
       let shippingAddr = '';
@@ -319,7 +320,7 @@ const Checkout = () => {
             price: item.price,
             quantity: item.quantity,
             skuid: item.skuid || item.id,
-            productId: item.originalProductId || item.id
+            productId: item.originalProductId || item.id // Always base product ID
           })),
           total: total,
           shippingCharges: shippingCharges,
@@ -406,23 +407,10 @@ const Checkout = () => {
           throw new Error(`Order amount ₹${total} exceeds your credit limit of ₹${creditLimit}`);
         }
         
-        // Generate invoice number for credit orders
-        let invoiceNumber = await generateInvoiceNumber();
+        // Use timestamp-based invoice number for credit orders
+        const invoiceTimestamp = Date.now().toString().slice(-7);
         let currentOrderNumber = orderNumber;
-        
-        // Check if order number already exists and generate new one if needed
-        try {
-          const existingOrderCheck = await fetch(`https://api.dharaniherbbals.com/api/orders?filters[ordernum][$eq]=${encodeURIComponent(currentOrderNumber)}`);
-          if (existingOrderCheck.ok) {
-            const existingData = await existingOrderCheck.json();
-            if (existingData.data && existingData.data.length > 0) {
-              currentOrderNumber = await generateOrderNumber();
-              invoiceNumber = await generateInvoiceNumber();
-            }
-          }
-        } catch (error) {
-          console.warn('Could not check for existing order:', error);
-        }
+        let invoiceNumber = `DH${invoiceTimestamp.padStart(7, '0')}`;
         
         const orderPayload = {
           data: {
@@ -609,7 +597,7 @@ const Checkout = () => {
             Name: cartItems.map(item => item.name.replace(/[\t\r\n\f\v]/g, '').trim()).join(' | '),
             price: cartItems.map(item => `${item.name.replace(/[\t\r\n\f\v]/g, '').trim()}: ${item.price} x ${item.quantity}`).join(' | '),
             skuid: cartItems.map(item => item.skuid || item.id).join(' | '),
-            prodid: cartItems.map(item => item.id).join(' | '),
+            prodid: cartItems.map(item => item.originalProductId || item.id).join(' | '),
             remarks: formData.notes || 'No special notes',
             notes: `COD Order - ${currentOrderNumber}`,
             quantity: String(cartItems.reduce((sum, item) => sum + item.quantity, 0)),

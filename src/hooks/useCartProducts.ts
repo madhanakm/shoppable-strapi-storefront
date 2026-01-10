@@ -104,8 +104,9 @@ export const useCartProducts = (cartItems: CartItem[]) => {
             
             return {
               id: product.id,
-              skuid: selectedVariation ? selectedVariation.skuid : (attrs.skuid || product.id),
-              originalProductId: cartItem.productId,
+              skuid: cartItem.productId, // Always use the cart productId as skuid (it's the actual SKU for variations)
+              originalProductId: product.id, // Always use base product ID
+              cartProductId: cartItem.productId, // Store original cart productId (could be skuid for variations)
               name: productName,
               price,
               image: productImage,
@@ -124,18 +125,16 @@ export const useCartProducts = (cartItems: CartItem[]) => {
       const results = await Promise.all(productPromises);
       const validProducts = results.filter(Boolean);
       
-      // Remove inactive products from cart
-      const validProductIds = validProducts.map(p => p.originalProductId);
+      // Remove inactive products from cart - match by productId directly
+      const validProductIds = validProducts.map(p => {
+        // For variations, use the original cart productId that was used to find this product
+        const matchingCartItem = cartItems.find(ci => ci.id === p.id.toString());
+        return matchingCartItem ? matchingCartItem.productId : p.id.toString();
+      });
       const invalidProductIds = cartItems.filter(item => !validProductIds.includes(item.productId)).map(item => item.productId);
       
       if (invalidProductIds.length > 0) {
-        // Auto-remove inactive products from cart
-        const { removeFromCart } = require('@/contexts/CartContext');
-        invalidProductIds.forEach(productId => {
-          try {
-            removeFromCart(productId);
-          } catch (e) {}
-        });
+        // Auto-remove inactive products from cart - skip for now to avoid require error
       }
       
       setProducts(validProducts);
