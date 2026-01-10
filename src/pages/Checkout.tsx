@@ -297,8 +297,7 @@ const Checkout = () => {
 
     try {
       // Generate order number only (invoice number generated only for successful orders)
-      const timestamp = Date.now().toString().slice(-3);
-      const orderNumber = formData.paymentMethod === 'credit' ? `DH-ECOM-${Math.max(750, parseInt(timestamp))}` : await generateOrderNumber();
+      const orderNumber = await generateOrderNumber();
       
       // Get address info
       let shippingAddr = '';
@@ -407,10 +406,9 @@ const Checkout = () => {
           throw new Error(`Order amount ₹${total} exceeds your credit limit of ₹${creditLimit}`);
         }
         
-        // Use timestamp-based invoice number for credit orders
-        const invoiceTimestamp = Date.now().toString().slice(-7);
+        // Use proper order number and generate invoice number
         let currentOrderNumber = orderNumber;
-        let invoiceNumber = `DH${invoiceTimestamp.padStart(7, '0')}`;
+        let invoiceNumber = await generateInvoiceNumber();
         
         const orderPayload = {
           data: {

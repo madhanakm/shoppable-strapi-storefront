@@ -12,7 +12,7 @@ import { useCartProducts } from '@/hooks/useCartProducts';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-settings';
-import { calculateShipping, calculateShippingSync } from '@/lib/shipping';
+import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { getStateShippingRates } from '@/services/state-shipping';
 
 
@@ -21,6 +21,7 @@ const Cart = () => {
   const { products, loading, cartTotal } = useCartProducts(cartItems);
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
+  const { clearQuickCheckout } = useQuickCheckout();
   const [ecomSettings, setEcomSettings] = React.useState<EcommerceSettings>({
     cod: true,
     onlinePay: true,
@@ -266,7 +267,7 @@ const Cart = () => {
                   </div>
                   
                   <div className="space-y-4">
-                    <Link to="/checkout" className="block">
+                    <Link to="/checkout" className="block" onClick={() => clearQuickCheckout()}>
                       <Button className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg py-3 text-lg">
                         Proceed to Checkout
                         <ArrowRight className="w-5 h-5 ml-2" />
