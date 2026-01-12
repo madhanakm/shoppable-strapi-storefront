@@ -476,19 +476,25 @@ const AllProducts = () => {
               <div data-products-grid className={`grid gap-4 lg:gap-6 w-full ${
                 viewMode === 'grid' 
                   ? 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-                  : 'grid-cols-1'
+                  : 'grid-cols-1 max-w-4xl mx-auto'
               }`}>
                 {displayedProducts.map((product) => {
                   const attrs = product.attributes || product;
                   return (
-                    <Card key={`${product.id}-${priceKey}`} className="group hover:shadow-xl transition-all duration-200 overflow-hidden border-0 shadow-md hover:-translate-y-1 w-full max-w-full bg-white rounded-2xl">
-                      <div className="relative overflow-hidden rounded-t-3xl">
+                    <Card key={`${product.id}-${priceKey}`} className={`group hover:shadow-xl transition-all duration-200 overflow-hidden border-0 shadow-md hover:-translate-y-1 w-full max-w-full bg-white rounded-2xl ${
+                      viewMode === 'list' ? 'flex flex-row' : ''
+                    }`}>
+                      <div className={`relative overflow-hidden ${
+                        viewMode === 'list' ? 'w-24 sm:w-48 flex-shrink-0 rounded-l-2xl' : 'rounded-t-3xl'
+                      }`}>
                         <Link to={`/product/${product.id}`} className="block cursor-pointer">
                           <div className="relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50">
                             <img 
                               src={attrs.photo || attrs.image || '/placeholder.svg'} 
                               alt={attrs.Name || attrs.name || 'Product'} 
-                              className="w-full aspect-square object-cover bg-white group-hover:scale-102 transition-transform duration-200"
+                              className={`w-full bg-white group-hover:scale-102 transition-transform duration-200 ${
+                                viewMode === 'list' ? 'h-20 sm:h-32 object-cover' : 'aspect-square object-cover'
+                              }`}
                               onError={(e) => {
                                 e.target.src = 'https://via.placeholder.com/300x300?text=Product';
                               }}
@@ -517,47 +523,57 @@ const AllProducts = () => {
                         )}
                       </div>
                       
-                      <CardContent className="p-4 md:p-6 bg-white">
-                        <Link to={`/product/${product.id}`}>
-                          <h3 className={`font-semibold text-xs md:text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 leading-tight uppercase ${isTamil ? 'tamil-text' : ''}`}>
-                            {isTamil && attrs.tamil ? attrs.tamil : (attrs.Name || attrs.name || 'Product')}
-                          </h3>
-                        </Link>
-                        
-                        <div className="flex items-center mb-2 md:mb-3">
-                          <StarRating 
-                            rating={reviewStats[product.id]?.average || 0} 
-                            count={reviewStats[product.id]?.count || 0} 
-                            size="sm" 
-                            showCount={true} 
-                          />
-                        </div>
-                        
-                        <div className="flex items-center justify-between mb-2 md:mb-3">
-                          <span className="text-base md:text-lg font-bold text-primary">
-                            {(() => {
-                              const currentUserType = userType || 'customer';
-                              
-                              if (attrs.isVariableProduct && attrs.variations) {
-                                try {
-                                  const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
-                                  const priceRange = getVariablePriceRange(variations, currentUserType);
-                                  if (!priceRange) return formatPrice(getPriceByUserType(attrs, currentUserType));
-                                  return priceRange.minPrice === priceRange.maxPrice ? 
-                                    formatPrice(priceRange.minPrice) : 
-                                    `${formatPrice(priceRange.minPrice)} - ${formatPrice(priceRange.maxPrice)}`;
-                                } catch {
-                                  return formatPrice(getPriceByUserType(attrs, currentUserType));
+                      <CardContent className={`bg-white ${
+                        viewMode === 'list' ? 'p-2 sm:p-4 flex-1 flex flex-col justify-between' : 'p-4 md:p-6'
+                      }`}>
+                        <div className={viewMode === 'list' ? 'flex-1' : ''}>
+                          <Link to={`/product/${product.id}`}>
+                            <h3 className={`font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2 leading-tight uppercase ${isTamil ? 'tamil-text' : ''} ${
+                              viewMode === 'list' ? 'text-sm sm:text-lg' : 'text-xs md:text-sm'
+                            }`}>
+                              {isTamil && attrs.tamil ? attrs.tamil : (attrs.Name || attrs.name || 'Product')}
+                            </h3>
+                          </Link>
+                          
+                          <div className="flex items-center mb-2 md:mb-3">
+                            <StarRating 
+                              rating={reviewStats[product.id]?.average || 0} 
+                              count={reviewStats[product.id]?.count || 0} 
+                              size="sm" 
+                              showCount={true} 
+                            />
+                          </div>
+                          
+                          <div className="flex items-center justify-between mb-2 md:mb-3">
+                            <span className={`font-bold text-primary ${
+                              viewMode === 'list' ? 'text-lg sm:text-xl' : 'text-base md:text-lg'
+                            }`}>
+                              {(() => {
+                                const currentUserType = userType || 'customer';
+                                
+                                if (attrs.isVariableProduct && attrs.variations) {
+                                  try {
+                                    const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+                                    const priceRange = getVariablePriceRange(variations, currentUserType);
+                                    if (!priceRange) return formatPrice(getPriceByUserType(attrs, currentUserType));
+                                    return priceRange.minPrice === priceRange.maxPrice ? 
+                                      formatPrice(priceRange.minPrice) : 
+                                      `${formatPrice(priceRange.minPrice)} - ${formatPrice(priceRange.maxPrice)}`;
+                                  } catch {
+                                    return formatPrice(getPriceByUserType(attrs, currentUserType));
+                                  }
+                                } else {
+                                  const price = getPriceByUserType(attrs, currentUserType);
+                                  return formatPrice(price);
                                 }
-                              } else {
-                                const price = getPriceByUserType(attrs, currentUserType);
-                                return formatPrice(price);
-                              }
-                            })()}
-                          </span>
+                              })()}
+                            </span>
+                          </div>
                         </div>
                         
-                        <div className="flex gap-1 md:gap-2">
+                        <div className={`flex gap-1 md:gap-2 ${
+                          viewMode === 'list' ? 'mt-4' : ''
+                        }`}>
                           <Button 
                             className="flex-1 min-w-0 bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl py-2.5 md:py-3 text-xs md:text-sm font-semibold" 
                             onClick={() => {

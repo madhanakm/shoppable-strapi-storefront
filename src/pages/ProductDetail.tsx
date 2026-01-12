@@ -567,7 +567,244 @@ const ProductDetail = () => {
       <Header />
       <div className="container mx-auto px-4 py-8 md:py-16">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Enhanced Sidebar */}
+          {/* Mobile Layout: Product Image and Info First */}
+          <div className="lg:hidden">
+            {/* Product Image for Mobile */}
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden mb-6">
+              <div 
+                ref={imageContainerRef}
+                className="relative group bg-gradient-to-br from-gray-50 to-white p-6"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={() => zoomedImageRef.current?.classList.add('scale-110')}
+                onMouseLeave={() => zoomedImageRef.current?.classList.remove('scale-110')}
+                onClick={() => setZoomActive(true)}
+              >
+                {selectedImage ? (
+                  <>
+                    <img 
+                      ref={zoomedImageRef}
+                      src={selectedImage} 
+                      alt={product.Name || product.name || product.title || 'Product'} 
+                      className="w-full h-auto max-h-[300px] object-contain cursor-zoom-in transition-all duration-500 rounded-2xl"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-2xl">
+                      <div className="opacity-0 group-hover:opacity-100 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-gray-800 font-medium shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 text-sm">
+                        🔍 {isTamil ? translate('product.clickToZoom') : 'Click to zoom'}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl">
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-gray-300 rounded-full mx-auto mb-3 flex items-center justify-center">
+                        📷
+                      </div>
+                      <span className={`text-gray-500 text-sm font-medium ${isTamil ? 'tamil-text' : ''}`}>{translate('product.noImageAvailable')}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Product Gallery for Mobile */}
+              {galleryImages && galleryImages.length > 0 && (
+                <div className="p-4 bg-gray-50">
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {product.photo && (
+                      <div 
+                        className={`w-12 h-12 rounded-lg border-2 cursor-pointer flex-shrink-0 ${selectedImage === product.photo ? 'border-primary' : 'border-gray-200'}`}
+                        onClick={() => setSelectedImage(product.photo)}
+                      >
+                        <img 
+                          src={product.photo} 
+                          alt="Main product" 
+                          className="w-full h-full object-contain rounded-md"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+                    {galleryImages.map((img, index) => {
+                      if (img === product.photo) return null;
+                      return (
+                        <div 
+                          key={index} 
+                          className={`w-12 h-12 rounded-lg border-2 cursor-pointer flex-shrink-0 ${selectedImage === img ? 'border-primary' : 'border-gray-200'}`}
+                          onClick={() => setSelectedImage(img)}
+                        >
+                          <img 
+                            src={img} 
+                            alt={`Product view ${index + 1}`} 
+                            className="w-full h-full object-contain rounded-md"
+                            loading="lazy"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Product Info for Mobile */}
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-6 mb-6">
+              <div className="mb-4">
+                <h1 className={`text-lg font-bold mb-3 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight uppercase ${isTamil ? 'tamil-text' : ''}`}>
+                  {isTamil && product.tamil ? product.tamil : (product.Name || product.name || product.title || 'Product')}
+                </h1>
+                
+                <div className="flex items-center mb-4">
+                  <StarRating 
+                    rating={reviewStats.average} 
+                    count={reviewStats.count} 
+                    size="sm" 
+                    showCount={true} 
+                  />
+                </div>
+              </div>
+              
+              <div className="mb-6 p-4 bg-gradient-to-r from-primary/5 to-green-50 rounded-2xl border border-primary/10">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
+                    {formatPrice(currentPrice)}
+                  </span>
+                  {product.originalPrice && (
+                    <span className="text-lg text-gray-500 line-through">
+                      {formatPrice(product.originalPrice)}
+                    </span>
+                  )}
+                </div>
+                {product.originalPrice && (
+                  <div className="mt-2">
+                    <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-semibold">
+                      Save {Math.round(((product.originalPrice - currentPrice) / product.originalPrice) * 100)}%
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              {/* Variable Product Options for Mobile */}
+              {product.isVariableProduct && variations.length > 0 && (
+                <div className="mb-6">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    {product.attributeName || 'Options'}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {variations.map((variation, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleVariationChange(variation)}
+                        className={`p-2 rounded-xl border-2 transition-all duration-300 text-left ${
+                          selectedVariation === variation
+                            ? 'border-primary bg-primary/5 text-primary'
+                            : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="font-medium text-xs">{variation.value || variation.name || variation.attributeValue}</div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {formatPrice(getPriceByUserType(variation, userType || 'customer'))}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Quantity Selector for Mobile */}
+              <div className="mb-6">
+                <label className={`block text-sm font-semibold text-gray-700 mb-2 ${isTamil ? 'tamil-text' : ''}`}>{translate('product.quantity')}</label>
+                <div className="flex items-center bg-gray-50 rounded-2xl p-2 w-fit">
+                  <button 
+                    className="w-8 h-8 rounded-xl bg-white shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center font-bold text-gray-600 hover:text-primary text-sm"
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  >
+                    −
+                  </button>
+                  <span className="px-4 py-1 font-bold text-base min-w-[50px] text-center">{quantity}</span>
+                  <button 
+                    className="w-8 h-8 rounded-xl bg-white shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center font-bold text-gray-600 hover:text-primary text-sm"
+                    onClick={() => setQuantity(q => q + 1)}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              
+              {/* Action Buttons for Mobile */}
+              <div className="mb-6">
+                <div className="flex gap-3">
+                  <Button 
+                    className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all duration-300 py-2.5 text-sm font-medium rounded-xl border border-primary/20"
+                    onClick={handleAddToCart}
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('products.addToCart')}</span>
+                  </Button>
+                  
+                  <Button 
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-300 py-2.5 text-sm font-medium rounded-xl border border-red-400/20"
+                    onClick={handleBuyNow}
+                  >
+                    <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.buyNow')}</span>
+                  </Button>
+                </div>
+                
+                <div className="mt-3">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 shadow-md hover:shadow-lg transition-all duration-300 py-2.5 text-sm font-medium rounded-xl"
+                    onClick={handleWishlistToggle}
+                  >
+                    <Heart className={`mr-2 h-4 w-4 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''} `} />
+                    <span className={`${isTamil ? 'tamil-text' : ''}`}>
+                      {isInWishlist(product.id.toString()) ? translate('product.removeFromWishlist') : translate('product.addToWishlist')}
+                    </span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Product Description for Mobile */}
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-6 mb-6">
+              <h3 className="text-lg font-bold mb-3 text-gray-800 flex items-center gap-2">
+                <div className="w-5 h-5 bg-primary/10 rounded-lg flex items-center justify-center text-xs">
+                  📝
+                </div>
+                <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.description')}</span>
+              </h3>
+              <div className="prose prose-gray max-w-none">
+                <p className={`text-gray-700 leading-relaxed text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                  {product.description || product.desc || (isTamil ? translate('product.noDescriptionAvailable') : 'No description available for this product.')}
+                </p>
+              </div>
+            </div>
+            
+            {/* Reviews Section for Mobile */}
+            <div className="lg:hidden bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden mb-6">
+              <div className="bg-gradient-to-r from-primary to-green-600 p-4 text-white">
+                <h2 className={`text-xl font-bold ${isTamil ? 'tamil-text' : ''}`}>{translate('product.reviews')}</h2>
+              </div>
+              <div className="p-4">
+                <div className="grid grid-cols-1 gap-6">
+                  <div>
+                    <ProductReviews 
+                      productId={product.id} 
+                      skuId={product.skuid || product.SKUID || product.id.toString()} 
+                      key={reviewsRefreshKey}
+                    />
+                  </div>
+                  <div>
+                    <ReviewForm 
+                      productId={product.id} 
+                      skuId={product.skuid || product.SKUID || product.id.toString()}
+                      productName={product.Name || product.name || product.title || ''}
+                      onReviewSubmitted={() => setReviewsRefreshKey(prev => prev + 1)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Enhanced Sidebar - Now shows after product info on mobile */}
           <div className="lg:w-80 flex-shrink-0 order-last lg:order-first">
             <div className="sticky top-24 space-y-4">
               {/* Categories Card */}
@@ -690,8 +927,8 @@ const ProductDetail = () => {
             </div>
           </div>
           
-          {/* Enhanced Product Image */}
-          <div className="lg:w-1/2">
+          {/* Enhanced Product Image - Desktop Only */}
+          <div className="lg:w-1/2 hidden lg:block">
             <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
               <div 
                 ref={imageContainerRef}
@@ -817,8 +1054,8 @@ const ProductDetail = () => {
             )}
           </div>
           
-          {/* Enhanced Product Info */}
-          <div className="lg:w-1/2">
+          {/* Enhanced Product Info - Desktop Only */}
+          <div className="lg:w-1/2 hidden lg:block">
             <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 md:p-10">
               <div className="mb-6">
                 <h1 className={`text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight uppercase ${isTamil ? 'tamil-text' : ''}`}>
@@ -988,8 +1225,8 @@ const ProductDetail = () => {
           </div>
         </div>
         
-        {/* Reviews Section */}
-        <div className="mt-12 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        {/* Reviews Section - Desktop Only */}
+        <div className="mt-12 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hidden lg:block">
           <div className="bg-gradient-to-r from-primary to-green-600 p-4 text-white">
             <h2 className={`text-xl font-bold ${isTamil ? 'tamil-text' : ''}`}>{translate('product.reviews')}</h2>
           </div>

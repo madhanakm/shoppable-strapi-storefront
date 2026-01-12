@@ -68,6 +68,7 @@ module.exports = {
               totalValue: order.total,
               total: order.total,
               shippingCharges: order.shippingCharges || 0,
+              shippingRate: order.shippingCharges || 0,
               customername: order.customerInfo.name,
               phoneNum: order.customerInfo.phone,
               email: order.customerInfo.email,

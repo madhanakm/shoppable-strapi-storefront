@@ -163,7 +163,7 @@ const Cart = () => {
                             <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
                               <div className="flex-1">
                                 <Link to={`/product/${item.id}`}>
-                                  <h3 className={`font-bold text-lg md:text-xl text-gray-800 mb-2 hover:text-primary transition-colors cursor-pointer ${isTamil ? 'tamil-text' : ''}`}>
+                                  <h3 className={`font-bold text-lg md:text-xl text-gray-800 mb-2 hover:text-primary transition-colors cursor-pointer uppercase ${isTamil ? 'tamil-text' : ''}`}>
                                     {isTamil && item.tamil ? item.tamil : item.name}
                                   </h3>
                                 </Link>

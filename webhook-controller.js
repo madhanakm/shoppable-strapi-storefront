@@ -33,6 +33,19 @@ module.exports = {
         if (pendingOrders.length > 0) {
           const order = pendingOrders[0];
           
+          // Check if order already exists to prevent duplicates
+          const existingOrder = await strapi.entityService.findMany('api::order.order', {
+            filters: { 
+              ordernum: order.orderNumber 
+            }
+          });
+          
+          if (existingOrder.length > 0) {
+            console.log(`Order ${order.orderNumber} already exists, skipping duplicate`);
+            ctx.body = { status: 'ok', message: 'Order already processed' };
+            return;
+          }
+          
           // Generate proper invoice number
           let invoiceNumber;
           try {
@@ -61,6 +74,7 @@ module.exports = {
             totalValue: order.total,
             total: order.total,
             shippingCharges: order.shippingCharges || 0,
+            shippingRate: order.shippingCharges || 0,
             customername: order.customerInfo.name,
             phoneNum: order.customerInfo.phone,
             email: order.customerInfo.email,
@@ -71,9 +85,11 @@ module.exports = {
             Name: order.items.map(item => item.name).join(' | '),
             price: order.items.map(item => `${item.name}: ${item.price} x ${item.quantity}`).join(' | '),
             skuid: order.items.map(item => item.skuid || item.id).join(' | '),
-            remarks: `Payment ID: ${paymentId}`,
+            prodid: order.items.map(item => item.productId || item.originalProductId || item.id).join(' | '),
+            remarks: `Payment ID: ${paymentId}. ${order.notes || ''}`,
             notes: `Online Payment - ${paymentId}`,
-            quantity: String(order.items.reduce((sum, item) => sum + item.quantity, 0))
+            quantity: String(order.items.reduce((sum, item) => sum + item.quantity, 0)),
+            publishedAt: new Date().toISOString()
           };
           
           await strapi.entityService.create('api::order.order', { data: orderData });
@@ -83,9 +99,38 @@ module.exports = {
               status: 'completed',
               paymentId: paymentId,
               invoiceNumber: invoiceNumber,
-              updatedAt: new Date()
+              completedAt: new Date().toISOString()
             }
           });
+          
+          // Send SMS and WhatsApp notifications
+          try {
+            const cleanPhone = order.customerInfo.phone.replace(/[^0-9]/g, '');
+            
+            await fetch('https://api.dharaniherbbals.com/api/order-sms', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                data: {
+                  mobile: cleanPhone,
+                  orderNumber: order.orderNumber,
+                  amount: order.total
+                }
+              })
+            });
+            
+            await fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                mobile: cleanPhone,
+                orderNumber: order.orderNumber,
+                amount: order.total
+              })
+            });
+          } catch (notificationError) {
+            console.error('SMS/WhatsApp notification failed:', notificationError);
+          }
           
           console.log('Order completed successfully:', order.orderNumber, 'Invoice:', invoiceNumber);
         }
