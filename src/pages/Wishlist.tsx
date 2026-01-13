@@ -16,7 +16,7 @@ const Wishlist = () => {
   const { wishlistProductIds, removeFromWishlist, wishlistCount } = useWishlistContext();
   const { products, loading } = useWishlistProducts(wishlistProductIds);
   const { addToCart } = useCart();
-  const { language } = useTranslation();
+  const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
 
   const handleAddToCart = (item: any) => {
@@ -38,16 +38,16 @@ const Wishlist = () => {
             <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-pink-100 to-red-100 rounded-full mb-8">
               <Heart className="w-12 h-12 text-pink-400" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent">
-              Your Wishlist is Empty
+            <h1 className={`text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('wishlist.empty')}
             </h1>
-            <p className="text-gray-600 text-lg mb-8">
+            <p className={`text-gray-600 text-lg mb-8 ${isTamil ? 'tamil-text' : ''}`}>
               Save your favorite items to your wishlist and never lose track of them
             </p>
             <Link to="/products">
               <Button size="lg" className="bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 shadow-lg px-8 py-3">
                 <ShoppingBag className="w-5 h-5 mr-2" />
-                Discover Products
+                <span className={isTamil ? 'tamil-text' : ''}>{translate('wishlist.continueShopping')}</span>
               </Button>
             </Link>
           </div>
@@ -72,11 +72,11 @@ const Wishlist = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-pink-500 to-red-500 rounded-full mb-4">
               <Heart className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent mb-4">
-              My Wishlist
+            <h1 className={`text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('wishlist.title')}
             </h1>
-            <p className="text-gray-600 text-lg">
-              {wishlistCount} {wishlistCount === 1 ? 'item' : 'items'} saved for later
+            <p className={`text-gray-600 text-lg ${isTamil ? 'tamil-text' : ''}`}>
+              {wishlistCount} {wishlistCount === 1 ? translate('wishlist.item') : translate('wishlist.items')} saved for later
             </p>
           </div>
           
@@ -84,7 +84,7 @@ const Wishlist = () => {
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading wishlist...</p>
+              <p className={`mt-4 text-gray-600 ${isTamil ? 'tamil-text' : ''}`}>{translate('common.loading')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -134,7 +134,7 @@ const Wishlist = () => {
                       onClick={() => handleAddToCart(item)}
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
-                      <span className={isTamil ? 'tamil-text' : ''}>Add to Cart</span>
+                      <span className={isTamil ? 'tamil-text' : ''}>{translate('wishlist.addToCart')}</span>
                     </Button>
                     <Button 
                       variant="destructive" 
@@ -156,7 +156,7 @@ const Wishlist = () => {
             <Link to="/products">
               <Button variant="outline" size="lg" className="border-2 border-pink-300 hover:bg-pink-50 px-8 py-3">
                 <ShoppingBag className="w-5 h-5 mr-2" />
-                Continue Shopping
+                <span className={isTamil ? 'tamil-text' : ''}>{translate('wishlist.continueShopping')}</span>
               </Button>
             </Link>
           </div>

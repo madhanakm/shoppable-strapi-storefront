@@ -19,7 +19,7 @@ import { getStateShippingRates } from '@/services/state-shipping';
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, cartCount } = useCart();
   const { products, loading, cartTotal } = useCartProducts(cartItems);
-  const { language } = useTranslation();
+  const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const { clearQuickCheckout } = useQuickCheckout();
   const [ecomSettings, setEcomSettings] = React.useState<EcommerceSettings>({
@@ -85,16 +85,16 @@ const Cart = () => {
             <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full mb-8">
               <ShoppingCart className="w-12 h-12 text-gray-400" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-              Your Cart is Empty
+            <h1 className={`text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('cart.empty')}
             </h1>
-            <p className="text-gray-600 text-lg mb-8">
+            <p className={`text-gray-600 text-lg mb-8 ${isTamil ? 'tamil-text' : ''}`}>
               Looks like you haven't added any items to your cart yet
             </p>
             <Link to="/products">
               <Button size="lg" className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg px-8 py-3">
                 <ShoppingBag className="w-5 h-5 mr-2" />
-                Start Shopping
+                <span className={isTamil ? 'tamil-text' : ''}>{translate('cart.continueShopping')}</span>
               </Button>
             </Link>
           </div>
@@ -119,11 +119,11 @@ const Cart = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-gray-500 to-gray-600 rounded-full mb-4">
               <ShoppingCart className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4">
-              Shopping Cart
+            <h1 className={`text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('cart.title')}
             </h1>
-            <p className="text-gray-600 text-lg">
-              {cartCount} {cartCount === 1 ? 'item' : 'items'} in your cart
+            <p className={`text-gray-600 text-lg ${isTamil ? 'tamil-text' : ''}`}>
+              {cartCount} {cartCount === 1 ? translate('cart.item') : translate('cart.items')} in your cart
             </p>
           </div>
           
@@ -136,7 +136,7 @@ const Cart = () => {
                     {loading ? (
                       <div className="text-center py-8">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                        <p className="mt-4 text-gray-600">Loading cart...</p>
+                        <p className={`mt-4 text-gray-600 ${isTamil ? 'tamil-text' : ''}`}>{translate('common.loading')}</p>
                       </div>
                     ) : (
                       products.map((item, index) => (
@@ -213,7 +213,7 @@ const Cart = () => {
                                     className="flex items-center gap-2"
                                   >
                                     <Trash2 className="w-4 h-4" />
-                                    Remove
+                                    <span className={isTamil ? 'tamil-text' : ''}>{translate('cart.remove')}</span>
                                   </Button>
                                 </div>
                               </div>
@@ -232,17 +232,17 @@ const Cart = () => {
             <div>
               <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm sticky top-8">
                 <CardContent className="p-6 md:p-8">
-                  <h2 className="text-2xl font-bold mb-6 text-gray-800">Order Summary</h2>
+                  <h2 className={`text-2xl font-bold mb-6 text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>{translate('cart.orderSummary')}</h2>
                   
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between text-lg">
-                      <span className="text-gray-600">Subtotal</span>
+                      <span className={`text-gray-600 ${isTamil ? 'tamil-text' : ''}`}>{translate('cart.subtotal')}</span>
                       <span className="font-semibold">{formatPrice(cartTotal)}</span>
                     </div>
-                    <div className="flex justify-between text-lg">
-                      <span className="text-gray-600">Shipping</span>
-                      <span className={`font-semibold ${shippingInfo.isFree ? 'text-green-600' : 'text-gray-600'}`}>
-                        {shippingInfo.isFree ? 'Free' : 'Calculated at checkout'}
+                    <div className="flex justify-between text-lg items-start">
+                      <span className={`text-gray-600 ${isTamil ? 'tamil-text' : ''}`}>{translate('cart.shipping')}</span>
+                      <span className={`font-semibold ${shippingInfo.isFree ? 'text-green-600' : 'text-gray-600'} ${isTamil ? 'tamil-text text-right' : 'text-right'} max-w-[60%]`}>
+                        {shippingInfo.isFree ? translate('cart.free') : translate('cart.calculatedAtCheckout')}
                       </span>
                     </div>
                     {!shippingInfo.isFree && shippingInfo.remainingForFreeShipping > 0 && (
@@ -252,16 +252,16 @@ const Cart = () => {
                     )}
 
                     <div className="flex justify-between text-lg">
-                      <span className="text-gray-600">Tax</span>
-                      <span className="font-semibold text-gray-500">Inclusive</span>
+                      <span className={`text-gray-600 ${isTamil ? 'tamil-text' : ''}`}>{translate('cart.tax')}</span>
+                      <span className={`font-semibold text-gray-500 ${isTamil ? 'tamil-text' : ''}`}>{translate('cart.inclusive')}</span>
                     </div>
                     <div className="border-t pt-4">
                       <div className="flex justify-between text-xl font-bold">
-                        <span>Total</span>
+                        <span className={isTamil ? 'tamil-text' : ''}>{translate('cart.total')}</span>
                         <span className="text-primary">{formatPrice(cartTotal)}</span>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        *Final shipping calculated at checkout based on delivery location
+                      <div className={`text-xs text-gray-500 mt-1 ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('cart.finalShippingNote')}
                       </div>
                     </div>
                   </div>
@@ -269,13 +269,13 @@ const Cart = () => {
                   <div className="space-y-4">
                     <Link to="/checkout" className="block" onClick={() => clearQuickCheckout()}>
                       <Button className="w-full bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg py-3 text-lg">
-                        Proceed to Checkout
+                        <span className={isTamil ? 'tamil-text' : ''}>{translate('cart.checkout')}</span>
                         <ArrowRight className="w-5 h-5 ml-2" />
                       </Button>
                     </Link>
                     <Link to="/products" className="block">
                       <Button variant="outline" className="w-full border-2 border-gray-300 hover:bg-gray-50 py-3">
-                        Continue Shopping
+                        <span className={isTamil ? 'tamil-text' : ''}>{translate('cart.continueShopping')}</span>
                       </Button>
                     </Link>
                   </div>
@@ -296,7 +296,7 @@ const Cart = () => {
             <Link to="/products">
               <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:bg-gray-50 px-8 py-3">
                 <ShoppingBag className="w-5 h-5 mr-2" />
-                Continue Shopping
+                <span className={isTamil ? 'tamil-text' : ''}>{translate('cart.continueShopping')}</span>
               </Button>
             </Link>
           </div>

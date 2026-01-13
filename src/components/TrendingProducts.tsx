@@ -273,7 +273,7 @@ const TrendingProducts = () => {
                 
                 <Button className="w-full group/btn" onClick={() => handleAddToCart(product)}>
                   <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
-                  <span className={isTamil ? 'tamil-text' : ''}>Add to Cart</span>
+                  <span className={isTamil ? 'tamil-text' : ''}>{translate('products.addToCart')}</span>
                 </Button>
               </CardContent>
             </Card>
@@ -283,7 +283,7 @@ const TrendingProducts = () => {
         <div className="text-center mt-12">
           <Link to="/products">
             <Button variant="outline" size="lg">
-              <span className={isTamil ? 'tamil-text' : ''}>View All Trending Products</span>
+              <span className={isTamil ? 'tamil-text' : ''}>{translate('blocks.viewAllTrendingProducts')}</span>
             </Button>
           </Link>
         </div>

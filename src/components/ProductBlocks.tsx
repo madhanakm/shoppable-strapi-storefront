@@ -490,7 +490,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                     
                     <div className="flex gap-2">
                       <Button 
-                        className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium"
+                        className={`flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -516,11 +516,11 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                         }}
                       >
                         <ShoppingCart className="w-3 h-3 mr-1" />
-                        Add to Cart
+                        <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('products.addToCart')}</span>
                       </Button>
                       
                       <Button 
-                        className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium"
+                        className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -568,7 +568,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                           navigate('/checkout');
                         }}
                       >
-                        Buy Now
+                        <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.buyNow')}</span>
                       </Button>
                     </div>
                   </CardContent>
@@ -801,7 +801,7 @@ const TrendingProductsSection = () => {
                   
                   <div className="flex gap-1">
                     <Button 
-                      className={`flex-1 bg-green-500 hover:bg-green-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text' : ''}`}
+                      className={`flex-1 bg-green-500 hover:bg-green-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -827,11 +827,11 @@ const TrendingProductsSection = () => {
                       }}
                     >
                       <ShoppingCart className="w-2 h-2 mr-1" />
-                      {translate('blocks.add')}
+                      {translate('products.addToCart')}
                     </Button>
                     
                     <Button 
-                      className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text' : ''}`}
+                      className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -879,7 +879,7 @@ const TrendingProductsSection = () => {
                         navigate('/checkout');
                       }}
                     >
-                      {translate('blocks.buy')}
+                      {translate('product.buyNow')}
                     </Button>
                   </div>
                 </CardContent>
@@ -1128,7 +1128,7 @@ const DealsOfTheDaySection = () => {
                     }}
                   >
                     <ShoppingCart className="w-3 h-3 mr-1" />
-                    Add to Cart
+                    {translate('products.addToCart')}
                   </Button>
                   
                   <Button 
@@ -1178,7 +1178,7 @@ const DealsOfTheDaySection = () => {
                       navigate('/checkout');
                     }}
                   >
-                    Buy Now
+                    {translate('product.buyNow')}
                   </Button>
                 </div>
               </div>
@@ -1554,7 +1554,7 @@ const ProductBlocks = () => {
   const { translate } = useTranslation();
   return (
     <>
-      <style jsx>{`
+      <style>{`
         @keyframes fade-in-up {
           from {
             opacity: 0;

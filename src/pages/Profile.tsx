@@ -24,7 +24,7 @@ const Profile = () => {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { language } = useTranslation();
+  const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const [isLoading, setIsLoading] = useState(false);
   
@@ -282,29 +282,29 @@ const Profile = () => {
             <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-primary to-primary/80 rounded-full mb-4 shadow-lg">
               <User className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
-              My Profile
+            <h1 className={`text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('profile.title')}
             </h1>
-            <p className="text-gray-600 text-lg">Welcome back, {user?.username}!</p>
+            <p className={`text-gray-600 text-lg ${isTamil ? 'tamil-text' : ''}`}>{translate('profile.welcome')}, {user?.username}!</p>
           </div>
           
           <Tabs defaultValue="orders" className="space-y-8">
             <TabsList className="grid w-full grid-cols-4 bg-white shadow-lg rounded-xl p-2 border">
               <TabsTrigger value="orders" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all">
                 <Package className="w-4 h-4" />
-                <span className="hidden sm:inline">Orders</span>
+                <span className={`hidden sm:inline ${isTamil ? 'tamil-text' : ''}`}>{translate('profile.orders')}</span>
               </TabsTrigger>
               <TabsTrigger value="profile" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all">
                 <User className="w-4 h-4" />
-                <span className="hidden sm:inline">Profile</span>
+                <span className={`hidden sm:inline ${isTamil ? 'tamil-text' : ''}`}>{translate('profile.profile')}</span>
               </TabsTrigger>
               <TabsTrigger value="password" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all">
                 <Lock className="w-4 h-4" />
-                <span className="hidden sm:inline">Password</span>
+                <span className={`hidden sm:inline ${isTamil ? 'tamil-text' : ''}`}>{translate('profile.password')}</span>
               </TabsTrigger>
               <TabsTrigger value="addresses" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white rounded-lg transition-all">
                 <MapPin className="w-4 h-4" />
-                <span className="hidden sm:inline">Addresses</span>
+                <span className={`hidden sm:inline ${isTamil ? 'tamil-text' : ''}`}>{translate('profile.addresses')}</span>
               </TabsTrigger>
             </TabsList>
 
@@ -312,9 +312,9 @@ const Profile = () => {
               <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                 <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-t-lg">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <CardTitle className="flex items-center gap-2 text-xl">
+                    <CardTitle className={`flex items-center gap-2 text-xl ${isTamil ? 'tamil-text' : ''}`}>
                       <Package className="w-5 h-5" />
-                      My Orders ({orders.length})
+                      {translate('profile.myOrders')} ({orders.length})
                     </CardTitle>
                     <Button variant="outline" size="sm" onClick={loadOrders} disabled={loadingOrders} className="w-full sm:w-auto">
                       <RefreshCw className={`w-4 h-4 mr-2 ${loadingOrders ? 'animate-spin' : ''}`} />

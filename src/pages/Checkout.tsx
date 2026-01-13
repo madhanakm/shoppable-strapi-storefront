@@ -48,7 +48,7 @@ const Checkout = () => {
     : processedCartTotal;
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { language } = useTranslation();
+  const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const { processOrder: fulfillOrder } = useOrderFulfillment();
   
@@ -787,57 +787,57 @@ const Checkout = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 overflow-x-hidden">
       <SEOHead 
         title="Checkout"
         description="Complete your order securely. Multiple payment options including COD and online payment with SSL encryption."
         url="/checkout"
       />
       <Header />
-      <main className="container mx-auto px-2 sm:px-4 py-4 md:py-8">
-        <div className="max-w-7xl mx-auto overflow-hidden">
+      <main className="w-full px-2 py-4 md:py-8 overflow-x-hidden">
+        <div className="w-full max-w-7xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-4">
-              <Package className="w-8 h-8 text-white" />
+          <div className="text-center mb-6 md:mb-12 px-2">
+            <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-3 md:mb-4">
+              <Package className="w-6 h-6 md:w-8 md:h-8 text-white" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">
-              Checkout
+            <h1 className={`text-xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2 md:mb-4 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('checkout.title')}
             </h1>
-            <p className="text-gray-600 text-lg">
-              Complete your order securely
+            <p className={`text-sm md:text-lg text-gray-600 ${isTamil ? 'tamil-text' : ''}`}>
+              {translate('checkout.subtitle')}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="grid lg:grid-cols-3 gap-4 md:gap-8">
+          <form onSubmit={handleSubmit} className="w-full overflow-x-hidden">
+            <div className="w-full flex flex-col lg:grid lg:grid-cols-3 gap-4 md:gap-8">
               {/* Checkout Form */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="w-full lg:col-span-2 space-y-4 md:space-y-6 overflow-x-hidden">
                 {/* Customer Information */}
-                <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-                  <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-t-lg">
-                    <CardTitle className="flex items-center gap-2 text-xl">
-                      <User className="w-5 h-5" />
-                      Customer Information
+                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm w-full overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-t-lg p-3 md:p-6">
+                    <CardTitle className={`flex items-center gap-2 text-lg md:text-xl ${isTamil ? 'tamil-text' : ''}`}>
+                      <User className="w-4 h-4 md:w-5 md:h-5" />
+                      {translate('checkout.customerInfo')}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-4 md:p-6">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">Full Name</Label>
+                  <CardContent className="p-3 md:p-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                      <div className="w-full">
+                        <Label htmlFor="fullName" className={`text-xs md:text-sm font-medium text-gray-700 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.fullName')}</Label>
                         <Input
                           id="fullName"
                           name="fullName"
                           value={formData.fullName}
                           onChange={handleInputChange}
                           required
-                          className="mt-2 h-12 border-gray-200 focus:border-blue-500"
+                          className="mt-1 md:mt-2 h-10 md:h-12 border-gray-200 focus:border-blue-500 w-full"
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</Label>
-                        <div className="relative mt-2">
-                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <div className="w-full">
+                        <Label htmlFor="phone" className={`text-xs md:text-sm font-medium text-gray-700 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.phone')}</Label>
+                        <div className="relative mt-1 md:mt-2">
+                          <Phone className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                           <Input
                             id="phone"
                             name="phone"
@@ -845,15 +845,15 @@ const Checkout = () => {
                             value={formData.phone}
                             onChange={handleInputChange}
                             required
-                            className="pl-12 h-12 border-gray-200 focus:border-blue-500"
+                            className="pl-8 md:pl-12 h-10 md:h-12 border-gray-200 focus:border-blue-500 w-full"
                           />
                         </div>
                       </div>
                     </div>
-                    <div className="mt-6">
-                      <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email Address</Label>
-                      <div className="relative mt-2">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <div className="mt-4 md:mt-6 w-full">
+                      <Label htmlFor="email" className={`text-xs md:text-sm font-medium text-gray-700 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.email')}</Label>
+                      <div className="relative mt-1 md:mt-2">
+                        <Mail className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                         <Input
                           id="email"
                           name="email"
@@ -861,7 +861,7 @@ const Checkout = () => {
                           value={formData.email}
                           onChange={handleInputChange}
                           required
-                          className="pl-12 h-12 border-gray-200 focus:border-blue-500"
+                          className="pl-8 md:pl-12 h-10 md:h-12 border-gray-200 focus:border-blue-500 w-full"
                         />
                       </div>
                     </div>
@@ -871,9 +871,9 @@ const Checkout = () => {
                 {/* Shipping Address */}
                 <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                   <CardHeader className="bg-gradient-to-r from-green-100 to-green-50 rounded-t-lg">
-                    <CardTitle className="flex items-center gap-2 text-xl">
+                    <CardTitle className={`flex items-center gap-2 text-xl ${isTamil ? 'tamil-text' : ''}`}>
                       <MapPin className="w-5 h-5" />
-                      Shipping Address
+                      {translate('checkout.shippingAddress')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 md:p-6">
@@ -887,14 +887,14 @@ const Checkout = () => {
                             onChange={(e) => setUseManualAddress(e.target.checked)}
                             className="w-4 h-4 text-green-600"
                           />
-                          <label htmlFor="useManualAddress" className="text-sm font-medium text-gray-700">
-                            Enter address manually
-                          </label>
+                      <label htmlFor="useManualAddress" className={`text-sm font-medium text-gray-700 ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('checkout.enterManually')}
+                      </label>
                         </div>
                         
                         {!useManualAddress && (
                           <div className="space-y-3">
-                            <Label className="text-sm font-medium text-gray-700">Select Shipping Address</Label>
+                            <Label className={`text-sm font-medium text-gray-700 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.selectShippingAddress')}</Label>
                             {addresses.map((address) => {
                               const attrs = address.attributes || address;
                               return (
@@ -1014,9 +1014,9 @@ const Checkout = () => {
                 {/* Billing Address */}
                 <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                   <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 rounded-t-lg">
-                    <CardTitle className="flex items-center gap-2 text-xl">
+                    <CardTitle className={`flex items-center gap-2 text-xl ${isTamil ? 'tamil-text' : ''}`}>
                       <CreditCard className="w-5 h-5" />
-                      Billing Address
+                      {translate('checkout.billingAddress')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 md:p-6">
@@ -1028,8 +1028,8 @@ const Checkout = () => {
                         onChange={(e) => setDifferentBillingAddress(e.target.checked)}
                         className="w-4 h-4 text-blue-600"
                       />
-                      <label htmlFor="differentBillingAddress" className="text-sm font-medium text-gray-700">
-                        Use different billing address
+                      <label htmlFor="differentBillingAddress" className={`text-sm font-medium text-gray-700 ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('checkout.useDifferentBilling')}
                       </label>
                     </div>
                     
@@ -1149,9 +1149,9 @@ const Checkout = () => {
                 {/* Payment Method */}
                 <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                   <CardHeader className="bg-gradient-to-r from-purple-100 to-purple-50 rounded-t-lg">
-                    <CardTitle className="flex items-center gap-2 text-xl">
+                    <CardTitle className={`flex items-center gap-2 text-xl ${isTamil ? 'tamil-text' : ''}`}>
                       <CreditCard className="w-5 h-5" />
-                      Payment Method
+                      {translate('checkout.paymentMethod')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 md:p-6">
@@ -1174,8 +1174,8 @@ const Checkout = () => {
                               className="w-4 h-4 text-blue-600"
                             />
                             <label htmlFor="online" className="flex-1 cursor-pointer">
-                              <div className="font-semibold text-blue-800">Online Payment</div>
-                              <div className="text-sm text-blue-600">UPI, Cards, Net Banking via Razorpay</div>
+                              <div className={`font-semibold text-blue-800 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.onlinePayment')}</div>
+                              <div className={`text-sm text-blue-600 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.onlinePaymentDesc')}</div>
                             </label>
                           </div>
                         )}
@@ -1192,8 +1192,8 @@ const Checkout = () => {
                               className="w-4 h-4 text-green-600"
                             />
                             <label htmlFor="cod" className="flex-1 cursor-pointer">
-                              <div className="font-semibold text-green-800">Cash on Delivery</div>
-                              <div className="text-sm text-green-600">Pay when you receive your order</div>
+                              <div className={`font-semibold text-green-800 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.cod')}</div>
+                              <div className={`text-sm text-green-600 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.codDesc')}</div>
                             </label>
                           </div>
                         )}
@@ -1210,8 +1210,8 @@ const Checkout = () => {
                               className="w-4 h-4 text-purple-600"
                             />
                             <label htmlFor="credit" className="flex-1 cursor-pointer">
-                              <div className="font-semibold text-purple-800">Credit Payment</div>
-                              <div className="text-sm text-purple-600">Pay later - Available for dealers & distributors</div>
+                              <div className={`font-semibold text-purple-800 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.creditPayment')}</div>
+                              <div className={`text-sm text-purple-600 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.creditPaymentDesc')}</div>
                             </label>
                           </div>
                         )}
@@ -1231,7 +1231,7 @@ const Checkout = () => {
                 {/* Order Notes */}
                 <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                   <CardContent className="p-4 md:p-6">
-                    <Label htmlFor="notes" className="text-sm font-medium text-gray-700">Order Notes (Optional)</Label>
+                    <Label htmlFor="notes" className={`text-sm font-medium text-gray-700 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.orderNotes')}</Label>
                     <Textarea
                       id="notes"
                       name="notes"
@@ -1249,7 +1249,7 @@ const Checkout = () => {
               <div className="order-last lg:order-last">
                 <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm lg:sticky lg:top-8">
                   <CardHeader className="bg-gradient-to-r from-gray-100 to-gray-50 rounded-t-lg">
-                    <CardTitle className="text-xl">Order Summary</CardTitle>
+                    <CardTitle className={`text-xl ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.orderSummary')}</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 md:p-6">
                     {/* Order Items */}
@@ -1280,38 +1280,38 @@ const Checkout = () => {
                     {/* Price Breakdown */}
                     <div className="space-y-3 mb-6">
                       <div className="flex justify-between text-lg">
-                        <span>Subtotal</span>
+                        <span className={isTamil ? 'tamil-text' : ''}>{translate('checkout.subtotal')}</span>
                         <span>{formatPrice(cartTotal)}</span>
                       </div>
                       {/* Minimum Order Value Warning */}
                       {minimumOrderValue > 0 && minimumOrderValue !== -1 && cartTotal < minimumOrderValue && (
                         <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                          <p className="text-sm text-red-600">
-                            Minimum order value: {formatPrice(minimumOrderValue)}
+                          <p className={`text-sm text-red-600 ${isTamil ? 'tamil-text' : ''}`}>
+                            {translate('checkout.minimumOrderValue')}: {formatPrice(minimumOrderValue)}
                           </p>
-                          <p className="text-xs text-red-500 mt-1">
-                            Add {formatPrice(minimumOrderValue - cartTotal)} more to place order
+                          <p className={`text-xs text-red-500 mt-1 ${isTamil ? 'tamil-text' : ''}`}>
+                            {translate('checkout.addMore')} {formatPrice(minimumOrderValue - cartTotal)} {translate('checkout.toPlaceOrder')}
                           </p>
                         </div>
                       )}
                       <div className="flex justify-between text-lg">
-                        <span>Shipping</span>
+                        <span className={isTamil ? 'tamil-text' : ''}>{translate('checkout.shipping')}</span>
                         <span className={`font-semibold ${shippingInfo.isFree ? 'text-green-600' : ''}`}>
-                          {shippingInfo.isFree ? 'Free' : formatPrice(shippingCharges)}
+                          {shippingInfo.isFree ? translate('checkout.free') : formatPrice(shippingCharges)}
                         </span>
                       </div>
                       {!shippingInfo.isFree && shippingInfo.remainingForFreeShipping > 0 && shippingInfo.freeShippingThreshold !== -1 && (
-                        <div className="text-sm text-green-600 mt-1">
-                          Add {formatPrice(shippingInfo.remainingForFreeShipping)} more for free shipping!
+                        <div className={`text-sm text-green-600 mt-1 ${isTamil ? 'tamil-text' : ''}`}>
+                          {translate('checkout.addMore')} {formatPrice(shippingInfo.remainingForFreeShipping)} {translate('checkout.forFreeShipping')}!
                         </div>
                       )}
                       <div className="flex justify-between text-lg text-gray-500">
-                        <span>Tax</span>
-                        <span>Inclusive</span>
+                        <span className={isTamil ? 'tamil-text' : ''}>{translate('checkout.tax')}</span>
+                        <span className={isTamil ? 'tamil-text' : ''}>{translate('checkout.inclusive')}</span>
                       </div>
                       <div className="border-t pt-3">
                         <div className="flex justify-between text-xl font-bold">
-                          <span>Total</span>
+                          <span className={isTamil ? 'tamil-text' : ''}>{translate('checkout.total')}</span>
                           <span className="text-green-600">{formatPrice(total)}</span>
                         </div>
                       </div>
@@ -1362,7 +1362,7 @@ const Checkout = () => {
                               </>
                             ) : !isMinimumOrderMet ? (
                               <>
-                                Minimum Order Not Met
+                                {translate('checkout.minimumOrderNotMet')}
                               </>
                             ) : isCreditOverLimit ? (
                               <>
@@ -1370,7 +1370,7 @@ const Checkout = () => {
                               </>
                             ) : (
                               <>
-                                Place Order
+                                {translate('checkout.placeOrder')}
                                 <ArrowRight className="w-5 h-5 ml-2" />
                               </>
                             )}
@@ -1383,8 +1383,8 @@ const Checkout = () => {
                     <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
                       <div className="flex items-center justify-center gap-2">
                         <ShieldCheck className="w-5 h-5 text-green-600" />
-                        <p className="text-sm text-green-800 font-medium">
-                          Secure & Safe Checkout
+                        <p className={`text-sm text-green-800 font-medium ${isTamil ? 'tamil-text' : ''}`}>
+                          {translate('checkout.secureCheckout')}
                         </p>
                       </div>
                     </div>

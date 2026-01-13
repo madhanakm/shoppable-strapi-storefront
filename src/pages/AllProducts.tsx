@@ -262,17 +262,17 @@ const AllProducts = () => {
       <div className="relative bg-gradient-to-r from-primary via-green-600 to-emerald-600 text-white py-8 md:py-12 overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4 leading-tight">
+            <h1 className={`text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4 leading-tight ${isTamil ? 'tamil-text' : ''}`}>
               {searchQuery ? (
                 <>
-                  Search Results for <span className="text-yellow-300">"{searchQuery}"</span>
+                  {translate('search.searchResults')} <span className="text-yellow-300">"{searchQuery}"</span>
                 </>
               ) : (
-                <>Premium Wellness <span className="text-yellow-300">Collection</span></>
+                <>{translate('products.premiumWellness')} <span className="text-yellow-300">{translate('products.collection')}</span></>
               )}
             </h1>
-            <p className="text-sm md:text-base text-green-100 mb-4 md:mb-6">
-              {searchQuery ? `Found ${totalProducts} products` : 'Discover curated herbal remedies and natural wellness solutions'}
+            <p className={`text-sm md:text-base text-green-100 mb-4 md:mb-6 ${isTamil ? 'tamil-text' : ''}`}>
+              {searchQuery ? `${translate('search.found')} ${totalProducts} ${translate('ui.products')}` : translate('products.discoverCurated')}
             </p>
             {searchQuery && (
               <Button 
@@ -281,7 +281,7 @@ const AllProducts = () => {
                 className="bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30 transition-all duration-300 rounded-full px-4 py-2 text-sm"
               >
                 <X className="w-3 h-3 mr-1" />
-                Clear Search
+                {translate('search.clearSearch')}
               </Button>
             )}
           </div>
@@ -297,7 +297,7 @@ const AllProducts = () => {
               className="w-full mb-4 border-2 border-primary/30 text-primary hover:bg-primary/5"
             >
               <Filter className="w-4 h-4 mr-2" />
-              {showFilters ? 'Hide Filters' : 'Show Filters'}
+              {showFilters ? translate('ui.hideFilters') : translate('ui.showFilters')}
             </Button>
           </div>
 
@@ -305,25 +305,25 @@ const AllProducts = () => {
             <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl border border-white/20 sticky top-20 overflow-hidden z-40">
               <div className="bg-gradient-to-r from-primary via-green-600 to-emerald-600 p-6 text-white relative overflow-hidden">
                 <div className="flex items-center justify-between relative z-10">
-                  <h2 className="font-bold text-xl flex items-center gap-2">
+                  <h2 className={`font-bold text-xl flex items-center gap-2 ${isTamil ? 'tamil-text' : ''}`}>
                     <Filter className="w-5 h-5" />
-                    Filters
+                    {translate('ui.filters')}
                   </h2>
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     onClick={clearFilters} 
-                    className="text-white hover:bg-white/20 border border-white/30 rounded-lg"
+                    className={`text-white hover:bg-white/20 border border-white/30 rounded-lg ${isTamil ? 'tamil-text' : ''}`}
                   >
                     <X className="w-4 h-4 mr-1" />
-                    Clear All
+                    {translate('ui.clearAll')}
                   </Button>
                 </div>
               </div>
 
               <div className="p-6 space-y-8">
                 <div>
-                  <h3 className="font-bold text-lg mb-4 text-gray-800 border-b border-gray-200 pb-2">Categories</h3>
+                  <h3 className={`font-bold text-lg mb-4 text-gray-800 border-b border-gray-200 pb-2 ${isTamil ? 'tamil-text' : ''}`}>{translate('products.categories')}</h3>
                   <div className="space-y-3">
                     <label className="flex items-center cursor-pointer group">
                       <input
@@ -335,8 +335,8 @@ const AllProducts = () => {
                       />
                       <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
                         selectedCategory === 'all' ? 'text-primary font-semibold' : 'text-gray-700'
-                      }`}>
-                        All Categories
+                      } ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('products.allCategories')}
                       </span>
                     </label>
                     {categories.map((category, index) => (
@@ -359,7 +359,7 @@ const AllProducts = () => {
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-lg mb-4 text-gray-800 border-b border-gray-200 pb-2">Brands</h3>
+                  <h3 className={`font-bold text-lg mb-4 text-gray-800 border-b border-gray-200 pb-2 ${isTamil ? 'tamil-text' : ''}`}>{translate('products.brands')}</h3>
                   <div className="space-y-3">
                     <label className="flex items-center cursor-pointer group">
                       <input
@@ -371,8 +371,8 @@ const AllProducts = () => {
                       />
                       <span className={`ml-3 text-sm font-medium group-hover:text-primary transition-colors ${
                         selectedBrand === 'all' ? 'text-primary font-semibold' : 'text-gray-700'
-                      }`}>
-                        All Brands
+                      } ${isTamil ? 'tamil-text' : ''}`}>
+                        {translate('products.allBrands')}
                       </span>
                     </label>
                     {brands.map((brand, index) => (
@@ -441,9 +441,9 @@ const AllProducts = () => {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="flex-1 sm:flex-none px-2 md:px-3 py-2 border border-gray-300 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                 >
-                  <option value="name">Sort by Name</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
+                  <option value="name">{translate('ui.sortByName')}</option>
+                  <option value="price-low">{translate('ui.priceLowToHigh')}</option>
+                  <option value="price-high">{translate('ui.priceHighToLow')}</option>
                 </select>
 
                 <div className="flex border border-gray-300 rounded-lg overflow-hidden">
@@ -677,7 +677,7 @@ const AllProducts = () => {
                   disabled={loadingMore}
                   className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  {loadingMore ? 'Loading...' : 'Load More Products'}
+                  {loadingMore ? translate('common.loading') : translate('products.loadMore')}
                 </Button>
               </div>
             )}
