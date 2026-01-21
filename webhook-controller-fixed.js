@@ -31,32 +31,112 @@ module.exports = {
           ctx.body = { status: 'ok', message: 'No order number found' };
           return;
         }
-        
-        // Find pending order by order number OR razorpay order ID
-        const pendingOrders = await strapi.entityService.findMany('api::pending-order.pending-order', {
-          filters: {
+
+        // Check if order already exists to prevent duplicates
+        const existingOrder = await strapi.entityService.findMany('api::order.order', {
+          filters: { 
             $or: [
-              { orderNumber: orderNumber },
-              { razorpayOrderId: orderId }
+              { ordernum: orderNumber },
+              { remarks: { $contains: paymentId } }
             ]
           }
         });
         
-        if (pendingOrders.length > 0) {
-          const order = pendingOrders[0];
+        if (existingOrder.length > 0) {
+          console.log(`Order ${orderNumber} already exists, skipping duplicate`);
+          ctx.body = { status: 'ok', message: 'Order already processed' };
+          return;
+        }
+        
+        // Find pending order by order number OR razorpay order ID OR mobile payment reference
+        const pendingOrders = await strapi.entityService.findMany('api::pending-order.pending-order', {
+          filters: {
+            $or: [
+              { orderNumber: orderNumber },
+              { razorpayOrderId: orderId },
+              { mobilePaymentRef: paymentId }
+            ]
+          }
+        });
+        
+        // If no pending order found, try to create order directly from payment notes (mobile app)
+        if (pendingOrders.length === 0) {
+          console.log('No pending order found, attempting to create order from payment notes');
           
-          // Check if order already exists to prevent duplicates
-          const existingOrder = await strapi.entityService.findMany('api::order.order', {
-            filters: { 
-              ordernum: order.orderNumber 
+          // Extract order details from payment notes
+          const customerName = payment.notes?.customer_name;
+          const customerEmail = payment.notes?.customer_email;
+          const customerPhone = payment.notes?.customer_phone;
+          const orderTotal = payment.amount / 100;
+          
+          if (customerName && customerEmail && customerPhone) {
+            const invoiceNumber = payment.notes?.invoice_number || `DH${String(Date.now()).slice(-7)}`;
+            
+            // Create order directly from payment data
+            await strapi.entityService.create('api::order.order', {
+              data: {
+                ordernum: orderNumber,
+                invoicenum: invoiceNumber,
+                totalValue: orderTotal,
+                total: orderTotal,
+                shippingCharges: payment.notes?.shipping_charges || 0,
+                shippingRate: payment.notes?.shipping_charges || 0,
+                customername: customerName,
+                phoneNum: customerPhone,
+                email: customerEmail,
+                shippingAddress: payment.notes?.shipping_address || 'Mobile App Order',
+                billingAddress: payment.notes?.billing_address || payment.notes?.shipping_address || 'Mobile App Order',
+                payment: 'Online Payment',
+                communication: 'mobile_app',
+                Name: payment.notes?.items || 'Mobile App Order',
+                price: payment.notes?.item_details || `Mobile Order: ${orderTotal}`,
+                skuid: payment.notes?.skuids || 'mobile_order',
+                prodid: payment.notes?.product_ids || 'mobile_order',
+                quantity: payment.notes?.total_quantity || '1',
+                remarks: `Mobile App Payment ID: ${paymentId}. ${payment.notes?.notes || ''}`,
+                publishedAt: new Date().toISOString()
+              }
+            });
+            
+            console.log(`Mobile order ${orderNumber} created successfully from payment notes`);
+            
+            // Send notifications for mobile orders
+            try {
+              const cleanPhone = customerPhone.replace(/[^0-9]/g, '');
+              
+              await fetch('https://api.dharaniherbbals.com/api/order-sms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  data: {
+                    mobile: cleanPhone,
+                    orderNumber: orderNumber,
+                    amount: orderTotal
+                  }
+                })
+              });
+              
+              await fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  mobile: cleanPhone,
+                  orderNumber: orderNumber,
+                  amount: orderTotal
+                })
+              });
+            } catch (notificationError) {
+              console.error('Mobile order SMS/WhatsApp notification failed:', notificationError);
             }
-          });
-          
-          if (existingOrder.length > 0) {
-            console.log(`Order ${order.orderNumber} already exists, skipping duplicate`);
-            ctx.body = { status: 'ok', message: 'Order already processed' };
+            
+            ctx.body = { status: 'ok', message: 'Mobile order created successfully' };
             return;
           }
+        }
+        
+        // Handle website orders (with pending orders)
+        if (pendingOrders.length > 0) {
+          const order = pendingOrders[0];
           
           const invoiceNumber = payment.notes?.invoice_number || `DH${String(Date.now()).slice(-7)}`;
           

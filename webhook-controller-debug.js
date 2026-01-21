@@ -3,166 +3,132 @@ const crypto = require('crypto');
 module.exports = {
   async razorpay(ctx) {
     try {
-      const webhookSecret = 'dh_ecom_webhook_2024_secure_key_dhtransactions';
-      const signature = ctx.request.headers['x-razorpay-signature'];
-      
-      if (signature) {
-        const expectedSignature = crypto
-          .createHmac('sha256', webhookSecret)
-          .update(JSON.stringify(ctx.request.body))
-          .digest('hex');
-        
-        if (signature !== expectedSignature) {
-          return ctx.badRequest('Invalid signature');
-        }
-      }
+      console.log('=== WEBHOOK TRIGGERED ===');
+      console.log('Headers:', ctx.request.headers);
+      console.log('Body:', JSON.stringify(ctx.request.body, null, 2));
       
       const { event, payload } = ctx.request.body;
       
       if (event === 'payment.captured') {
         const payment = payload.payment.entity;
-        const orderId = payment.order_id;
         const paymentId = payment.id;
-        
-        console.log('🔍 Payment captured:', { orderId, paymentId });
-        console.log('📝 Payment notes:', JSON.stringify(payment.notes));
-        
-        // Get order number from payment notes
         const orderNumber = payment.notes?.order_number;
         
+        console.log('Payment captured:', { paymentId, orderNumber });
+        console.log('Payment notes:', JSON.stringify(payment.notes, null, 2));
+        
         if (!orderNumber) {
-          console.log('❌ No order number in notes:', payment.notes);
+          console.log('ERROR: No order number found');
           ctx.body = { status: 'ok', message: 'No order number found' };
           return;
         }
         
-        console.log('🔍 Searching for order:', orderNumber);
+        // Extract customer data
+        const customerName = payment.notes?.customer_name;
+        const customerEmail = payment.notes?.customer_email;
+        const customerPhone = payment.notes?.customer_phone;
+        const orderTotal = payment.amount / 100;
         
-        let pendingOrders = [];
+        console.log('Customer data:', { customerName, customerEmail, customerPhone, orderTotal });
         
-        // Find pending order by order number
-        pendingOrders = await strapi.entityService.findMany('api::pending-order.pending-order', {
-          filters: { orderNumber: orderNumber }
+        if (!customerName || !customerEmail || !customerPhone) {
+          console.log('ERROR: Missing customer data');
+          ctx.body = { status: 'ok', message: 'Missing customer data' };
+          return;
+        }
+        
+        // Check if order exists
+        const existingOrder = await strapi.entityService.findMany('api::order.order', {
+          filters: { ordernum: orderNumber }
         });
         
-        console.log('📊 Found pending orders:', pendingOrders.length);
-        
-        if (pendingOrders.length > 0) {
-          const order = pendingOrders[0];
-          
-          // Check if order already exists to prevent duplicates
-          const existingOrder = await strapi.entityService.findMany('api::order.order', {
-            filters: { 
-              ordernum: order.orderNumber 
-            }
-          });
-          
-          if (existingOrder.length > 0) {
-            console.log(`Order ${order.orderNumber} already exists, skipping duplicate`);
-            ctx.body = { status: 'ok', message: 'Order already processed' };
-            return;
-          }
-          
-          const invoiceNumber = payment.notes?.invoice_number || `DH${String(Date.now()).slice(-7)}`;
-          
-          // Create complete order with all details
-          await strapi.entityService.create('api::order.order', {
-            data: {
-              ordernum: order.orderNumber,
-              invoicenum: invoiceNumber,
-              totalValue: order.total,
-              total: order.total,
-              shippingCharges: order.shippingCharges || 0,
-              customername: order.customerInfo.name,
-              phoneNum: order.customerInfo.phone,
-              email: order.customerInfo.email,
-              shippingAddress: `${order.customerInfo.address}, ${order.customerInfo.city}, ${order.customerInfo.state} - ${order.customerInfo.pincode}`,
-              billingAddress: `${order.customerInfo.address}, ${order.customerInfo.city}, ${order.customerInfo.state} - ${order.customerInfo.pincode}`,
-              payment: 'Online Payment',
-              communication: 'website',
-              Name: order.items.map(item => item.name).join(' | '),
-              price: order.items.map(item => `${item.name}: ${item.price} x ${item.quantity}`).join(' | '),
-              skuid: order.items.map(item => item.skuid).join(' | '),
-              prodid: order.items.map(item => item.productId).join(' | '),
-              quantity: String(order.items.reduce((sum, item) => sum + item.quantity, 0)),
-              remarks: `Payment ID: ${paymentId}. ${order.notes || ''}`,
-              publishedAt: new Date().toISOString()
-            }
-          });
-          
-          // Update pending order status
-          await strapi.entityService.update('api::pending-order.pending-order', order.id, {
-            data: { 
-              status: 'completed', 
-              paymentId,
-              completedAt: new Date().toISOString()
-            }
-          });
-          
-          console.log(`✅ Order ${order.orderNumber} created successfully via webhook`);
-          
-          // Send SMS and WhatsApp notifications
-          try {
-            const cleanPhone = order.customerInfo.phone.replace(/[^0-9]/g, '');
-            
-            // Send SMS
-            await fetch('https://api.dharaniherbbals.com/api/order-sms', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                data: {
-                  mobile: cleanPhone,
-                  orderNumber: order.orderNumber,
-                  amount: order.total
-                }
-              })
-            });
-            
-            // Send WhatsApp message
-            await fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                mobile: cleanPhone,
-                orderNumber: order.orderNumber,
-                amount: order.total
-              })
-            });
-          } catch (notificationError) {
-            console.error('SMS/WhatsApp notification failed:', notificationError);
-          }
-        } else {
-          console.log('❌ No pending order found for:', orderNumber);
+        if (existingOrder.length > 0) {
+          console.log('Order already exists:', orderNumber);
+          ctx.body = { status: 'ok', message: 'Order already processed' };
+          return;
         }
-      }
-      
-      if (event === 'payment.failed') {
-        const payment = payload.payment.entity;
-        const orderNumber = payment.notes?.order_number;
         
-        if (orderNumber) {
-          const pendingOrders = await strapi.entityService.findMany('api::pending-order.pending-order', {
-            filters: { orderNumber: orderNumber }
+        console.log('Creating order...');
+        
+        // Create order
+        const invoiceNumber = `DH${String(Date.now()).slice(-7)}`;
+        
+        const orderData = {
+          ordernum: orderNumber,
+          invoicenum: invoiceNumber,
+          totalValue: orderTotal,
+          total: orderTotal,
+          shippingCharges: parseFloat(payment.notes?.shipping_charges || '0'),
+          shippingRate: parseFloat(payment.notes?.shipping_charges || '0'),
+          customername: customerName,
+          phoneNum: customerPhone,
+          email: customerEmail,
+          shippingAddress: payment.notes?.shipping_address || 'Mobile App Order',
+          billingAddress: payment.notes?.shipping_address || 'Mobile App Order',
+          payment: 'Online Payment',
+          communication: 'mobile_app',
+          Name: payment.notes?.items || 'Mobile App Order',
+          price: payment.notes?.item_details || `Mobile Order: ₹${orderTotal}`,
+          skuid: 'mobile_order',
+          prodid: 'mobile_order',
+          quantity: payment.notes?.total_quantity || '1',
+          remarks: `Mobile App Payment ID: ${paymentId}`,
+          publishedAt: new Date().toISOString()
+        };
+        
+        console.log('Order data to create:', JSON.stringify(orderData, null, 2));
+        
+        try {
+          const createdOrder = await strapi.entityService.create('api::order.order', {
+            data: orderData
           });
           
-          if (pendingOrders.length > 0) {
-            const order = pendingOrders[0];
-            await strapi.entityService.update('api::pending-order.pending-order', order.id, {
-              data: { 
-                status: 'failed', 
-                failureReason: 'Payment failed via webhook',
-                failedAt: new Date().toISOString()
+          console.log('Order created successfully:', createdOrder.id);
+          
+          // Send notifications
+          const cleanPhone = customerPhone.replace(/[^0-9]/g, '');
+          console.log('Sending notifications to:', cleanPhone);
+          
+          // SMS
+          const smsResponse = await fetch('https://api.dharaniherbbals.com/api/order-sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              data: {
+                mobile: cleanPhone,
+                orderNumber: orderNumber,
+                amount: orderTotal
               }
-            });
-          }
+            })
+          });
+          
+          console.log('SMS response status:', smsResponse.status);
+          
+          // WhatsApp
+          const whatsappResponse = await fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              mobile: cleanPhone,
+              orderNumber: orderNumber,
+              amount: orderTotal
+            })
+          });
+          
+          console.log('WhatsApp response status:', whatsappResponse.status);
+          
+          ctx.body = { status: 'ok', message: 'Order created and notifications sent' };
+          
+        } catch (orderError) {
+          console.error('Order creation failed:', orderError);
+          ctx.body = { status: 'error', message: 'Order creation failed' };
         }
       }
       
       ctx.body = { status: 'ok' };
     } catch (error) {
       console.error('Webhook error:', error);
-      ctx.status = 500;
-      ctx.body = { error: 'Webhook failed' };
+      ctx.body = { status: 'error', message: error.message };
     }
   }
 };
