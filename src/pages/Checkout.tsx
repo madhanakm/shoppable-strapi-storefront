@@ -1228,21 +1228,7 @@ const Checkout = () => {
                   </CardContent>
                 </Card>
 
-                {/* Order Notes */}
-                <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-                  <CardContent className="p-4 md:p-6">
-                    <Label htmlFor="notes" className={`text-sm font-medium text-gray-700 ${isTamil ? 'tamil-text' : ''}`}>{translate('checkout.orderNotes')}</Label>
-                    <Textarea
-                      id="notes"
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleInputChange}
-                      className="mt-2 border-gray-200 focus:border-gray-400"
-                      placeholder="Any special instructions for delivery..."
-                      rows={3}
-                    />
-                  </CardContent>
-                </Card>
+
               </div>
 
               {/* Order Summary */}
