@@ -101,6 +101,9 @@ module.exports = {
                   continue; // Skip this retry, try again
                 }
                 
+                // Determine orderType based on state
+                const orderType = orderData.customerInfo.state?.toLowerCase() === 'tamil nadu' || orderData.customerInfo.state?.toLowerCase() === 'tamilnadu' ? 'DH Online TN' : 'DH Online OS';
+                
                 const result = await Promise.race([
                   strapi.entityService.create('api::order.order', {
                     data: {
@@ -117,6 +120,7 @@ module.exports = {
                       billingAddress: `${orderData.customerInfo.address}, ${orderData.customerInfo.city}, ${orderData.customerInfo.state} - ${orderData.customerInfo.pincode}`,
                       payment: 'Online Payment',
                       communication: orderData.communication || 'website',
+                      orderType: orderType,
                       Name: orderData.items ? orderData.items.map(item => item.name).join(' | ') : 'Online Order',
                       price: orderData.items ? orderData.items.map(item => `${item.name}: ${item.price} x ${item.quantity}`).join(' | ') : `Order: ₹${orderData.total}`,
                       skuid: orderData.items ? orderData.items.map(item => item.skuid || item.id).join(' | ') : 'online_order',

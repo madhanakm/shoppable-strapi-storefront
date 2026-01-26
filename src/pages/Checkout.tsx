@@ -423,6 +423,9 @@ const Checkout = () => {
             communication: 'website',
             shippingAddress: shippingAddr,
             billingAddress: shippingAddr,
+            orderType: (formData.shippingState || selectedShippingAddress?.attributes?.state || selectedShippingAddress?.state || '').toLowerCase() === 'tamil nadu' || 
+                      (formData.shippingState || selectedShippingAddress?.attributes?.state || selectedShippingAddress?.state || '').toLowerCase() === 'tamilnadu' ? 
+                      'DH Online TN' : 'DH Online OS',
             Name: cartItems.map(item => item.name.replace(/\t/g, '').trim()).join(' | '),
             price: cartItems.map(item => `${item.name.replace(/\t/g, '').trim()}: ${formatPrice(item.price)} x ${item.quantity}`).join(' | '),
             skuid: cartItems.map(item => item.skuid || item.id).join(' | '),
@@ -592,6 +595,9 @@ const Checkout = () => {
             payment: 'COD',
             shippingAddress: shippingAddr,
             billingAddress: shippingAddr,
+            orderType: (formData.shippingState || selectedShippingAddress?.attributes?.state || selectedShippingAddress?.state || '').toLowerCase() === 'tamil nadu' || 
+                      (formData.shippingState || selectedShippingAddress?.attributes?.state || selectedShippingAddress?.state || '').toLowerCase() === 'tamilnadu' ? 
+                      'DH Online TN' : 'DH Online OS',
             Name: cartItems.map(item => item.name.replace(/[\t\r\n\f\v]/g, '').trim()).join(' | '),
             price: cartItems.map(item => `${item.name.replace(/[\t\r\n\f\v]/g, '').trim()}: ${item.price} x ${item.quantity}`).join(' | '),
             skuid: cartItems.map(item => item.skuid || item.id).join(' | '),

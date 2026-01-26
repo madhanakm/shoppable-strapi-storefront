@@ -104,8 +104,30 @@ export const generateOrderNumber = async (): Promise<string> => {
 
 export const initiatePayment = async (orderData: OrderData, orderNumber: string, invoiceNumber: string, notes?: string): Promise<any> => {
   return new Promise(async (resolve, reject) => {
-    if (!window.Razorpay) {
-      reject(new Error('Razorpay SDK not loaded'));
+    // Wait for Razorpay SDK to load
+    const waitForRazorpay = () => {
+      return new Promise<void>((resolve) => {
+        if (window.Razorpay) {
+          resolve();
+          return;
+        }
+        
+        const checkRazorpay = () => {
+          if (window.Razorpay) {
+            resolve();
+          } else {
+            setTimeout(checkRazorpay, 100);
+          }
+        };
+        
+        checkRazorpay();
+      });
+    };
+    
+    try {
+      await waitForRazorpay();
+    } catch (error) {
+      reject(new Error('Razorpay SDK failed to load'));
       return;
     }
 

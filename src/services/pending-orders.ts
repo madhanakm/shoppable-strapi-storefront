@@ -28,6 +28,7 @@ export interface PendingOrderData {
   razorpayOrderId?: string;
   paymentId?: string;
   failureReason?: string;
+  orderType?: 'DH Online TN' | 'DH Online OS';
 }
 
 export const createPendingOrder = async (orderData: PendingOrderData): Promise<string | null> => {
@@ -37,6 +38,17 @@ export const createPendingOrder = async (orderData: PendingOrderData): Promise<s
       throw new Error('Missing required order data');
     }
 
+    // Determine orderType based on state
+    const orderType = orderData.customerInfo.state?.toLowerCase() === 'tamil nadu' || 
+                      orderData.customerInfo.state?.toLowerCase() === 'tamilnadu' ? 
+                      'DH Online TN' : 'DH Online OS';
+    
+    // Add orderType to order data
+    const orderDataWithType = {
+      ...orderData,
+      orderType
+    };
+
     // Always create a new pending order - remove duplicate check
     // Each order should have a unique order number, so duplicates shouldn't occur
     const response = await fetch('https://api.dharaniherbbals.com/api/pending-orders', {
@@ -45,7 +57,7 @@ export const createPendingOrder = async (orderData: PendingOrderData): Promise<s
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({ data: orderData })
+      body: JSON.stringify({ data: orderDataWithType })
     });
 
     if (!response.ok) {
