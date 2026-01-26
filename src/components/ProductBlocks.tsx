@@ -444,11 +444,11 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
         </div>
 
         <div className="overflow-hidden mb-16 w-full">
-          <div className="flex gap-4 animate-scroll-interval">
+          <div className="flex gap-3 animate-scroll-interval">
             {products.slice(0, 12).concat(products.slice(0, 12)).map((product, index) => (
               <div 
                 key={`${product.id}-${index}`} 
-                className="flex-shrink-0 w-64"
+                className="flex-shrink-0 w-56 sm:w-64"
               >
                 <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-red-200 bg-white rounded-2xl">
                   <div className="relative overflow-hidden bg-gradient-to-br from-red-50 via-white to-red-50">
@@ -461,10 +461,10 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                     </Link>
                   </div>
                   
-                  <CardContent className="p-4 bg-white">
+                  <CardContent className="p-3 sm:p-4 bg-white">
                     <Link to={`/product/${product.id}`}>
-                      <h3 className="font-bold text-sm mb-2 group-hover:text-red-600 transition-colors line-clamp-2 min-h-[2.5rem] leading-tight uppercase">
-                        {filterPriceFromName(product.name)}
+                      <h3 className={`font-bold text-xs sm:text-sm mb-2 group-hover:text-red-600 transition-colors line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] leading-tight uppercase ${isTamil ? 'tamil-text' : ''}`}>
+                        {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
                       </h3>
                     </Link>
                     
@@ -475,9 +475,9 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                       showCount={false} 
                     />
                     
-                    <div className="mb-3">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-lg font-black text-green-600">
+                    <div className="mb-2 sm:mb-3">
+                      <div className="flex items-baseline gap-1 sm:gap-2">
+                        <span className="text-sm sm:text-lg font-black text-green-600">
                           {product.priceRange || formatPrice(product.price)}
                         </span>
                         {product.originalPrice && (
@@ -488,9 +488,9 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                       </div>
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 sm:gap-2">
                       <Button 
-                        className={`flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
+                        className={`flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium min-h-[24px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -515,12 +515,12 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                           addToCart(skuid, product.id.toString(), 1);
                         }}
                       >
-                        <ShoppingCart className="w-3 h-3 mr-1" />
-                        <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('products.addToCart')}</span>
+                        <ShoppingCart className="w-2 sm:w-3 h-2 sm:h-3 mr-0.5 sm:mr-1" />
+                        <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[10px] sm:text-xs'}`}>{translate('blocks.add')}</span>
                       </Button>
                       
                       <Button 
-                        className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
+                        className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium min-h-[24px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -568,7 +568,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                           navigate('/checkout');
                         }}
                       >
-                        <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.buyNow')}</span>
+                        <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[10px] sm:text-xs'}`}>{translate('blocks.buy')}</span>
                       </Button>
                     </div>
                   </CardContent>
@@ -753,8 +753,8 @@ const TrendingProductsSection = () => {
           </p>
         </div>
 
-        {/* 4 Column 2 Row Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
+        {/* 2 Column 4 Row Layout for Mobile, 4 Column 2 Row for Desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-6xl mx-auto">
           {products.slice(0, 8).map((product, index) => (
             <div 
               key={product.id} 
@@ -827,7 +827,7 @@ const TrendingProductsSection = () => {
                       }}
                     >
                       <ShoppingCart className="w-2 h-2 mr-1" />
-                      {translate('products.addToCart')}
+                      <span className={`${isTamil ? 'tamil-text text-[9px]' : 'text-xs'}`}>{translate('blocks.add')}</span>
                     </Button>
                     
                     <Button 
@@ -879,7 +879,7 @@ const TrendingProductsSection = () => {
                         navigate('/checkout');
                       }}
                     >
-                      {translate('product.buyNow')}
+                      <span className={`${isTamil ? 'tamil-text text-[9px]' : 'text-xs'}`}>{translate('blocks.buy')}</span>
                     </Button>
                   </div>
                 </CardContent>
@@ -1060,8 +1060,8 @@ const DealsOfTheDaySection = () => {
           </div>
         </div>
 
-        {/* Simple Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* 2 Column Layout for Mobile, 4 Column for Desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {products.slice(0, 8).map((product, index) => (
             <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden bg-white rounded-2xl border border-gray-100 hover:border-red-200">
               <div className="relative overflow-hidden">
@@ -1072,14 +1072,14 @@ const DealsOfTheDaySection = () => {
                     className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
-                <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-red-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold">
                   🔥 Deal
                 </div>
               </div>
               
-              <div className="p-4">
+              <div className="p-2 sm:p-4">
                 <Link to={`/product/${product.id}`}>
-                  <h3 className={`font-bold text-sm text-gray-800 group-hover:text-red-600 transition-colors line-clamp-2 mb-2 uppercase ${isTamil ? 'tamil-text' : ''}`}>
+                  <h3 className={`font-bold text-[10px] sm:text-sm text-gray-800 group-hover:text-red-600 transition-colors line-clamp-2 mb-1 sm:mb-2 uppercase ${isTamil ? 'tamil-text' : ''}`}>
                     {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
                   </h3>
                 </Link>
@@ -1091,20 +1091,20 @@ const DealsOfTheDaySection = () => {
                   showCount={false} 
                 />
                 
-                <div className="mb-3">
-                  <span className="text-lg font-black text-red-600">
+                <div className="mb-2 sm:mb-3">
+                  <span className="text-sm sm:text-lg font-black text-red-600">
                     {product.priceRange || formatPrice(product.price)}
                   </span>
                   {product.originalPrice && (
-                    <div className="text-xs text-gray-400 line-through">
+                    <div className="text-[10px] sm:text-xs text-gray-400 line-through">
                       {formatPrice(product.originalPrice)}
                     </div>
                   )}
                 </div>
                 
-                <div className="flex gap-2 mt-3">
-                  <Button 
-                    className={`flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium ${isTamil ? 'tamil-text' : ''}`}
+                <div className="flex gap-1 sm:gap-2 mt-2 sm:mt-3">
+                    <Button 
+                      className={`flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -1127,12 +1127,12 @@ const DealsOfTheDaySection = () => {
                       addToCart(skuid, product.id.toString(), 1);
                     }}
                   >
-                    <ShoppingCart className="w-3 h-3 mr-1" />
-                    {translate('products.addToCart')}
+                    <ShoppingCart className="w-2 sm:w-3 h-2 sm:h-3 mr-0.5 sm:mr-1" />
+                    <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-xs'}`}>{translate('blocks.add')}</span>
                   </Button>
                   
                   <Button 
-                    className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-xl py-1.5 text-xs font-medium ${isTamil ? 'tamil-text' : ''}`}
+                    className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -1178,7 +1178,7 @@ const DealsOfTheDaySection = () => {
                       navigate('/checkout');
                     }}
                   >
-                    {translate('product.buyNow')}
+                    <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-xs'}`}>{translate('blocks.buy')}</span>
                   </Button>
                 </div>
               </div>
@@ -1404,8 +1404,8 @@ const PopularChoicesSection = () => {
           </p>
         </div>
 
-        {/* 4 Column Grid Layout */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* 2 Column 4 Row Layout for Mobile, 4 Column 2 Row for Desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {products.slice(0, 8).map((product, index) => (
             <div key={product.id}>
               <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden border border-green-100 hover:border-green-200 bg-white rounded-2xl">
@@ -1414,14 +1414,14 @@ const PopularChoicesSection = () => {
                     <img 
                       src={product.image} 
                       alt={product.name}
-                      className="w-full aspect-square object-contain group-hover:scale-105 transition-transform duration-300 p-3"
+                      className="w-full aspect-square object-contain group-hover:scale-105 transition-transform duration-300 p-2 sm:p-3"
                     />
                   </Link>
                 </div>
                 
-                <CardContent className="p-3 bg-white">
+                <CardContent className="p-2 sm:p-3 bg-white">
                   <Link to={`/product/${product.id}`}>
-                    <h3 className={`font-bold text-xs mb-2 group-hover:text-green-600 transition-colors line-clamp-2 min-h-[2rem] uppercase ${isTamil ? 'tamil-text' : ''}`}>
+                    <h3 className={`font-bold text-[10px] sm:text-xs mb-1 sm:mb-2 group-hover:text-green-600 transition-colors line-clamp-2 min-h-[1.5rem] sm:min-h-[2rem] uppercase ${isTamil ? 'tamil-text' : ''}`}>
                       {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
                     </h3>
                   </Link>
@@ -1433,13 +1433,13 @@ const PopularChoicesSection = () => {
                     showCount={false} 
                   />
                   
-                  <div className="mb-2">
+                  <div className="mb-1 sm:mb-2">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-sm font-black text-green-600">
+                      <span className="text-xs sm:text-sm font-black text-green-600">
                         {product.priceRange || formatPrice(product.price)}
                       </span>
                       {product.originalPrice && (
-                        <span className="text-xs text-gray-400 line-through">
+                        <span className="text-[10px] sm:text-xs text-gray-400 line-through">
                           {formatPrice(product.originalPrice)}
                         </span>
                       )}
@@ -1448,7 +1448,7 @@ const PopularChoicesSection = () => {
                   
                   <div className="flex gap-1">
                     <Button 
-                      className={`flex-1 bg-green-500 hover:bg-green-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-xs font-medium ${isTamil ? 'tamil-text' : ''}`}
+                      className={`flex-1 bg-green-500 hover:bg-green-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -1473,12 +1473,12 @@ const PopularChoicesSection = () => {
                         addToCart(skuid, product.id.toString(), 1);
                       }}
                     >
-                      <ShoppingCart className="w-2 h-2 mr-1" />
-                      {translate('blocks.add')}
+                      <ShoppingCart className="w-2 h-2 mr-0.5" />
+                      <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-xs'}`}>{translate('blocks.add')}</span>
                     </Button>
                     
                     <Button 
-                      className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-xs font-medium ${isTamil ? 'tamil-text' : ''}`}
+                      className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -1526,7 +1526,7 @@ const PopularChoicesSection = () => {
                         navigate('/checkout');
                       }}
                     >
-                      {translate('blocks.buy')}
+                      <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-xs'}`}>{translate('blocks.buy')}</span>
                     </Button>
                   </div>
                 </CardContent>
