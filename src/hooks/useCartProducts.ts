@@ -104,9 +104,9 @@ export const useCartProducts = (cartItems: CartItem[]) => {
             
             return {
               id: product.id,
-              skuid: cartItem.productId, // Always use the cart productId as skuid (it's the actual SKU for variations)
+              skuid: cartItem.productId, // This is the actual SKUID (for variations) or product ID (for simple products)
               originalProductId: product.id, // Always use base product ID
-              cartProductId: cartItem.productId, // Store original cart productId (could be skuid for variations)
+              cartProductId: cartItem.productId, // Store original cart productId (SKUID for variations)
               name: productName,
               price,
               image: productImage,

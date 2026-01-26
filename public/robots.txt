@@ -1,14 +1,24 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
+
+# Sitemap
+Sitemap: https://dharaniherbbals.com/sitemap.xml
+
+# Disallow admin and private pages
+Disallow: /admin/
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /checkout
+Disallow: /profile
+Disallow: /wishlist
+
+# Allow important pages
+Allow: /
+Allow: /products
+Allow: /product/
+Allow: /about
+Allow: /contact
+Allow: /privacy-policy
+Allow: /terms-conditions
+Allow: /shipping-policy
+Allow: /refund-returns

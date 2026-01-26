@@ -27,9 +27,9 @@ const Index = () => {
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Dharani Herbbals - Premium Natural & Herbal Products" />
         <meta property="og:description" content="Discover premium natural and herbal products. Traditional Ayurvedic remedies, organic wellness solutions for your health journey. ✅ 100% Natural ✅ Lab Tested ✅ Free Delivery" />
-        <meta property="og:image" content="https://api.dharaniherbbals.com/uploads/favicon_b04c8c6af4.png" />
-        <meta property="og:image:width" content="512" />
-        <meta property="og:image:height" content="512" />
+        <meta property="og:image" content="https://api.dharaniherbbals.com/uploads/1_1_ea7068fde8.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:url" content="https://dharaniherbbals.com/" />
         <meta property="og:site_name" content="Dharani Herbbals" />
@@ -39,7 +39,7 @@ const Index = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Dharani Herbbals - Premium Natural & Herbal Products" />
         <meta name="twitter:description" content="Discover premium natural and herbal products. Traditional Ayurvedic remedies, organic wellness solutions. 100% Natural • Lab Tested • Free Delivery" />
-        <meta name="twitter:image" content="https://api.dharaniherbbals.com/uploads/favicon_b04c8c6af4.png" />
+        <meta name="twitter:image" content="https://api.dharaniherbbals.com/uploads/1_1_ea7068fde8.jpg" />
         <meta name="twitter:site" content="@dharaniherbbals" />
         
         {/* WhatsApp Specific */}
@@ -54,7 +54,7 @@ const Index = () => {
             "description": "Premium natural and herbal products for wellness. Traditional Ayurvedic remedies and organic health solutions.",
             "url": "https://dharaniherbbals.com",
             "logo": "https://api.dharaniherbbals.com/uploads/favicon_b04c8c6af4.png",
-            "image": "https://api.dharaniherbbals.com/uploads/favicon_b04c8c6af4.png",
+            "image": "https://api.dharaniherbbals.com/uploads/1_1_ea7068fde8.jpg",
             "sameAs": [
               "https://facebook.com/dharaniherbbals",
               "https://instagram.com/dharaniherbbals",
