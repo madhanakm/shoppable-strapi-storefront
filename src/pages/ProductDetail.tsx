@@ -121,10 +121,9 @@ const ProductDetail = () => {
               
               setVariations(variationsData || []);
               
-              // Set first variation as default
+              // Don't set first variation as default - let user choose
+              // Just set the price based on first variation for display
               if (variationsData && variationsData.length > 0) {
-                setSelectedVariation(variationsData[0]);
-                // Use getPriceByUserType to get the correct price based on user type
                 const firstVariationPrice = getPriceByUserType(variationsData[0], userType || 'customer');
                 setCurrentPrice(firstVariationPrice);
               } else {
@@ -273,19 +272,11 @@ const ProductDetail = () => {
   }, [userType, product, selectedVariation]);
   
   useEffect(() => {
-    // Reset selected image and set the main product image as the selected image initially
-    if (product) {
-      // Reset selected image first
-      setSelectedImage(null);
-      
-      // For variable products, use variation image if available
-      if (selectedVariation && selectedVariation.image) {
-        setSelectedImage(selectedVariation.image);
-      } else if (product.photo) {
-        setSelectedImage(product.photo);
-      }
+    // Set main product image as default, only change when variation is manually selected
+    if (product && product.photo) {
+      setSelectedImage(product.photo);
     }
-  }, [product, selectedVariation]);
+  }, [product]);
   
   const handleVariationChange = (variation) => {
     setSelectedVariation(variation);
