@@ -27,7 +27,8 @@ const Index = () => {
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Dharani Herbbals - Premium Natural & Herbal Products" />
         <meta property="og:description" content="Discover premium natural and herbal products. Traditional Ayurvedic remedies, organic wellness solutions for your health journey. ✅ 100% Natural ✅ Lab Tested ✅ Free Delivery" />
-        <meta property="og:image" content="https://api.dharaniherbbals.com/uploads/1_1_ea7068fde8.jpg" />
+        <meta property="og:image" content="https://api.dharaniherbbals.com/uploads/slider1_241909925a.jpg" />
+        <meta property="og:image:secure_url" content="https://api.dharaniherbbals.com/uploads/slider1_241909925a.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:type" content="image/jpeg" />
@@ -39,7 +40,7 @@ const Index = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Dharani Herbbals - Premium Natural & Herbal Products" />
         <meta name="twitter:description" content="Discover premium natural and herbal products. Traditional Ayurvedic remedies, organic wellness solutions. 100% Natural • Lab Tested • Free Delivery" />
-        <meta name="twitter:image" content="https://api.dharaniherbbals.com/uploads/1_1_ea7068fde8.jpg" />
+        <meta name="twitter:image" content="https://api.dharaniherbbals.com/uploads/slider1_241909925a.jpg" />
         <meta name="twitter:site" content="@dharaniherbbals" />
         
         {/* WhatsApp Specific */}

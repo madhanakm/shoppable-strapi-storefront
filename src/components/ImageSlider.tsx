@@ -6,22 +6,27 @@ const ImageSlider = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch slider images from API
-    fetch('https://api.dharaniherbbals.com/api/sliders')
+    // Fetch slider images from API with status filter
+    fetch('https://api.dharaniherbbals.com/api/sliders?filters[status][$eq]=true')
       .then(response => response.json())
       .then(data => {
         // Process slider data
         
         let slidesData = [];
         if (Array.isArray(data)) {
-          slidesData = data;
+          slidesData = data.filter(item => item.status === true);
         } else if (data && Array.isArray(data.data)) {
-          slidesData = data.data.map(item => ({
-            id: item.id,
-            image: item.attributes?.image || item.image || item.attributes?.photo || item.photo,
-            title: item.attributes?.title || item.title,
-            description: item.attributes?.description || item.description
-          }));
+          slidesData = data.data
+            .filter(item => {
+              const attrs = item.attributes || item;
+              return attrs.status === true;
+            })
+            .map(item => ({
+              id: item.id,
+              image: item.attributes?.image || item.image || item.attributes?.photo || item.photo,
+              title: item.attributes?.title || item.title,
+              description: item.attributes?.description || item.description
+            }));
         }
         
         // Set slides data

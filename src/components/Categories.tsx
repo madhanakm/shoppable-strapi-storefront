@@ -10,6 +10,35 @@ const Categories = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   
+  // Auto scroll functionality with infinite loop
+  useEffect(() => {
+    const container = document.getElementById('categories-slider');
+    if (!container || categories.length === 0) return;
+    
+    let scrollPosition = 0;
+    const cardWidth = 200; // Card width + gap
+    const totalWidth = categories.length * cardWidth;
+    
+    const autoScroll = setInterval(() => {
+      scrollPosition += cardWidth;
+      
+      container.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth'
+      });
+      
+      // Reset to beginning seamlessly when reaching duplicate content
+      if (scrollPosition >= totalWidth) {
+        setTimeout(() => {
+          container.scrollTo({ left: 0, behavior: 'auto' });
+          scrollPosition = 0;
+        }, 500); // Wait for smooth scroll to complete
+      }
+    }, 3000);
+    
+    return () => clearInterval(autoScroll);
+  }, [categories]);
+  
   // Enhanced gradient colors with better visual appeal
   const bgColors = [
     'bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600',
@@ -113,12 +142,21 @@ const Categories = () => {
               id="categories-slider"
               className="flex overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-smooth w-full"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              onMouseEnter={(e) => {
+                // Pause auto scroll on hover
+                e.currentTarget.style.scrollBehavior = 'auto';
+              }}
+              onMouseLeave={(e) => {
+                // Resume smooth scroll
+                e.currentTarget.style.scrollBehavior = 'smooth';
+              }}
             >
               <div className="flex gap-6 px-4 w-full">
+                {/* Original categories */}
                 {categories.map((category, index) => (
                   <Link 
                     to={`/products?category=${encodeURIComponent(category.name)}`}
-                    key={category.id}
+                    key={`original-${category.id}`}
                     className="snap-start flex-shrink-0 w-48 group"
                     style={{animationDelay: `${index * 0.1}s`}}
                   >
@@ -127,24 +165,90 @@ const Categories = () => {
                         {/* Hover effect overlay */}
                         <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         
-                        {/* Enhanced icon container */}
-                        <div className={`relative w-24 h-24 ${category.color} rounded-2xl mx-auto mb-5 flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
-                          <div className="absolute inset-0 bg-white/20 group-hover:bg-white/30 transition-colors duration-300"></div>
-                          {category.photo ? (
-                            <img 
-                              src={category.photo}
-                              alt={category.name}
-                              className="w-full h-full object-cover relative z-10"
-                              onError={(e) => {
-                                e.target.style.display = 'none';
-                                e.target.parentNode.innerHTML = `<span class="text-3xl text-white font-bold relative z-10">${category.name.charAt(0).toUpperCase()}</span>`;
-                              }}
-                            />
-                          ) : (
-                            <span className="text-3xl text-white font-bold relative z-10">
-                              {category.name.charAt(0).toUpperCase()}
-                            </span>
-                          )}
+                        {/* Enhanced image container with better styling */}
+                        <div className="relative w-28 h-28 mx-auto mb-4 group-hover:scale-110 transition-all duration-300">
+                          <div className={`absolute inset-0 ${category.color} rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300`}></div>
+                          <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white/10 backdrop-blur-sm border border-white/20">
+                            {category.photo ? (
+                              <img 
+                                src={category.photo}
+                                alt={category.name}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextElementSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div className={`absolute inset-0 flex items-center justify-center ${category.photo ? 'hidden' : 'flex'}`}>
+                              <span className="text-3xl text-white font-bold drop-shadow-lg">
+                                {category.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          </div>
+                          {/* Decorative elements */}
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-white/30 rounded-full blur-sm group-hover:bg-white/50 transition-colors duration-300"></div>
+                          <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-white/20 rounded-full blur-sm group-hover:bg-white/40 transition-colors duration-300"></div>
+                        </div>
+                        
+                        {/* Enhanced text content */}
+                        <h3 className={`font-bold text-base mb-2 text-gray-800 group-hover:text-green-700 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
+                          {category.name}
+                        </h3>
+                        <p className={`text-sm text-gray-500 group-hover:text-green-600 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
+                          {category.count}
+                        </p>
+                        
+                        {/* Subtle arrow indicator */}
+                        <div className="mt-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 relative z-10">
+                          <div className={`inline-flex items-center text-green-600 text-sm font-medium ${isTamil ? 'tamil-text' : ''}`}>
+                            {translate('home.explore')}
+                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+                
+                {/* Duplicate categories for seamless loop */}
+                {categories.map((category, index) => (
+                  <Link 
+                    to={`/products?category=${encodeURIComponent(category.name)}`}
+                    key={`duplicate-${category.id}`}
+                    className="snap-start flex-shrink-0 w-48 group"
+                  >
+                    <Card className="hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border-0 shadow-lg hover:shadow-green-200/50 h-full bg-white/80 backdrop-blur-sm group-hover:bg-white overflow-hidden">
+                      <CardContent className="p-6 text-center relative">
+                        {/* Hover effect overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        {/* Enhanced image container with better styling */}
+                        <div className="relative w-28 h-28 mx-auto mb-4 group-hover:scale-110 transition-all duration-300">
+                          <div className={`absolute inset-0 ${category.color} rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300`}></div>
+                          <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white/10 backdrop-blur-sm border border-white/20">
+                            {category.photo ? (
+                              <img 
+                                src={category.photo}
+                                alt={category.name}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextElementSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div className={`absolute inset-0 flex items-center justify-center ${category.photo ? 'hidden' : 'flex'}`}>
+                              <span className="text-3xl text-white font-bold drop-shadow-lg">
+                                {category.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          </div>
+                          {/* Decorative elements */}
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-white/30 rounded-full blur-sm group-hover:bg-white/50 transition-colors duration-300"></div>
+                          <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-white/20 rounded-full blur-sm group-hover:bg-white/40 transition-colors duration-300"></div>
                         </div>
                         
                         {/* Enhanced text content */}

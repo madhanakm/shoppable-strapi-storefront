@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SEOHead from '@/components/SEOHead';
@@ -377,16 +378,16 @@ const AboutUs = () => {
                 {isTamil ? 'தரணி ஹெர்பல்ஸுடன் இயற்கை நலவாழ்வின் சக்தியை அனுபவியுங்கள். இயற்கையின் ஞானம் மற்றும் நவீன மூலிகை மருத்துவத்தின் அறிவியல் மூலம் சிறந்த ஆரோக்கியத்தை அடைவதற்கு உங்கள் பங்காளராக இருக்க அனுமதியுங்கள்.' : 'Experience the power of natural wellness with Dharani Herbals. Let us be your partner in achieving optimal health through the wisdom of nature and the science of modern herbal medicine.'}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/products" className="inline-block">
+                <Link to="/products" className="inline-block">
                   <button className="bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-600 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all">
                     {translate('about.exploreProducts')}
                   </button>
-                </a>
-                <a href="/contact" className="inline-block">
+                </Link>
+                <Link to="/contact" className="inline-block">
                   <button className="border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-3 rounded-lg font-semibold transition-all">
                     {translate('about.getInTouch')}
                   </button>
-                </a>
+                </Link>
               </div>
             </CardContent>
           </Card>
