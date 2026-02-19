@@ -66,6 +66,8 @@ const Checkout = () => {
   const [ecomUser, setEcomUser] = useState<EcomUser | null>(null);
   const [stateRates, setStateRates] = useState([]);
   const [shippingInfo, setShippingInfo] = useState({ charges: 0, isFree: false, isTamilNadu: false, freeShippingThreshold: 0, remainingForFreeShipping: 0 });
+  const [saveShippingAddress, setSaveShippingAddress] = useState(false);
+  const [saveBillingAddress, setSaveBillingAddress] = useState(false);
   
   const [formData, setFormData] = useState({
     // Billing Info
@@ -243,6 +245,54 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // Save shipping address if checkbox is checked
+    if (saveShippingAddress && useManualAddress && user?.id) {
+      try {
+        await fetch('https://api.dharaniherbbals.com/api/addresses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            data: {
+              user: user.id,
+              fullName: formData.fullName,
+              phone: formData.phone,
+              address: formData.shippingAddress,
+              city: formData.shippingCity,
+              state: formData.shippingState,
+              pincode: formData.shippingPincode,
+              type: 'shipping'
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to save shipping address:', error);
+      }
+    }
+    
+    // Save billing address if checkbox is checked
+    if (saveBillingAddress && differentBillingAddress && !selectedBillingAddress && user?.id) {
+      try {
+        await fetch('https://api.dharaniherbbals.com/api/addresses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            data: {
+              user: user.id,
+              fullName: formData.fullName,
+              phone: formData.phone,
+              address: formData.billingAddress,
+              city: formData.billingCity,
+              state: formData.billingState,
+              pincode: formData.billingPincode,
+              type: 'billing'
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to save billing address:', error);
+      }
+    }
     
     // Get current state for minimum order value calculation
     const currentState = selectedShippingAddress && !useManualAddress 
@@ -1012,6 +1062,22 @@ const Checkout = () => {
                             />
                           </div>
                         </div>
+                        
+                        {/* Save Address Checkbox */}
+                        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              id="saveShippingAddress"
+                              checked={saveShippingAddress}
+                              onChange={(e) => setSaveShippingAddress(e.target.checked)}
+                              className="w-4 h-4 text-blue-600"
+                            />
+                            <label htmlFor="saveShippingAddress" className={`text-sm font-medium text-blue-800 cursor-pointer ${isTamil ? 'tamil-text' : ''}`}>
+                              {isTamil ? 'இந்த முகவரியை எதிர்கால ஆர்டர்களுக்காக சேமிக்கவும்' : 'Save this address for future orders'}
+                            </label>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </CardContent>
@@ -1143,6 +1209,22 @@ const Checkout = () => {
                                   required
                                   className="mt-2 h-12 border-gray-200 focus:border-blue-500"
                                 />
+                              </div>
+                            </div>
+                            
+                            {/* Save Billing Address Checkbox */}
+                            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <input
+                                  type="checkbox"
+                                  id="saveBillingAddress"
+                                  checked={saveBillingAddress}
+                                  onChange={(e) => setSaveBillingAddress(e.target.checked)}
+                                  className="w-4 h-4 text-blue-600"
+                                />
+                                <label htmlFor="saveBillingAddress" className={`text-sm font-medium text-blue-800 cursor-pointer ${isTamil ? 'tamil-text' : ''}`}>
+                                  {isTamil ? 'இந்த பில்லிங் முகவரியை எதிர்கால ஆர்டர்களுக்காக சேமிக்கவும்' : 'Save this billing address for future orders'}
+                                </label>
                               </div>
                             </div>
                           </div>
