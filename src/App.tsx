@@ -50,6 +50,7 @@ const App = () => (
               <WhatsAppFloat />
               <ScrollToTopButton />
               <BrowserRouter>
+                <FloatingCart />
                 <ScrollToTop />
                 <Routes>
                   <Route path="/" element={<Index />} />

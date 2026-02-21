@@ -179,7 +179,7 @@ const Cart = () => {
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => updateQuantity(item.cartProductId || item.id, item.quantity - 1)}
+                                    onClick={() => updateQuantity(item.skuid, item.quantity - 1)}
                                     className="h-10 w-10 rounded-md hover:bg-white"
                                     disabled={item.quantity <= 1}
                                   >
@@ -188,14 +188,14 @@ const Cart = () => {
                                   <Input
                                     type="number"
                                     value={item.quantity}
-                                    onChange={(e) => updateQuantity(item.cartProductId || item.id, parseInt(e.target.value) || 1)}
+                                    onChange={(e) => updateQuantity(item.skuid, parseInt(e.target.value) || 1)}
                                     className="w-16 text-center border-0 bg-transparent font-semibold"
                                     min="1"
                                   />
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    onClick={() => updateQuantity(item.cartProductId || item.id, item.quantity + 1)}
+                                    onClick={() => updateQuantity(item.skuid, item.quantity + 1)}
                                     className="h-10 w-10 rounded-md hover:bg-white"
                                   >
                                     <Plus className="w-4 h-4" />
@@ -209,7 +209,7 @@ const Cart = () => {
                                   <Button
                                     size="sm"
                                     variant="destructive"
-                                    onClick={() => removeFromCart(item.cartProductId || item.id)}
+                                    onClick={() => removeFromCart(item.skuid)}
                                     className="flex items-center gap-2"
                                   >
                                     <Trash2 className="w-4 h-4" />

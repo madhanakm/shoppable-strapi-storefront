@@ -762,7 +762,8 @@ const Checkout = () => {
       } else {
         clearCart();
       }
-      navigate('/order-success');
+      // Force page reload to reset all cart-related state
+      window.location.href = '/order-success';
     } catch (error) {
       console.error('Checkout error:', error);
       

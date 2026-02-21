@@ -912,6 +912,8 @@ const DealsOfTheDaySection = () => {
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { setQuickCheckoutItem } = useQuickCheckout();
 
   useEffect(() => {
     const fetchUserType = async () => {

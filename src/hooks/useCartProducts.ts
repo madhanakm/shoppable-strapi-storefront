@@ -12,6 +12,14 @@ export const useCartProducts = (cartItems: CartItem[]) => {
   const { user } = useAuth();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [cartKey, setCartKey] = useState('');
+
+  useEffect(() => {
+    const newKey = JSON.stringify(cartItems.map(item => `${item.productId}-${item.quantity}`));
+    if (newKey !== cartKey) {
+      setCartKey(newKey);
+    }
+  }, [cartItems]);
 
   useEffect(() => {
     if (cartItems.length > 0) {
@@ -19,7 +27,7 @@ export const useCartProducts = (cartItems: CartItem[]) => {
     } else {
       setProducts([]);
     }
-  }, [cartItems, user?.userType]);
+  }, [cartKey, user?.userType]);
 
   const fetchProducts = async () => {
     setLoading(true);
