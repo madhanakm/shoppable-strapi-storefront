@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { saveWishlistToAPI, loadWishlistFromAPI } from '@/services/wishlist';
+import { toast } from '@/hooks/use-toast';
 
 export const useWishlist = () => {
   const [wishlistProductIds, setWishlistProductIds] = useState<string[]>([]);
@@ -37,13 +38,24 @@ export const useWishlist = () => {
   };
 
   const addToWishlist = (productId: string) => {
-    setWishlistProductIds(prev => 
-      prev.includes(productId) ? prev : [...prev, productId]
-    );
+    setWishlistProductIds(prev => {
+      if (prev.includes(productId)) {
+        return prev;
+      }
+      toast({
+        title: "Added to Wishlist",
+        description: "Product added to wishlist successfully",
+      });
+      return [...prev, productId];
+    });
   };
 
   const removeFromWishlist = (productId: string) => {
     setWishlistProductIds(prev => prev.filter(id => id !== productId));
+    toast({
+      title: "Removed from Wishlist",
+      description: "Product removed from wishlist",
+    });
   };
 
   const isInWishlist = (productId: string) => {

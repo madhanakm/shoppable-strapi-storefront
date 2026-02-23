@@ -2,16 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Menu, X, Search, ShoppingCart, Heart, User, Leaf, Globe, Phone, Mail } from 'lucide-react';
+import { Menu, X, Search, ShoppingCart, Heart, User, Leaf, Globe, Phone, Mail, ChevronDown } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation, LANGUAGES } from './TranslationProvider';
+import { getProductCategories } from '@/services/categories';
 
+const dropdownAnimation = `
+  @keyframes fade-in-down {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  .animate-fade-in-down {
+    animation: fade-in-down 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+`;
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false);
   const location = useLocation();
   
   // Sync search query with URL
@@ -20,6 +38,25 @@ const Header = () => {
     const searchParam = urlParams.get('search');
     setSearchQuery(searchParam || '');
   }, [location.search]);
+  
+  // Load categories
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await getProductCategories();
+        if (Array.isArray(response)) {
+          setCategories(response);
+        } else if (response?.data) {
+          setCategories(response.data);
+        } else {
+          setCategories([]);
+        }
+      } catch (error) {
+        // Silent error
+      }
+    };
+    loadCategories();
+  }, []);
   
   const clearSearch = () => {
     setSearchQuery('');
@@ -57,6 +94,7 @@ const Header = () => {
 
   return (
     <>
+      <style>{dropdownAnimation}</style>
       {/* Top Bar */}
       <div className="bg-gradient-to-r from-primary/90 to-green-600 text-white py-2 hidden md:block sticky top-0 z-50">
         <div className="container mx-auto px-4">
@@ -151,6 +189,40 @@ const Header = () => {
               >
                 {translate('header.home')}
               </Link>
+              
+              {/* Categories Dropdown */}
+              <div 
+                className="relative"
+                onMouseEnter={() => setShowCategoriesDropdown(true)}
+                onMouseLeave={() => setShowCategoriesDropdown(false)}
+              >
+                <button className={`font-medium transition-colors hover:text-primary flex items-center gap-1 ${isTamil ? 'tamil-text' : ''}`}>
+                  {isTamil ? 'வகைகள்' : 'Categories'}
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                {showCategoriesDropdown && categories.length > 0 && (
+                  <div className="absolute top-full left-0 mt-0 bg-white shadow-xl rounded-lg py-3 min-w-[220px] z-50 border border-gray-100 animate-fade-in-down">
+                    {categories.map((category) => {
+                      const catName = category.attributes?.Name;
+                      const catImage = category.attributes?.photo;
+                      return (
+                        <Link
+                          key={category.id}
+                          to={`/products?category=${catName}`}
+                          className="flex items-center gap-3 px-5 py-2.5 hover:bg-primary/10 hover:text-primary transition-colors font-medium text-gray-700 border-l-2 border-transparent hover:border-primary"
+                          onClick={() => setShowCategoriesDropdown(false)}
+                        >
+                          {catImage && (
+                            <img src={catImage} alt={catName} className="w-8 h-8 object-cover rounded-full" />
+                          )}
+                          <span>{catName}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              
               <Link 
                 to="/products" 
                 className={`font-medium transition-colors hover:text-primary ${isTamil ? 'tamil-text' : ''}`}
@@ -291,6 +363,42 @@ const Header = () => {
                 >
                   {translate('header.home')}
                 </Link>
+                
+                {/* Categories in Mobile Menu */}
+                <div>
+                  <button 
+                    onClick={() => setShowCategoriesDropdown(!showCategoriesDropdown)}
+                    className={`text-foreground hover:text-primary transition-colors font-medium text-base flex items-center gap-1 ${isTamil ? 'tamil-text' : ''}`}
+                  >
+                    {isTamil ? 'வகைகள்' : 'Categories'}
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showCategoriesDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                  {showCategoriesDropdown && categories.length > 0 && (
+                    <div className="ml-4 mt-2 space-y-2">
+                      {categories.map((category) => {
+                        const catName = category.attributes?.Name;
+                        const catImage = category.attributes?.photo;
+                        return (
+                          <Link
+                            key={category.id}
+                            to={`/products?category=${catName}`}
+                            className="flex items-center gap-2 py-2 text-sm text-gray-600 hover:text-primary transition-colors"
+                            onClick={() => {
+                              setShowCategoriesDropdown(false);
+                              setIsMenuOpen(false);
+                            }}
+                          >
+                            {catImage && (
+                              <img src={catImage} alt={catName} className="w-6 h-6 object-cover rounded-full" />
+                            )}
+                            <span>{catName}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                
                 <Link 
                   to="/products" 
                   className={`text-foreground hover:text-primary transition-colors font-medium text-base ${isTamil ? 'tamil-text' : ''}`}

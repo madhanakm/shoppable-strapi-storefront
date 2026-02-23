@@ -276,6 +276,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
 
   // Always fetch fresh user type from API - exactly like AllProducts page
   useEffect(() => {
@@ -459,6 +460,18 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                         className="w-full aspect-square object-cover group-hover:scale-105 transition-all duration-300"
                       />
                     </Link>
+                    <Button 
+                      size="sm" 
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all rounded-full shadow-lg bg-white/95 hover:bg-white border border-gray-100 hover:border-red-200 p-1.5"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const skuid = product.skuid || product.id.toString();
+                        isInWishlist(skuid) ? removeFromWishlist(skuid) : addToWishlist(skuid);
+                      }}
+                    >
+                      <Heart className={`w-3 h-3 ${isInWishlist(product.skuid || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                    </Button>
                   </div>
                   
                   <CardContent className="p-3 sm:p-4 bg-white">
@@ -617,6 +630,7 @@ const TrendingProductsSection = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
 
   useEffect(() => {
     const fetchUserType = async () => {
@@ -770,6 +784,18 @@ const TrendingProductsSection = () => {
                       className="w-full aspect-square object-cover group-hover:scale-105 transition-all duration-300"
                     />
                   </Link>
+                  <Button 
+                    size="sm" 
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all rounded-full shadow-lg bg-white/95 hover:bg-white border border-gray-100 hover:border-red-200 p-1.5"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const skuid = product.skuid || product.id.toString();
+                      isInWishlist(skuid) ? removeFromWishlist(skuid) : addToWishlist(skuid);
+                    }}
+                  >
+                    <Heart className={`w-3 h-3 ${isInWishlist(product.skuid || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                  </Button>
                 </div>
                 
                 <CardContent className="p-3 bg-white">
@@ -914,6 +940,7 @@ const DealsOfTheDaySection = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
 
   useEffect(() => {
     const fetchUserType = async () => {
@@ -1077,6 +1104,18 @@ const DealsOfTheDaySection = () => {
                 <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-red-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold">
                   🔥 Deal
                 </div>
+                <Button 
+                  size="sm" 
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all rounded-full shadow-lg bg-white/95 hover:bg-white border border-gray-100 hover:border-red-200 p-1.5"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const skuid = product.skuid || product.id.toString();
+                    isInWishlist(skuid) ? removeFromWishlist(skuid) : addToWishlist(skuid);
+                  }}
+                >
+                  <Heart className={`w-3 h-3 ${isInWishlist(product.skuid || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                </Button>
               </div>
               
               <div className="p-2 sm:p-4">
@@ -1268,6 +1307,7 @@ const PopularChoicesSection = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
 
   useEffect(() => {
     const fetchUserType = async () => {
@@ -1419,6 +1459,18 @@ const PopularChoicesSection = () => {
                       className="w-full aspect-square object-contain group-hover:scale-105 transition-transform duration-300 p-2 sm:p-3"
                     />
                   </Link>
+                  <Button 
+                    size="sm" 
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all rounded-full shadow-lg bg-white/95 hover:bg-white border border-gray-100 hover:border-red-200 p-1.5"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const skuid = product.skuid || product.id.toString();
+                      isInWishlist(skuid) ? removeFromWishlist(skuid) : addToWishlist(skuid);
+                    }}
+                  >
+                    <Heart className={`w-3 h-3 ${isInWishlist(product.skuid || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                  </Button>
                 </div>
                 
                 <CardContent className="p-2 sm:p-3 bg-white">

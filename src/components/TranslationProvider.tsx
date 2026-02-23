@@ -1,10 +1,10 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 // Define available languages
-const LANGUAGES = {
+export const LANGUAGES = {
   ENGLISH: 'en',
   TAMIL: 'ta'
-};
+} as const;
 
 // Create translation context
 const TranslationContext = createContext({
@@ -18,7 +18,7 @@ const TranslationContext = createContext({
 const enTranslations = {
   // Header
   'header.home': 'Home',
-  'header.products': 'Products',
+  'header.products': 'All Products',
   'header.about': 'About Us',
   'header.contact': 'Contact Us',
   'header.login': 'Login',
@@ -396,7 +396,7 @@ const enTranslations = {
 const taTranslations = {
   // Header
   'header.home': 'முகப்பு',
-  'header.products': 'தயாரிப்புகள்',
+  'header.products': 'அனைத்து தயாரிப்புகளும்',
   'header.about': 'எங்களை பற்றி',
   'header.contact': 'தொடர்பு',
   'header.login': 'உள்நுழைய',
@@ -843,4 +843,4 @@ export const useTranslation = () => {
   return context;
 };
 
-export { LANGUAGES };
+// LANGUAGES already exported at the top

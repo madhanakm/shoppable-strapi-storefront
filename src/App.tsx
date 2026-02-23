@@ -33,6 +33,7 @@ import WhatsAppFloat from "./components/WhatsAppFloat";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import FloatingCart from "@/components/FloatingCart";
+import SitePopup from "@/components/SitePopup";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
             <TooltipProvider>
               <Toaster />
               <Sonner />
+              <SitePopup />
               <WhatsAppFloat />
               <ScrollToTopButton />
               <BrowserRouter>

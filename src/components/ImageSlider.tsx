@@ -118,26 +118,6 @@ const ImageSlider = () => {
           />
         ))}
       </div>
-      
-      {/* Previous/Next buttons */}
-      <button
-        className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white text-primary p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl border border-white/20 z-20 group"
-        onClick={() => setCurrentSlide((currentSlide - 1 + slides.length) % slides.length)}
-        aria-label="Previous slide"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:-translate-x-0.5 transition-transform">
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-      </button>
-      <button
-        className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white text-primary p-1.5 sm:p-2 md:p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl border border-white/20 z-20 group"
-        onClick={() => setCurrentSlide((currentSlide + 1) % slides.length)}
-        aria-label="Next slide"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:translate-x-0.5 transition-transform">
-          <path d="M9 18l6-6-6-6" />
-        </svg>
-      </button>
     </div>
   );
 };

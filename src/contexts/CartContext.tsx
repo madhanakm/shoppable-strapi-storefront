@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { saveCartToAPI, loadCartFromAPI } from '@/services/cart';
+import { toast } from '@/hooks/use-toast';
 
 interface CartItem {
   productId: string;
@@ -91,12 +92,20 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     setCartItems(prev => {
       const existingItem = prev.find(item => item.productId === productId);
       if (existingItem) {
+        toast({
+          title: "Updated Cart",
+          description: "Product quantity updated in cart",
+        });
         return prev.map(item =>
           item.productId === productId
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
+      toast({
+        title: "Added to Cart",
+        description: "Product added to cart successfully",
+      });
       return [...prev, { productId, id, quantity }];
     });
   };
