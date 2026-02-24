@@ -2,6 +2,8 @@ export interface PopupData {
   photo: string;
   message: string;
   status: boolean;
+  buttonText?: string;
+  buttonLink?: string;
 }
 
 export const getPopup = async (): Promise<PopupData | null> => {
@@ -20,12 +22,13 @@ export const getPopup = async (): Promise<PopupData | null> => {
     if (!attrs || !attrs.status) return null;
 
     return {
-      photo: attrs.photo,
-      message: attrs.message,
-      status: attrs.status
+      photo: attrs.photo || '',
+      message: attrs.message || '',
+      status: attrs.status,
+      buttonText: attrs.buttonText || '',
+      buttonLink: attrs.buttonLink || ''
     };
   } catch (error) {
-    console.error('Error fetching popup:', error);
     return null;
   }
 };
