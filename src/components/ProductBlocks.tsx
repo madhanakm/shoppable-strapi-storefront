@@ -59,7 +59,8 @@ const ProductCard = ({ product, reviewStats = {} }) => {
         if (variations && variations.length > 0) {
           const firstVariation = variations[0];
           const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-          addToCart(skuid, product.id.toString(), 1);
+          const variationPrice = getPriceByUserType(firstVariation, product.userType || 'customer');
+          addToCart(skuid, product.id.toString(), 1, product.name, variationPrice);
           return;
         }
       } catch (e) {
@@ -69,7 +70,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
     
     // For regular products
     const skuid = product.skuid || product.id.toString();
-    addToCart(skuid, product.id.toString(), 1);
+    addToCart(skuid, product.id.toString(), 1, product.name, product.price);
   };
   
   const handleBuyNow = () => {
@@ -515,7 +516,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                               if (variations && variations.length > 0) {
                                 const firstVariation = variations[0];
                                 const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-                                addToCart(skuid, product.id.toString(), 1);
+                                addToCart(skuid, product.id.toString(), 1, product.name, product.price);
                                 return;
                               }
                             } catch (e) {
@@ -525,7 +526,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                           
                           // For regular products
                           const skuid = product.skuid || product.id.toString();
-                          addToCart(skuid, product.id.toString(), 1);
+                          addToCart(skuid, product.id.toString(), 1, product.name, product.price);
                         }}
                       >
                         <ShoppingCart className="w-2 sm:w-3 h-2 sm:h-3 mr-0.5 sm:mr-1" />
@@ -839,7 +840,7 @@ const TrendingProductsSection = () => {
                             if (variations && variations.length > 0) {
                               const firstVariation = variations[0];
                               const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-                              addToCart(skuid, product.id.toString(), 1);
+                              addToCart(skuid, product.id.toString(), 1, product.name, product.price);
                               return;
                             }
                           } catch (e) {
@@ -849,7 +850,7 @@ const TrendingProductsSection = () => {
                         
                         // For regular products
                         const skuid = product.skuid || product.id.toString();
-                        addToCart(skuid, product.id.toString(), 1);
+                        addToCart(skuid, product.id.toString(), 1, product.name, product.price);
                       }}
                     >
                       <ShoppingCart className="w-2 h-2 mr-1" />
@@ -1156,7 +1157,7 @@ const DealsOfTheDaySection = () => {
                           if (variations && variations.length > 0) {
                             const firstVariation = variations[0];
                             const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-                            addToCart(skuid, product.id.toString(), 1);
+                            addToCart(skuid, product.id.toString(), 1, product.name, product.price);
                             return;
                           }
                         } catch (e) {
@@ -1165,7 +1166,7 @@ const DealsOfTheDaySection = () => {
                       }
                       
                       const skuid = product.skuid || product.id.toString();
-                      addToCart(skuid, product.id.toString(), 1);
+                      addToCart(skuid, product.id.toString(), 1, product.name, product.price);
                     }}
                   >
                     <ShoppingCart className="w-2 sm:w-3 h-2 sm:h-3 mr-0.5 sm:mr-1" />
@@ -1514,7 +1515,7 @@ const PopularChoicesSection = () => {
                             if (variations && variations.length > 0) {
                               const firstVariation = variations[0];
                               const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-                              addToCart(skuid, product.id.toString(), 1);
+                              addToCart(skuid, product.id.toString(), 1, product.name, product.price);
                               return;
                             }
                           } catch (e) {
@@ -1524,7 +1525,7 @@ const PopularChoicesSection = () => {
                         
                         // For regular products
                         const skuid = product.skuid || product.id.toString();
-                        addToCart(skuid, product.id.toString(), 1);
+                        addToCart(skuid, product.id.toString(), 1, product.name, product.price);
                       }}
                     >
                       <ShoppingCart className="w-2 h-2 mr-0.5" />

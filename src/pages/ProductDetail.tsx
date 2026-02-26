@@ -234,6 +234,18 @@ const ProductDetail = () => {
           } catch (reviewError) {
             
           }
+          
+          // Track ViewContent event - moved to separate useEffect to ensure userType is loaded
+          const productPrice = getPriceByUserType(foundProduct.attributes, userType || 'customer');
+          
+          // Store product data for tracking
+          if (typeof window !== 'undefined') {
+            window._pendingProductView = {
+              id: foundProduct.id.toString(),
+              name: foundProduct.attributes?.Name || foundProduct.attributes?.name,
+              price: productPrice
+            };
+          }
         }
       } catch (error) {
         
@@ -246,6 +258,36 @@ const ProductDetail = () => {
       fetchData();
     }
   }, [id, userType]);
+  
+  // Track ViewContent event after product and userType are loaded
+  useEffect(() => {
+    if (product && userType !== null && typeof window !== 'undefined') {
+      const productPrice = getPriceByUserType(product, userType);
+      
+      if (window.fbq) {
+        window.fbq('track', 'ViewContent', {
+          content_name: product.Name || product.name,
+          content_ids: [product.id.toString()],
+          content_type: 'product',
+          value: productPrice,
+          currency: 'INR'
+        });
+      }
+      
+      if (window.dataLayer) {
+        window.dataLayer.push({
+          event: 'view_item',
+          ecommerce: {
+            items: [{
+              item_id: product.id.toString(),
+              item_name: product.Name || product.name,
+              price: productPrice
+            }]
+          }
+        });
+      }
+    }
+  }, [product, userType]);
   
   // Update prices when userType changes
   useEffect(() => {
@@ -305,16 +347,15 @@ const ProductDetail = () => {
       let productId, skuid;
       
       if (product.isVariableProduct && selectedVariation && selectedVariation.skuid) {
-        // For variable products: skuid = variation skuid, id = base product id
         skuid = selectedVariation.skuid.toString();
         productId = product.id.toString();
       } else {
-        // For simple products, use the base product ID
         productId = product.id.toString();
         skuid = product.skuid || product.SKUID || productId;
       }
       
-      addToCart(skuid, productId, quantity); // Use skuid as unique identifier
+      const productName = product.Name || product.name || product.title;
+      addToCart(skuid, productId, quantity, productName, currentPrice);
     }
   };
   

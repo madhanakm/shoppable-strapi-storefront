@@ -7,11 +7,13 @@ interface CartItem {
   productId: string;
   quantity: number;
   id: string;
+  name?: string;
+  price?: number;
 }
 
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (productId: string, id: string, quantity?: number) => void;
+  addToCart: (productId: string, id: string, quantity?: number, name?: string, price?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -88,7 +90,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
   };
 
-  const addToCart = (productId: string, id: string, quantity: number = 1) => {
+  const addToCart = (productId: string, id: string, quantity: number = 1, name?: string, price?: number) => {
     setCartItems(prev => {
       const existingItem = prev.find(item => item.productId === productId);
       if (existingItem) {
@@ -96,17 +98,68 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           title: "Updated Cart",
           description: "Product quantity updated in cart",
         });
+        
+        if (typeof window !== 'undefined' && window.fbq && price) {
+          window.fbq('track', 'AddToCart', {
+            content_ids: [productId],
+            content_name: name,
+            content_type: 'product',
+            value: price * quantity,
+            currency: 'INR'
+          });
+        }
+        
+        if (typeof window !== 'undefined' && window.dataLayer && price) {
+          window.dataLayer.push({
+            event: 'add_to_cart',
+            ecommerce: {
+              items: [{
+                item_id: productId,
+                item_name: name,
+                price: price,
+                quantity: quantity
+              }]
+            }
+          });
+        }
+        
         return prev.map(item =>
           item.productId === productId
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
+      
       toast({
         title: "Added to Cart",
         description: "Product added to cart successfully",
       });
-      return [...prev, { productId, id, quantity }];
+      
+      if (typeof window !== 'undefined' && window.fbq && price) {
+        window.fbq('track', 'AddToCart', {
+          content_ids: [productId],
+          content_name: name,
+          content_type: 'product',
+          value: price * quantity,
+          currency: 'INR'
+        });
+      }
+      
+      if (typeof window !== 'undefined' && window.dataLayer && price) {
+        window.dataLayer.push({
+          event: 'add_to_cart',
+          ecommerce: {
+            items: [{
+              item_id: productId,
+              item_name: name,
+              price: price,
+              quantity: quantity
+            }]
+          }
+        });
+      }
+      
+      return [...prev, { productId, id, quantity, name, price }];
     });
   };
 

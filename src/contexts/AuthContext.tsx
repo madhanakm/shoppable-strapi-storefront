@@ -152,6 +152,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           localStorage.setItem('user', loginData.user);
           localStorage.setItem('loginTime', loginData.loginTime);
           setUser(userData as any);
+          
+          // Send user data to Meta Pixel
+          if (typeof window !== 'undefined' && window.fbq) {
+            window.fbq('setUserProperties', {
+              em: user.attributes.email,
+              ph: user.attributes.phone,
+              fn: user.attributes.name
+            });
+          }
+          
           return true;
         }
       }
