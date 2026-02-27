@@ -54,25 +54,27 @@ export const generateInvoiceNumber = async (): Promise<string> => {
 
 export const generateOrderNumber = async (): Promise<string> => {
   try {
-    // Get the latest order numbers from both orders and pending-orders
+    // Get the latest order numbers from both orders and pending-orders (sorted by createdAt)
     const [ordersResponse, pendingOrdersResponse] = await Promise.all([
-      fetch('https://api.dharaniherbbals.com/api/orders?sort=ordernum:desc&pagination[limit]=1'),
+      fetch('https://api.dharaniherbbals.com/api/orders?sort=createdAt:desc&pagination[limit]=10'),
       fetch('https://api.dharaniherbbals.com/api/pending-orders?sort=createdAt:desc&pagination[limit]=10')
     ]);
     
     let maxNumber = 750; // Starting from 750
     
-    // Check latest order from orders collection
+    // Check latest orders from orders collection (check last 10)
     if (ordersResponse.ok) {
       const ordersData = await ordersResponse.json();
       if (ordersData.data && ordersData.data.length > 0) {
-        const lastOrder = ordersData.data[0].attributes?.ordernum || ordersData.data[0].ordernum;
-        if (lastOrder && lastOrder.startsWith('DH-ECOM-')) {
-          const lastNumber = parseInt(lastOrder.replace('DH-ECOM-', ''));
-          if (!isNaN(lastNumber)) {
-            maxNumber = Math.max(maxNumber, lastNumber);
+        ordersData.data.forEach((order: any) => {
+          const orderNum = order.attributes?.ordernum || order.ordernum;
+          if (orderNum && orderNum.startsWith('DH-ECOM-')) {
+            const lastNumber = parseInt(orderNum.replace('DH-ECOM-', ''));
+            if (!isNaN(lastNumber)) {
+              maxNumber = Math.max(maxNumber, lastNumber);
+            }
           }
-        }
+        });
       }
     }
     

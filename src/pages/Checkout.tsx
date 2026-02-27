@@ -456,9 +456,9 @@ const Checkout = () => {
           throw new Error(`Order amount ₹${total} exceeds your credit limit of ₹${creditLimit}`);
         }
         
-        // Use proper order number and generate invoice number
-        let currentOrderNumber = orderNumber;
-        let invoiceNumber = await generateInvoiceNumber();
+        // Generate fresh order number and invoice number
+        const currentOrderNumber = orderNumber;
+        const invoiceNumber = await generateInvoiceNumber();
         
         const orderPayload = {
           data: {
@@ -535,36 +535,54 @@ const Checkout = () => {
           const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
           
           // Send SMS
-          fetch('https://api.dharaniherbbals.com/api/order-sms', {
+          await fetch('https://api.dharaniherbbals.com/api/order-sms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               data: {
                 mobile: cleanPhone,
-                orderNumber: orderNumber,
+                orderNumber: currentOrderNumber,
                 amount: total
               }
             })
-          });
+          }).catch(error => console.error('Failed to send SMS:', error));
           
           // Send WhatsApp message
-          fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
+          await fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               mobile: cleanPhone,
-              orderNumber: orderNumber,
+              orderNumber: currentOrderNumber,
               amount: total
             })
-          });
+          }).catch(error => console.error('Failed to send WhatsApp:', error));
         } catch (error) {
           console.error('Error sending notifications:', error);
         }
         
+        console.log('Credit order completed, clearing cart...');
+        
+        // Clear cart and redirect
+        if (isQuickCheckout) {
+          clearQuickCheckout();
+        } else {
+          clearCart();
+          localStorage.removeItem('cart');
+        }
+        
+        console.log('Cart cleared, showing toast...');
+        
         toast({
           title: "Credit Order Placed Successfully!",
-          description: `Order #${orderNumber} placed on credit. You will receive confirmation shortly.`,
+          description: `Order #${currentOrderNumber} placed on credit. You will receive confirmation shortly.`,
         });
+        
+        console.log('Redirecting to order success page...');
+        
+        setTimeout(() => {
+          window.location.href = '/order-success';
+        }, 100);
       } else {
         // COD Order - Create pending order first (without invoice number), then store
         const pendingOrderData: PendingOrderData = {
@@ -613,22 +631,8 @@ const Checkout = () => {
         }
         
         // Generate invoice number for COD orders
-        let invoiceNumber = await generateInvoiceNumber();
-        let currentOrderNumber = orderNumber;
-        
-        // Check if order number already exists and generate new one if needed
-        try {
-          const existingOrderCheck = await fetch(`https://api.dharaniherbbals.com/api/orders?filters[ordernum][$eq]=${encodeURIComponent(currentOrderNumber)}`);
-          if (existingOrderCheck.ok) {
-            const existingData = await existingOrderCheck.json();
-            if (existingData.data && existingData.data.length > 0) {
-              currentOrderNumber = await generateOrderNumber();
-              invoiceNumber = await generateInvoiceNumber();
-            }
-          }
-        } catch (error) {
-          console.warn('Could not check for existing COD order:', error);
-        }
+        const invoiceNumber = await generateInvoiceNumber();
+        const currentOrderNumber = orderNumber;
         
         const orderPayload = {
           data: {
@@ -725,7 +729,7 @@ const Checkout = () => {
           const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
           
           // Send SMS
-          fetch('https://api.dharaniherbbals.com/api/order-sms', {
+          await fetch('https://api.dharaniherbbals.com/api/order-sms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -735,10 +739,10 @@ const Checkout = () => {
                 amount: total
               }
             })
-          });
+          }).catch(error => console.error('Failed to send SMS:', error));
           
           // Send WhatsApp message
-          fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
+          await fetch('https://api.dharaniherbbals.com/api/whatsapp/send-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -746,7 +750,7 @@ const Checkout = () => {
               orderNumber: orderNumber,
               amount: total
             })
-          });
+          }).catch(error => console.error('Failed to send WhatsApp:', error));
         } catch (error) {
           console.error('Error sending notifications:', error);
         }

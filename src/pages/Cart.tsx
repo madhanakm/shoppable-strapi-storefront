@@ -14,6 +14,7 @@ import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-settings';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { getStateShippingRates } from '@/services/state-shipping';
+import { calculateShipping, calculateShippingSync } from '@/lib/shipping';
 
 
 const Cart = () => {
