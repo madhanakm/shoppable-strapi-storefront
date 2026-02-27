@@ -57,7 +57,7 @@ export const generateOrderNumber = async (): Promise<string> => {
     // Get the latest order numbers from both orders and pending-orders
     const [ordersResponse, pendingOrdersResponse] = await Promise.all([
       fetch('https://api.dharaniherbbals.com/api/orders?sort=ordernum:desc&pagination[limit]=1'),
-      fetch('https://api.dharaniherbbals.com/api/pending-orders?sort=orderNumber:desc&pagination[limit]=1')
+      fetch('https://api.dharaniherbbals.com/api/pending-orders?sort=createdAt:desc&pagination[limit]=10')
     ]);
     
     let maxNumber = 750; // Starting from 750
@@ -76,29 +76,31 @@ export const generateOrderNumber = async (): Promise<string> => {
       }
     }
     
-    // Check latest order from pending-orders collection
+    // Check latest orders from pending-orders collection (check last 10)
     if (pendingOrdersResponse.ok) {
       const pendingData = await pendingOrdersResponse.json();
       if (pendingData.data && pendingData.data.length > 0) {
-        const lastPendingOrder = pendingData.data[0].attributes?.orderNumber || pendingData.data[0].orderNumber;
-        if (lastPendingOrder && lastPendingOrder.startsWith('DH-ECOM-')) {
-          const lastNumber = parseInt(lastPendingOrder.replace('DH-ECOM-', ''));
-          if (!isNaN(lastNumber)) {
-            maxNumber = Math.max(maxNumber, lastNumber);
+        pendingData.data.forEach((order: any) => {
+          const orderNumber = order.attributes?.orderNumber || order.orderNumber;
+          if (orderNumber && orderNumber.startsWith('DH-ECOM-')) {
+            const lastNumber = parseInt(orderNumber.replace('DH-ECOM-', ''));
+            if (!isNaN(lastNumber)) {
+              maxNumber = Math.max(maxNumber, lastNumber);
+            }
           }
-        }
+        });
       }
     }
     
     // Generate next order number
     const nextNumber = maxNumber + 1;
-    const orderNumber = `DH-ECOM-${String(nextNumber).padStart(3, '0')}`;
+    const orderNumber = `DH-ECOM-${String(nextNumber).padStart(4, '0')}`;
     
     return orderNumber;
   } catch (error) {
     console.error('Error generating order number:', error);
     // Fallback to timestamp-based number
-    return `DH-ECOM-${String(Date.now()).slice(-3)}`;
+    return `DH-ECOM-${String(Date.now()).slice(-4)}`;
   }
 };
 
