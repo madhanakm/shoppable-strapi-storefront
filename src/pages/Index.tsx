@@ -10,6 +10,7 @@ import ImageSlider from '@/components/ImageSlider';
 import ProductBlocks from '@/components/ProductBlocks';
 import SimpleGoogleReviews from '@/components/SimpleGoogleReviews';
 import FloatingCart from '@/components/FloatingCart';
+import InstagramReels from '@/components/InstagramReels';
 
 const Index = () => {
   const { translate, language } = useTranslation();
@@ -103,6 +104,11 @@ const Index = () => {
           <div className="py-16 bg-gradient-to-r from-green-50 to-emerald-50">
             <Categories />
           </div>
+        </ErrorBoundary>
+        
+        {/* Instagram Reels Section */}
+        <ErrorBoundary>
+          <InstagramReels />
         </ErrorBoundary>
         
         {/* Google Reviews Section - Full Screen */}

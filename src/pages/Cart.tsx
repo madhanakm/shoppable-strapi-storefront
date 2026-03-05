@@ -15,6 +15,7 @@ import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-se
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import { getStateShippingRates } from '@/services/state-shipping';
 import { calculateShipping, calculateShippingSync } from '@/lib/shipping';
+import RelatedProducts from '@/components/RelatedProducts';
 
 
 const Cart = () => {
@@ -301,6 +302,9 @@ const Cart = () => {
               </Button>
             </Link>
           </div>
+
+          {/* Related Products */}
+          <RelatedProducts />
         </div>
       </main>
       <Footer />
