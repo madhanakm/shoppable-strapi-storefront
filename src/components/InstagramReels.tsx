@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ShoppingCart, Instagram, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingCart, ChevronLeft, ChevronRight, Play, X } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import { getPriceByUserType, getVariablePriceRange } from '@/lib/pricing';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +15,7 @@ interface InstaPost {
     product_id: string;
     status: boolean;
     videoFile?: any;
+    thumbnailUrl?: string;
   };
 }
 
@@ -34,6 +35,8 @@ const InstagramReels = () => {
   const [posts, setPosts] = useState<InstaPost[]>([]);
   const [products, setProducts] = useState<{ [key: number]: Product }>({});
   const [loading, setLoading] = useState(true);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentVideo, setCurrentVideo] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { language, translate } = useTranslation();
@@ -183,31 +186,91 @@ const InstagramReels = () => {
     }
   };
 
-  const getEmbedUrl = (instaLink: string) => {
-    // Extract video ID from Instagram link
-    let videoId = '';
+  const getYouTubeVideoId = (url: string) => {
+    const patterns = [
+      /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]+)/,
+      /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/,
+      /(?:youtu\.be\/)([a-zA-Z0-9_-]+)/
+    ];
     
-    if (instaLink.includes('/reel/')) {
-      videoId = instaLink.split('/reel/')[1]?.split('/')[0]?.split('?')[0];
-    } else if (instaLink.includes('/p/')) {
-      videoId = instaLink.split('/p/')[1]?.split('/')[0]?.split('?')[0];
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) return match[1];
     }
-    
-    if (videoId) {
-      return `https://www.instagram.com/p/${videoId}/embed/captioned`;
-    }
-    
-    return instaLink;
+    return null;
+  };
+
+  const getYouTubeThumbnail = (videoId: string) => {
+    return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  };
+
+  const openLightbox = (videoUrl: string) => {
+    setCurrentVideo(videoUrl);
+    setLightboxOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    setCurrentVideo(null);
   };
 
   if (loading) {
     return (
       <section className="py-8 md:py-12 bg-gradient-to-br from-pink-50 via-white to-purple-50">
         <div className="container mx-auto px-4">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
+          {/* Loading Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full mb-4 animate-pulse">
+              <Play className="w-6 h-6 md:w-8 md:h-8 text-white" />
+            </div>
+            <div className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-64 mx-auto mb-2 animate-pulse"></div>
+            <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-48 mx-auto animate-pulse"></div>
           </div>
         </div>
+
+        {/* Loading Slider Cards */}
+        <div className="relative">
+          <div className="overflow-hidden">
+            <div className="flex gap-4 md:gap-6 pb-4 px-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div 
+                  key={i} 
+                  className="flex-shrink-0 w-[240px] md:w-[280px] bg-white shadow-lg rounded-lg overflow-hidden"
+                >
+                  {/* Video Skeleton with shimmer effect */}
+                  <div className="relative w-full h-[350px] md:h-[400px] bg-gradient-to-br from-gray-200 via-gray-300 to-gray-200 overflow-hidden">
+                    <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-16 h-16 bg-gray-400/50 rounded-full flex items-center justify-center animate-pulse">
+                        <Play className="w-8 h-8 text-gray-300" />
+                      </div>
+                    </div>
+                  </div>
+                  {/* Product Info Skeleton */}
+                  <div className="p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 rounded-full bg-gray-300 animate-pulse"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+                        <div className="h-4 bg-gray-300 rounded w-1/2 animate-pulse" style={{ animationDelay: '150ms' }}></div>
+                      </div>
+                    </div>
+                    <div className="h-8 bg-gray-300 rounded mb-3 w-1/2 animate-pulse" style={{ animationDelay: '300ms' }}></div>
+                    <div className="h-10 bg-gradient-to-r from-red-300 to-red-400 rounded animate-pulse" style={{ animationDelay: '450ms' }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes shimmer {
+            100% {
+              transform: translateX(100%);
+            }
+          }
+        `}</style>
       </section>
     );
   }
@@ -221,10 +284,10 @@ const InstagramReels = () => {
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full mb-4">
-            <Instagram className="w-6 h-6 md:w-8 md:h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full mb-4">
+            <Play className="w-6 h-6 md:w-8 md:h-8 text-white" />
           </div>
-          <h2 className={`text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mb-2 ${isTamil ? 'tamil-text' : ''}`}>
+          <h2 className={`text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent mb-2 ${isTamil ? 'tamil-text' : ''}`}>
             {isTamil ? 'விளம்பர வீடியோக்கள்' : 'Featured Videos'}
           </h2>
           <p className={`text-gray-600 text-sm md:text-base ${isTamil ? 'tamil-text' : ''}`}>
@@ -268,44 +331,43 @@ const InstagramReels = () => {
                     key={post.id} 
                     className="flex-shrink-0 w-[240px] md:w-[280px] bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
                   >
-                    {/* Video/Instagram */}
+                    {/* YouTube Shorts Thumbnail */}
                     <div className="relative w-full h-[350px] md:h-[400px] bg-gray-900">
-                      {post.attributes.videoFile?.data?.attributes?.url ? (
-                        <video 
-                          className="w-full h-full object-cover"
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                        >
-                          <source src={post.attributes.videoFile.data.attributes.url} type="video/mp4" />
-                        </video>
-                      ) : (
-                        <a 
-                          href={post.attributes.instaLink} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="absolute inset-0 flex items-center justify-center group"
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                          <div className="relative z-10 text-center">
-                            <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center mb-3 mx-auto group-hover:scale-110 transition-transform">
-                              <svg className="w-8 h-8 text-pink-500" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z"/>
-                              </svg>
-                            </div>
-                            <p className="text-white font-semibold text-sm">Watch on Instagram</p>
+                      {(() => {
+                        const videoId = getYouTubeVideoId(post.attributes.instaLink);
+                        if (videoId) {
+                          return (
+                            <button
+                              onClick={() => openLightbox(post.attributes.instaLink)}
+                              className="absolute inset-0 flex items-center justify-center group cursor-pointer w-full h-full"
+                            >
+                              <img 
+                                src={getYouTubeThumbnail(videoId)} 
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src = product.image || 'https://via.placeholder.com/400x450?text=Video';
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+                                  <Play className="w-8 h-8 text-white ml-1" fill="white" />
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        }
+                        return (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <img 
+                              src={product.image || 'https://via.placeholder.com/400x450?text=Video'} 
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
                           </div>
-                          <img 
-                            src={product.image || 'https://via.placeholder.com/400x450?text=Video'} 
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src = 'https://via.placeholder.com/400x450?text=Video';
-                            }}
-                          />
-                        </a>
-                      )}
+                        );
+                      })()}
                     </div>
 
                     {/* Product Info */}
@@ -341,6 +403,41 @@ const InstagramReels = () => {
           </div>
         </div>
       </div>
+
+      {/* Lightbox */}
+      {lightboxOpen && currentVideo && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={closeLightbox}
+        >
+          <button
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 z-50 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+          <div 
+            className="relative w-full max-w-[400px] aspect-[9/16] bg-black"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {(() => {
+              const videoId = getYouTubeVideoId(currentVideo);
+              if (videoId) {
+                return (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+                    className="w-full h-full"
+                    allow="autoplay; encrypted-media"
+                    allowFullScreen
+                  />
+                );
+              }
+              return null;
+            })()}
+          </div>
+        </div>
+      )}
     </section>
   );
 };

@@ -6,12 +6,9 @@ const ImageSlider = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch slider images from API with status filter
     fetch('https://api.dharaniherbbals.com/api/sliders?filters[status][$eq]=true')
       .then(response => response.json())
       .then(data => {
-        // Process slider data
-        
         let slidesData = [];
         if (Array.isArray(data)) {
           slidesData = data.filter(item => item.status === true);
@@ -28,13 +25,10 @@ const ImageSlider = () => {
               description: item.attributes?.description || item.description
             }));
         }
-        
-        // Set slides data
         setSlides(slidesData);
         setLoading(false);
       })
       .catch(error => {
-        // Handle slider fetch error
         setLoading(false);
       });
   }, []);
@@ -44,7 +38,6 @@ const ImageSlider = () => {
       const interval = setInterval(() => {
         setCurrentSlide(prev => (prev + 1) % slides.length);
       }, 5000);
-      
       return () => clearInterval(interval);
     }
   }, [slides.length]);
@@ -54,7 +47,33 @@ const ImageSlider = () => {
   };
 
   if (loading) {
-    return <div className="h-[250px] sm:h-[400px] md:h-[800px] bg-gray-100 flex items-center justify-center">Loading slider...</div>;
+    return (
+      <div className="relative h-[250px] sm:h-[400px] md:h-[800px] bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 overflow-hidden">
+        <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+        <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8">
+          <div className="space-y-3 md:space-y-4 max-w-2xl">
+            <div className="h-6 sm:h-8 md:h-10 bg-gray-300/60 rounded-lg w-3/4 animate-pulse"></div>
+            <div className="h-4 sm:h-5 md:h-6 bg-gray-300/60 rounded-lg w-1/2 animate-pulse" style={{ animationDelay: '200ms' }}></div>
+          </div>
+        </div>
+        <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 flex justify-center space-x-2 sm:space-x-3">
+          {[1, 2, 3].map((i) => (
+            <div 
+              key={i} 
+              className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-white/50 rounded-full animate-pulse"
+              style={{ animationDelay: `${i * 150}ms` }}
+            />
+          ))}
+        </div>
+        <style>{`
+          @keyframes shimmer {
+            100% {
+              transform: translateX(100%);
+            }
+          }
+        `}</style>
+      </div>
+    );
   }
 
   if (slides.length === 0) {
@@ -63,9 +82,7 @@ const ImageSlider = () => {
 
   return (
     <div className="relative w-full h-[250px] sm:h-[400px] md:h-[800px] overflow-hidden shadow-2xl isolate">
-      {/* Background overlay for better contrast */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10"></div>
-      
       {slides.map((slide, index) => (
         <div
           key={slide.id || index}
@@ -81,7 +98,6 @@ const ImageSlider = () => {
               alt={slide.title || `Slide ${index + 1}`}
               className="w-full h-full object-cover object-center transition-transform duration-1000 hover:scale-105"
               onError={(e) => {
-                // Handle image loading error
                 e.target.src = 'https://via.placeholder.com/1200x400?text=Image+Not+Available';
               }}
             />
@@ -102,8 +118,6 @@ const ImageSlider = () => {
           )}
         </div>
       ))}
-      
-      {/* Navigation dots */}
       <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 flex justify-center space-x-2 sm:space-x-3 z-20">
         {slides.map((_, index) => (
           <button
