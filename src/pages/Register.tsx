@@ -71,8 +71,10 @@ const Register = () => {
         setUserId(result.userId);
         setStep(2);
         toast({
-          title: "Registration Successful",
-          description: "Please verify your phone number with the OTP sent to you.",
+          title: result.message || "Registration Successful",
+          description: result.message === 'OTP resent to your mobile number' 
+            ? "Please verify your phone number with the OTP sent to you." 
+            : "Please verify your phone number with the OTP sent to you.",
         });
       } else {
         toast({

@@ -18,6 +18,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [resetFlow, setResetFlow] = useState(false);
+  const [otpVerificationFlow, setOtpVerificationFlow] = useState(false);
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [userId, setUserId] = useState<number | null>(null);
@@ -49,8 +50,19 @@ const Login = () => {
     try {
       const result = await login(email, password);
       
+      // Check if user needs OTP verification
+      if (result && typeof result === 'object' && 'requireOTPVerification' in result && result.requireOTPVerification) {
+        setUserId(result.userId);
+        setUserPhone(result.phone);
+        setOtpVerificationFlow(true);
+        
+        toast({
+          title: "Account Not Verified",
+          description: "Please verify your account with the OTP sent to your phone.",
+        });
+      }
       // Check if this is a migrated user that needs password reset
-      if (result && typeof result === 'object' && result.requirePasswordReset) {
+      else if (result && typeof result === 'object' && 'requirePasswordReset' in result && result.requirePasswordReset) {
         // Start password reset flow
         setUserId(result.userId);
         setUserPhone(result.phone);
@@ -86,6 +98,45 @@ const Login = () => {
       toast({
         title: "Error",
         description: "An error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleOTPVerification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      if (!userId) {
+        throw new Error("User ID is missing");
+      }
+      
+      // Verify OTP
+      const otpVerified = await verifyOTP(userId, userPhone, otp);
+      
+      if (otpVerified) {
+        toast({
+          title: "Account Verified",
+          description: "Your account has been verified successfully. Please login again.",
+        });
+        
+        // Reset to login form
+        setOtpVerificationFlow(false);
+        setOtp('');
+      } else {
+        toast({
+          title: "Invalid OTP",
+          description: "The OTP you entered is incorrect or expired.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to verify OTP. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -181,7 +232,61 @@ const Login = () => {
             </CardHeader>
             
             <CardContent className="p-8 md:p-10">
-              {!resetFlow ? (
+              {otpVerificationFlow ? (
+                <form onSubmit={handleOTPVerification} className="space-y-6">
+                  <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                    <p className="text-blue-800 text-sm">
+                      Your account is not verified. We've sent an OTP to your phone number ending with {userPhone.slice(-4)}. Please verify to continue.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="otp" className="text-sm font-medium text-gray-700 mb-2 block">
+                      Enter OTP
+                    </Label>
+                    <Input
+                      id="otp"
+                      type="text"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      required
+                      placeholder="Enter 6-digit OTP"
+                      className="h-12 border-gray-200 focus:border-primary focus:ring-primary/20 text-center text-lg tracking-widest transition-all"
+                      maxLength={6}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={handleResendOTP}
+                      className="text-sm text-primary mt-2 hover:underline"
+                    >
+                      Resend OTP
+                    </button>
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    disabled={isLoading} 
+                    className="w-full h-12 bg-gradient-to-r from-primary to-green-500 hover:from-primary/90 hover:to-green-600 shadow-lg text-lg font-semibold transition-all"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Verifying...
+                      </>
+                    ) : (
+                      "Verify Account"
+                    )}
+                  </Button>
+                  
+                  <button 
+                    type="button" 
+                    onClick={() => setOtpVerificationFlow(false)}
+                    className="w-full text-center text-sm text-gray-600 hover:text-gray-800 mt-4"
+                  >
+                    Back to Login
+                  </button>
+                </form>
+              ) : !resetFlow ? (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 block">

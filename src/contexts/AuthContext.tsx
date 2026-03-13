@@ -7,8 +7,8 @@ import { generateOTP } from '@/services/sms';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean | { requirePasswordReset: boolean; userId: number; phone: string }>;
-  register: (name: string, email: string, mobile: string, password: string) => Promise<{ success: boolean; userId?: number }>;
+  login: (email: string, password: string) => Promise<boolean | { requirePasswordReset: boolean; userId: number; phone: string } | { requireOTPVerification: boolean; userId: number; phone: string }>;
+  register: (name: string, email: string, mobile: string, password: string) => Promise<{ success: boolean; userId?: number; message?: string }>;
   verifyOTP: (userId: number, mobile: string, otp: string) => Promise<boolean>;
   resendOTP: (mobile: string) => Promise<boolean>;
   logout: () => void;
@@ -103,7 +103,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     validateUser();
   }, []);
 
-  const login = async (identifier: string, password: string): Promise<boolean | { requirePasswordReset: boolean; userId: number; phone: string }> => {
+  const login = async (identifier: string, password: string): Promise<boolean | { requirePasswordReset: boolean; userId: number; phone: string } | { requireOTPVerification: boolean; userId: number; phone: string }> => {
     try {
       setLoading(true);
       
@@ -133,15 +133,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           };
         }
         
-        // Normal login flow for users with passwords
-        if (user.attributes.password === password && user.attributes.isVerified) {
-          // Store user info for session
+        // Check if password matches
+        if (user.attributes.password === password) {
+          // Check if user is verified
+          if (!user.attributes.isVerified) {
+            // User not verified, send OTP and ask for verification
+            const otp = generateOTP();
+            const otpExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+            
+            await updateEcomUser(user.id, { otp, otpExpiresAt });
+            
+            try {
+              await sendOTPViaSMS(user.attributes.phone, otp);
+            } catch (smsError) {
+              // SMS sending failed but continue
+            }
+            
+            return {
+              requireOTPVerification: true,
+              userId: user.id,
+              phone: user.attributes.phone
+            };
+          }
+          
+          // User verified, proceed with login
           const userData = {
             id: user.id,
             username: user.attributes.name,
             email: user.attributes.email,
             phone: user.attributes.phone,
-            userType: user.attributes.userType || 'customer' // Store user type, default to customer
+            userType: user.attributes.userType || 'customer'
           };
           
           const loginData = {
@@ -176,22 +197,76 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const register = async (name: string, email: string, mobile: string, password: string): Promise<{ success: boolean; userId?: number; message?: string }> => {
+    console.log('Register function called with:', { name, email, mobile });
     try {
       setLoading(true);
       
       // Check if email already exists
+      console.log('Checking email...');
       const emailResponse = await fetch(`https://api.dharaniherbbals.com/api/ecom-users?filters[email][$eq]=${email}`);
       const emailData = await emailResponse.json();
+      console.log('Email check result:', emailData);
       if (emailData.data && emailData.data.length > 0) {
-        return { success: false, message: 'Email address already exists' };
+        const existingUser = emailData.data[0];
+        console.log('Email exists, checking verification status:', existingUser.attributes.isVerified);
+        
+        // If user exists but not verified, resend OTP and allow to continue
+        if (!existingUser.attributes.isVerified) {
+          console.log('User not verified, resending OTP');
+          const otp = generateOTP();
+          const otpExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+          
+          // Update existing user with new OTP and password
+          await updateEcomUser(existingUser.id, { otp, otpExpiresAt, password });
+          
+          // Send SMS
+          try {
+            await sendOTPViaSMS(existingUser.attributes.phone, otp);
+          } catch (smsError) {
+            console.error('SMS send error:', smsError);
+          }
+          
+          console.log('Returning success with userId:', existingUser.id);
+          return { success: true, userId: existingUser.id, message: 'Account not verified. OTP has been resent to your mobile number.' };
+        }
+        
+        console.log('Email already exists and verified');
+        return { success: false, message: 'Email address already exists and is verified. Please login instead.' };
       }
       
       // Check if phone already exists
+      console.log('Checking phone...');
       const phoneResponse = await getEcomUserByPhone(mobile);
+      console.log('Phone check response:', phoneResponse);
       if (phoneResponse.data && phoneResponse.data.length > 0) {
-        return { success: false, message: 'Mobile number already exists' };
+        const existingUser = phoneResponse.data[0];
+        console.log('Existing user found:', { id: existingUser.id, isVerified: existingUser.attributes.isVerified });
+        
+        // If user exists but not verified, resend OTP and allow to continue
+        if (!existingUser.attributes.isVerified) {
+          console.log('User not verified, resending OTP');
+          const otp = generateOTP();
+          const otpExpiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+          
+          // Update existing user with new OTP and password
+          await updateEcomUser(existingUser.id, { otp, otpExpiresAt, password });
+          
+          // Send SMS
+          try {
+            await sendOTPViaSMS(mobile, otp);
+          } catch (smsError) {
+            console.error('SMS send error:', smsError);
+          }
+          
+          console.log('Returning success with userId:', existingUser.id);
+          return { success: true, userId: existingUser.id, message: 'Account not verified. OTP has been resent to your mobile number.' };
+        }
+        
+        console.log('User already verified');
+        return { success: false, message: 'Mobile number already exists and is verified. Please login instead.' };
       }
       
+      console.log('Creating new user...');
       const otp = generateOTP();
       
       // Create user with OTP
@@ -206,25 +281,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isVerified: false
       };
       
-      // Creating user with data
-      // console.log('Creating user with data:', { ...userData, password: '[HIDDEN]' });
-      
       const userResponse = await createEcomUser(userData);
-      
-      
-      // Log OTP for testing
-      
+      console.log('User created:', userResponse.data.id);
       
       // Send SMS
       try {
         await sendOTPViaSMS(mobile, otp);
       } catch (smsError) {
-        // SMS sending failed
+        console.error('SMS send error:', smsError);
       }
       
       return { success: true, userId: userResponse.data.id };
     } catch (error) {
-      
+      console.error('Register error:', error);
       return { success: false, message: 'Registration failed. Please try again.' };
     } finally {
       setLoading(false);
