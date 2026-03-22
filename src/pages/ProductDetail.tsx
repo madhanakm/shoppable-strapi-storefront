@@ -1339,16 +1339,16 @@ const ProductDetail = () => {
                           {/* Hover overlay effect */}
                           <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-300 z-10"></div>
                           
-                          <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-white p-4">
+                          <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-white">
                             {productImage ? (
                               <img 
                                 src={productImage} 
                                 alt={relatedProduct.attributes?.Name || 'Product'} 
-                                className="w-full h-48 object-contain group-hover:scale-110 transition-transform duration-500 rounded-xl"
+                                className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                                 loading="lazy"
                               />
                             ) : (
-                              <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl">
+                              <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                                 <span className={`text-gray-400 text-sm ${isTamil ? 'tamil-text' : ''}`}>{translate('product.noImageAvailable')}</span>
                               </div>
                             )}

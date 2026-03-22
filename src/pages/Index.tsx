@@ -11,6 +11,7 @@ import ProductBlocks from '@/components/ProductBlocks';
 import SimpleGoogleReviews from '@/components/SimpleGoogleReviews';
 import FloatingCart from '@/components/FloatingCart';
 import InstagramReels from '@/components/InstagramReels';
+import BestSellingProducts from '@/components/BestSellingProducts';
 
 const Index = () => {
   const { translate, language } = useTranslation();
@@ -92,9 +93,14 @@ const Index = () => {
           </div>
         </ErrorBoundary>
         
+        {/* Best Selling Products Section */}
+        <ErrorBoundary>
+          <BestSellingProducts />
+        </ErrorBoundary>
+        
         {/* Hero Section */}
         <ErrorBoundary>
-          <div className="relative -mt-16 z-10">
+          <div className="relative z-10">
             <Hero />
           </div>
         </ErrorBoundary>

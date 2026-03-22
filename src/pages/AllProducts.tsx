@@ -397,7 +397,7 @@ const AllProducts = () => {
                 <div>
                   <h3 className="font-bold text-lg mb-4 text-gray-800 border-b border-gray-200 pb-2">Product Types</h3>
                   <div className="space-y-3">
-                    {['all', 'deals', 'trending', 'hot', 'popular'].map((type) => (
+                    {['all', 'Best Selling', 'deals', 'trending', 'hot', 'popular'].map((type) => (
                       <label key={type} className="flex items-center cursor-pointer group">
                         <input
                           type="radio"
@@ -412,11 +412,13 @@ const AllProducts = () => {
                           {type === 'all' ? 'All Types' : type}
                           {type !== 'all' && (
                             <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
+                              type === 'Best Selling' ? 'bg-orange-100 text-orange-600' :
                               type === 'deals' ? 'bg-purple-100 text-purple-600' :
                               type === 'trending' ? 'bg-blue-100 text-blue-600' :
                               type === 'hot' ? 'bg-red-100 text-red-600' :
                               type === 'popular' ? 'bg-green-100 text-green-600' : ''
                             }`}>
+                              {type === 'Best Selling' ? '🔥' : ''}
                               {type.charAt(0).toUpperCase() + type.slice(1)}
                             </span>
                           )}
