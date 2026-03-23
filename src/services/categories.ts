@@ -12,7 +12,17 @@ export const getCategories = async (): Promise<StrapiResponse<Category>> => {
  * Get product categories with images
  */
 export const getProductCategories = async () => {
-  return get('/product-categories');
+  return get('/product-categories?populate=*');
+};
+
+/**
+ * Get active menu categories (menuItem: true)
+ */
+export const getActiveMenuCategories = async () => {
+  return get('/product-categories', {
+    'filters[menuItem][$eq]': 'true',
+    'populate': '*'
+  });
 };
 
 /**

@@ -253,7 +253,7 @@ const BestSellingProducts = () => {
               {/* Product Info */}
               <CardContent className="p-4">
                 <Link to={`/product/${product.id}`}>
-                  <h3 className={`font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors uppercase text-sm md:text-base ${isTamil ? 'tamil-text' : ''}`}>
+                  <h3 className={`font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors uppercase text-xs md:text-sm ${isTamil ? 'tamil-text' : ''}`}>
                     {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
                   </h3>
                 </Link>
