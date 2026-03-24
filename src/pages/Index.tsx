@@ -11,7 +11,9 @@ import ProductBlocks from '@/components/ProductBlocks';
 import SimpleGoogleReviews from '@/components/SimpleGoogleReviews';
 import FloatingCart from '@/components/FloatingCart';
 import InstagramReels from '@/components/InstagramReels';
+import NewLaunchProducts from '@/components/NewLaunchProducts';
 import BestSellingProducts from '@/components/BestSellingProducts';
+import OurStorySection from '@/components/OurStorySection';
 
 const Index = () => {
   const { translate, language } = useTranslation();
@@ -93,6 +95,11 @@ const Index = () => {
           </div>
         </ErrorBoundary>
         
+        {/* New Launch Products Section */}
+        <ErrorBoundary>
+          <NewLaunchProducts />
+        </ErrorBoundary>
+        
         {/* Best Selling Products Section */}
         <ErrorBoundary>
           <BestSellingProducts />
@@ -137,6 +144,11 @@ const Index = () => {
               <ProductBlocks />
             </div>
           </div>
+        </ErrorBoundary>
+        
+        {/* Our Story Section */}
+        <ErrorBoundary>
+          <OurStorySection />
         </ErrorBoundary>
         
         {/* Trust Indicators */}

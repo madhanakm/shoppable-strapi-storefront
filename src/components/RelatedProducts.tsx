@@ -123,65 +123,113 @@ const RelatedProducts = () => {
   }
 
   return (
-    <div className="mt-16 bg-white p-8 rounded-lg shadow-lg">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className={`text-2xl md:text-3xl font-bold text-gray-800 mb-2 ${isTamil ? 'tamil-text' : ''}`}>
-            {isTamil ? 'தொடர்புடைய தயாரிப்புகள்' : 'You May Also Like'}
-          </h2>
-          <p className={`text-gray-600 ${isTamil ? 'tamil-text' : ''}`}>
-            {isTamil ? 'இந்த தயாரிப்புகளையும் பாருங்கள்' : 'Check out these products'}
+    <section className="mt-16 bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-20 left-20 w-40 h-40 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-full blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
+      <div className="container mx-auto px-4 py-16 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-3 mb-6">
+            <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl shadow-xl animate-bounce">
+              <ShoppingCart className="w-8 h-8 text-white" />
+            </div>
+            <h2 className={`text-3xl md:text-4xl lg:text-5xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
+              {isTamil ? 'நீங்கள் விரும்பக்கூடியவை' : 'You May Also Like'}
+            </h2>
+          </div>
+          <p className={`text-lg text-gray-600 max-w-2xl mx-auto ${isTamil ? 'tamil-text' : ''}`}>
+            {isTamil ? 'உங்கள் கூடையில் சேர்க்க இந்த அற்புதமான தயாரிப்புகளையும் பாருங்கள்' : 'Complete your wellness journey with these amazing products'}
           </p>
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+            <div className="w-20 h-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></div>
+            <div className="w-12 h-1 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full"></div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4">
-        {products.map((product) => {
-          const price = getProductPrice(product);
-          const isRange = typeof price === 'object' && price.minPrice !== undefined;
+        {/* Products Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+          {products.map((product, index) => {
+            const price = getProductPrice(product);
+            const isRange = typeof price === 'object' && price.minPrice !== undefined;
 
-          return (
-            <Card key={product.id} className="group hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-3">
-                <Link to={`/product/${product.id}`}>
-                  <div className="aspect-square bg-white rounded-lg overflow-hidden mb-2">
+            return (
+              <Card 
+                key={product.id} 
+                className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-2 border-transparent hover:border-blue-200 bg-white rounded-3xl hover:-translate-y-3 hover:rotate-1"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                {/* Product Image */}
+                <div className="relative overflow-hidden rounded-t-3xl bg-gradient-to-br from-blue-50 via-white to-purple-50">
+                  <Link to={`/product/${product.id}`} className="block cursor-pointer">
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => {
-                        e.currentTarget.src = 'https://via.placeholder.com/150x150?text=Product';
+                        e.currentTarget.src = 'https://via.placeholder.com/300x300?text=Product';
                       }}
                     />
+                  </Link>
+                  
+                  {/* Floating Badge */}
+                  <div className="absolute top-3 right-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-pulse">
+                    ✨ New
                   </div>
-                </Link>
+                  
+                  {/* Overlay on Hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                </div>
                 
-                <Link to={`/product/${product.id}`}>
-                  <h3 className={`font-semibold text-xs mb-1 line-clamp-2 hover:text-primary transition-colors uppercase ${isTamil ? 'tamil-text' : ''}`}>
-                    {product.name}
-                  </h3>
-                </Link>
-                
-                <p className="text-sm font-bold text-primary mb-2">
-                  {isRange ? `${formatPrice(price.minPrice)} - ${formatPrice(price.maxPrice)}` : formatPrice(price)}
-                </p>
-                
-                <Button
-                  size="sm"
-                  className="w-full text-xs py-1 h-7"
-                  onClick={() => handleAddToCart(product)}
-                >
-                  <ShoppingCart className="w-3 h-3 mr-1" />
-                  <span className={isTamil ? 'tamil-text' : ''}>
-                    {isTamil ? 'சேர்' : 'Add'}
-                  </span>
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
+                <CardContent className="p-4 bg-white">
+                  <Link to={`/product/${product.id}`}>
+                    <h3 className={`font-bold text-sm mb-3 line-clamp-2 hover:text-blue-600 transition-colors uppercase leading-tight min-h-[2.5rem] ${isTamil ? 'tamil-text' : ''}`}>
+                      {product.name}
+                    </h3>
+                  </Link>
+                  
+                  <div className="mb-4">
+                    <p className="text-lg font-black text-blue-600">
+                      {isRange ? `${formatPrice(price.minPrice)} - ${formatPrice(price.maxPrice)}` : formatPrice(price)}
+                    </p>
+                  </div>
+                  
+                  <Button
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl py-2 font-semibold transform hover:scale-105"
+                    onClick={() => handleAddToCart(product)}
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    <span className={isTamil ? 'tamil-text' : ''}>
+                      {isTamil ? 'கூடையில் சேர்' : 'Add to Cart'}
+                    </span>
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* View More Button */}
+        <div className="text-center mt-12">
+          <Link to="/products">
+            <Button 
+              size="lg"
+              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-xl hover:shadow-2xl transition-all px-8 py-4 text-lg font-bold rounded-2xl transform hover:scale-105"
+            >
+              <span className={isTamil ? 'tamil-text' : ''}>
+                {isTamil ? 'மேலும் தயாரிப்புகள் பார்க்க' : 'Explore More Products'}
+              </span>
+              <ShoppingCart className="w-5 h-5 ml-2" />
+            </Button>
+          </Link>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

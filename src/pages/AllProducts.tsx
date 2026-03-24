@@ -81,6 +81,7 @@ const AllProducts = () => {
   useEffect(() => {
     const categoryParam = searchParams.get('category');
     const typeParam = searchParams.get('type');
+    const newLaunchParam = searchParams.get('newLaunch');
     const searchParam = searchParams.get('search') || '';
     
     let hasChanges = false;
@@ -91,6 +92,10 @@ const AllProducts = () => {
     }
     if (typeParam && typeParam !== selectedType) {
       setSelectedType(typeParam);
+      hasChanges = true;
+    }
+    if (newLaunchParam === 'true' && selectedType !== 'newLaunch') {
+      setSelectedType('newLaunch');
       hasChanges = true;
     }
     if (searchParam !== searchQuery) {
@@ -397,7 +402,7 @@ const AllProducts = () => {
                 <div>
                   <h3 className="font-bold text-lg mb-4 text-gray-800 border-b border-gray-200 pb-2">Product Types</h3>
                   <div className="space-y-3">
-                    {['all', 'Best Selling', 'deals', 'trending', 'hot', 'popular'].map((type) => (
+                    {['all', 'newLaunch', 'Best Selling', 'deals', 'trending', 'hot', 'popular'].map((type) => (
                       <label key={type} className="flex items-center cursor-pointer group">
                         <input
                           type="radio"
@@ -409,17 +414,19 @@ const AllProducts = () => {
                         <span className={`ml-3 text-sm font-medium capitalize group-hover:text-primary transition-colors ${
                           selectedType === type ? 'text-primary font-semibold' : 'text-gray-700'
                         }`}>
-                          {type === 'all' ? 'All Types' : type}
+                          {type === 'all' ? 'All Types' : 
+                           type === 'newLaunch' ? 'New Launch' : type}
                           {type !== 'all' && (
                             <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
+                              type === 'newLaunch' ? 'bg-blue-100 text-blue-600' :
                               type === 'Best Selling' ? 'bg-orange-100 text-orange-600' :
                               type === 'deals' ? 'bg-purple-100 text-purple-600' :
                               type === 'trending' ? 'bg-blue-100 text-blue-600' :
                               type === 'hot' ? 'bg-red-100 text-red-600' :
                               type === 'popular' ? 'bg-green-100 text-green-600' : ''
                             }`}>
-                              {type === 'Best Selling' ? '🔥' : ''}
-                              {type.charAt(0).toUpperCase() + type.slice(1)}
+                              {type === 'newLaunch' ? '✨' : type === 'Best Selling' ? '🔥' : ''}
+                              {type === 'newLaunch' ? 'New' : type.charAt(0).toUpperCase() + type.slice(1)}
                             </span>
                           )}
                         </span>

@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { useAuth } from './AuthContext';
 import { saveCartToAPI, loadCartFromAPI } from '@/services/cart';
 import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { ShoppingCart } from 'lucide-react';
 
 interface CartItem {
   productId: string;
@@ -97,6 +99,16 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         toast({
           title: "Updated Cart",
           description: "Product quantity updated in cart",
+          action: (
+            <Button 
+              size="sm" 
+              onClick={() => window.location.href = '/cart'}
+              className="bg-primary hover:bg-primary/90 text-white"
+            >
+              <ShoppingCart className="w-4 h-4 mr-1" />
+              View Cart
+            </Button>
+          ),
         });
         
         if (typeof window !== 'undefined' && window.fbq && price) {
@@ -133,6 +145,16 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       toast({
         title: "Added to Cart",
         description: "Product added to cart successfully",
+        action: (
+          <Button 
+            size="sm" 
+            onClick={() => window.location.href = '/cart'}
+            className="bg-primary hover:bg-primary/90 text-white"
+          >
+            <ShoppingCart className="w-4 h-4 mr-1" />
+            View Cart
+          </Button>
+        ),
       });
       
       if (typeof window !== 'undefined' && window.fbq && price) {

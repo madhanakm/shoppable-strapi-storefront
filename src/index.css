@@ -147,6 +147,30 @@
   }
 }
 
+@keyframes wobble {
+  0%, 70% {
+    transform: translateX(0px);
+  }
+  72% {
+    transform: translateX(-16px);
+  }
+  76% {
+    transform: translateX(16px);
+  }
+  80% {
+    transform: translateX(-16px);
+  }
+  84% {
+    transform: translateX(16px);
+  }
+  88% {
+    transform: translateX(-8px);
+  }
+  92%, 100% {
+    transform: translateX(0px);
+  }
+}
+
 .animate-fade-in-up {
   animation: fade-in-up 0.8s ease-out;
 }
@@ -161,6 +185,10 @@
 
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-wobble {
+  animation: wobble 2s ease-in-out infinite;
 }
 
 /* Smooth scrolling */

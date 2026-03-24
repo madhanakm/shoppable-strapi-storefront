@@ -38,62 +38,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const validateUser = async () => {
       const storedUser = localStorage.getItem('user');
-      const loginTime = localStorage.getItem('loginTime');
       
-      
-      
-      if (storedUser && loginTime) {
-        try {
-          const loginTimestamp = parseInt(loginTime);
-          const currentTime = Date.now();
-          const fifteenDays = 15 * 24 * 60 * 60 * 1000; // 15 days in milliseconds
-          
-          
-          
-          if (currentTime - loginTimestamp < fifteenDays) {
-            const userData = JSON.parse(storedUser);
-            
-            // Validate user still exists in API
-            try {
-              const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
-              if (response.ok) {
-                const result = await response.json();
-                if (result.data) {
-                  // User validated, restoring session
-                  setUser(userData);
-                } else {
-                  
-                  localStorage.removeItem('user');
-                  localStorage.removeItem('loginTime');
-                }
-              } else {
-                
-                localStorage.removeItem('user');
-                localStorage.removeItem('loginTime');
-              }
-            } catch (apiError) {
-              // User validation error, keeping session
-              setUser(userData);
-            }
-          } else {
-            
-            localStorage.removeItem('user');
-            localStorage.removeItem('loginTime');
-          }
-        } catch (error) {
-          
-          localStorage.removeItem('user');
-          localStorage.removeItem('loginTime');
-        }
-      } else if (storedUser) {
-        // Handle old sessions without loginTime
+      if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
           
-          localStorage.setItem('loginTime', Date.now().toString());
-          setUser(userData);
+          // Only validate if user data has required fields
+          if (userData.id && userData.username && userData.email) {
+            setUser(userData);
+          } else {
+            // Invalid user data, clear storage
+            localStorage.removeItem('user');
+            localStorage.removeItem('loginTime');
+            localStorage.removeItem('lastActivity');
+          }
         } catch (error) {
+          // JSON parse error, clear corrupted data
           localStorage.removeItem('user');
+          localStorage.removeItem('loginTime');
+          localStorage.removeItem('lastActivity');
         }
       }
       
@@ -156,7 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             };
           }
           
-          // User verified, proceed with login
+          // Store user data permanently (no expiry)
           const userData = {
             id: user.id,
             username: user.attributes.name,
@@ -165,13 +128,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             userType: user.attributes.userType || 'customer'
           };
           
-          const loginData = {
-            user: JSON.stringify(userData),
-            loginTime: Date.now().toString()
-          };
-          
-          localStorage.setItem('user', loginData.user);
-          localStorage.setItem('loginTime', loginData.loginTime);
+          localStorage.setItem('user', JSON.stringify(userData));
           setUser(userData as any);
           
           // Send user data to Meta Pixel
@@ -352,10 +309,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 
   const logout = () => {
-    
     localStorage.removeItem('jwt');
     localStorage.removeItem('user');
-    localStorage.removeItem('loginTime');
+    localStorage.removeItem('loginTime'); // Clean up old timestamp if exists
+    localStorage.removeItem('lastActivity'); // Clean up old timestamp if exists
     // Clear guest data as well
     localStorage.removeItem('cart');
     localStorage.removeItem('wishlist');

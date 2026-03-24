@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SEOHead from '@/components/SEOHead';
@@ -22,7 +22,7 @@ import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-se
 import { calculateShipping, calculateShippingSync } from '@/lib/shipping';
 import { getStateShippingRates } from '@/services/state-shipping';
 import { deleteAddress } from '@/services/profile';
-import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package, Plus, Trash2 } from 'lucide-react';
+import { CreditCard, MapPin, User, Phone, Mail, ShieldCheck, ArrowRight, Package, Plus, Trash2, AlertTriangle } from 'lucide-react';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { recoverPendingPayments } from '@/services/payment-recovery';
 import { canPlaceCreditOrder, placeCreditOrder } from '@/services/credit-orders';
@@ -68,6 +68,82 @@ const Checkout = () => {
   const [shippingInfo, setShippingInfo] = useState({ charges: 0, isFree: false, isTamilNadu: false, freeShippingThreshold: 0, remainingForFreeShipping: 0 });
   const [saveShippingAddress, setSaveShippingAddress] = useState(false);
   const [saveBillingAddress, setSaveBillingAddress] = useState(false);
+  const [showNavigationConfirm, setShowNavigationConfirm] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
+  const location = useLocation();
+  
+  // Handle beforeunload event for browser navigation
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (cartItems.length > 0 && !isLoading) {
+        e.preventDefault();
+        e.returnValue = 'Are you sure you want to cancel this payment? Your order details will be lost.';
+        return e.returnValue;
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [cartItems.length, isLoading]);
+  
+  // Override navigation using history API
+  useEffect(() => {
+    const originalPushState = window.history.pushState;
+    const originalReplaceState = window.history.replaceState;
+    
+    const handleNavigation = (url) => {
+      if (cartItems.length > 0 && !isLoading && !url.includes('/order-success') && !url.includes('/checkout')) {
+        setShowNavigationConfirm(true);
+        setPendingNavigation(() => () => {
+          window.location.href = url;
+        });
+        return false;
+      }
+      return true;
+    };
+    
+    window.history.pushState = function(state, title, url) {
+      if (handleNavigation(url)) {
+        originalPushState.apply(this, arguments);
+      }
+    };
+    
+    window.history.replaceState = function(state, title, url) {
+      if (handleNavigation(url)) {
+        originalReplaceState.apply(this, arguments);
+      }
+    };
+    
+    const handlePopState = (e) => {
+      if (cartItems.length > 0 && !isLoading) {
+        e.preventDefault();
+        setShowNavigationConfirm(true);
+        setPendingNavigation(() => () => {
+          window.history.back();
+        });
+      }
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.history.pushState = originalPushState;
+      window.history.replaceState = originalReplaceState;
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [cartItems.length, isLoading]);
+  
+  const handleNavigationConfirm = () => {
+    setShowNavigationConfirm(false);
+    if (pendingNavigation) {
+      pendingNavigation();
+    }
+  };
+  
+  const handleNavigationCancel = () => {
+    setShowNavigationConfirm(false);
+    setPendingNavigation(null);
+  };
   
   const [formData, setFormData] = useState({
     // Billing Info
@@ -1393,6 +1469,19 @@ const Checkout = () => {
                           <span className={isTamil ? 'tamil-text' : ''}>{translate('checkout.total')}</span>
                           <span className="text-green-600">{formatPrice(total)}</span>
                         </div>
+                        {shippingInfo.isFree && shippingInfo.freeShippingThreshold > 0 && (
+                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <span className={`text-sm font-medium text-green-700 ${isTamil ? 'tamil-text' : ''}`}>You Save:</span>
+                              <span className="text-sm font-bold text-green-600">
+                                {formatPrice(shippingInfo.isTamilNadu ? parseFloat(ecomSettings.tamilNaduShipping) : parseFloat(ecomSettings.otherStateShipping))}
+                              </span>
+                            </div>
+                            <p className={`text-xs text-green-600 mt-1 ${isTamil ? 'tamil-text' : ''}`}>
+                              🎉 Free shipping applied!
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -1496,6 +1585,43 @@ const Checkout = () => {
             </div>
           </div>
         </div>
+      )}
+      
+      {/* Navigation Confirmation Modal */}
+      {showNavigationConfirm && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50" onClick={handleNavigationCancel} />
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <AlertTriangle className="w-8 h-8 text-red-600" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  Cancel Payment?
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Are you sure you want to cancel this payment? Your order details will be lost.
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={handleNavigationCancel}
+                    variant="outline"
+                    className="flex-1 border-gray-300 hover:bg-gray-50"
+                  >
+                    Stay Here
+                  </Button>
+                  <Button
+                    onClick={handleNavigationConfirm}
+                    className="flex-1 bg-red-500 hover:bg-red-600"
+                  >
+                    Yes, Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
       
       <Footer />

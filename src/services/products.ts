@@ -34,7 +34,11 @@ export const getProducts = async (
       queryParams.push(`filters[brand][$eq]=${encodeURIComponent(filters.brand)}`);
     }
     if (filters.type && filters.type !== 'all') {
-      queryParams.push(`filters[type][$eq]=${encodeURIComponent(filters.type)}`);
+      if (filters.type === 'newLaunch') {
+        queryParams.push(`filters[newLaunch][$eq]=true`);
+      } else {
+        queryParams.push(`filters[type][$eq]=${encodeURIComponent(filters.type)}`);
+      }
     }
     if (filters.search) {
       const searchTerm = encodeURIComponent(filters.search);
