@@ -1,39 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, TrendingUp, Flame, Heart } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
-import { getPriceByUserType, getVariablePriceRange } from '@/lib/pricing';
-import { useAuth } from '@/contexts/AuthContext';
+import { getPriceByUserType } from '@/lib/pricing';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
 import StarRating from './StarRating';
-import { getBulkProductReviewStats } from '@/services/reviews';
 import { filterPriceFromName } from '@/lib/productUtils';
-
-interface Product {
-  id: number;
-  attributes: {
-    Name: string;
-    skuid: string;
-    photo: string;
-    price: string;
-    customerprice: string;
-    distributorprice: string;
-    tags?: string;
-    variations?: any;
-  };
-}
+import { useBestSellingProducts } from '@/hooks/useProductData';
+import ProductSectionSkeleton from './ProductSectionSkeleton';
 
 const BestSellingProducts = () => {
-  const [products, setProducts] = useState<any[]>([]);
-  const [reviewStats, setReviewStats] = useState<any>({});
-  const [loading, setLoading] = useState(true);
-  const [userType, setUserType] = useState('customer');
-  const { user } = useAuth();
+  const { products, reviewStats, loading } = useBestSellingProducts();
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const navigate = useNavigate();
@@ -41,138 +23,14 @@ const BestSellingProducts = () => {
   const { setQuickCheckoutItem } = useQuickCheckout();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
 
-  useEffect(() => {
-    const fetchUserType = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          const timestamp = new Date().getTime();
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
-          if (response.ok) {
-            const result = await response.json();
-            if (result.data && result.data.attributes) {
-              setUserType(result.data.attributes.userType || 'customer');
-              return;
-            }
-          }
-        }
-        setUserType('customer');
-      } catch (error) {
-        setUserType('customer');
-      }
-    };
-    fetchUserType();
-  }, []);
-
-  useEffect(() => {
-    fetchBestSellingProducts();
-  }, [userType]);
-
-  const fetchBestSellingProducts = async () => {
-    try {
-      setLoading(true);
-      const timestamp = new Date().getTime();
-      const response = await fetch(
-        `https://api.dharaniherbbals.com/api/product-masters?filters[type][$eq]=Best Selling&filters[status][$eq]=true&pagination[pageSize]=10&timestamp=${timestamp}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch products: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      const productList = data.data || [];
-      
-      const formattedProducts = productList.map((item: any) => {
-        const attributes = item.attributes || item;
-        const currentUserType = userType || 'customer';
-        
-        let price = getPriceByUserType(attributes, currentUserType);
-        let priceRange = null;
-        
-        if (attributes.isVariableProduct && attributes.variations) {
-          try {
-            const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
-            const prices = variations.map((variation: any) => getPriceByUserType(variation, currentUserType));
-            
-            if (prices.length > 0) {
-              const minPrice = Math.min(...prices);
-              const maxPrice = Math.max(...prices);
-              price = minPrice;
-              priceRange = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
-            }
-          } catch (e) {
-            // Keep default price
-          }
-        }
-        
-        return {
-          id: item.id || Math.random().toString(),
-          name: attributes.Name || attributes.name || 'Product',
-          tamil: attributes.tamil || null,
-          price: price,
-          priceRange: priceRange,
-          image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
-          originalPrice: attributes.originalPrice || null,
-          category: attributes.category,
-          skuid: attributes.skuid || attributes.SKUID,
-          isVariableProduct: attributes.isVariableProduct,
-          variations: attributes.variations,
-          userType: userType || 'customer'
-        };
-      });
-      
-      setProducts(formattedProducts);
-      
-      const productIds = formattedProducts.map((p: any) => parseInt(p.id)).filter((id: number) => !isNaN(id));
-      if (productIds.length > 0) {
-        try {
-          const stats = await getBulkProductReviewStats(productIds);
-          setReviewStats(stats);
-        } catch (reviewError) {
-          // Handle error
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching best selling products:', error);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (loading) {
     return (
-      <section className="py-16 bg-gradient-to-br from-orange-50 via-white to-red-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mb-4 animate-pulse">
-              <Flame className="w-8 h-8 text-white" />
-            </div>
-            <div className="h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-64 mx-auto mb-2 animate-pulse"></div>
-            <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-48 mx-auto animate-pulse"></div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-lg overflow-hidden animate-pulse">
-                <div className="aspect-square bg-gray-300"></div>
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                  <div className="h-6 bg-gray-300 rounded w-1/2"></div>
-                  <div className="h-10 bg-gray-300 rounded"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ProductSectionSkeleton 
+        title="Best Selling Products"
+        icon="flame"
+        gradient="bg-gradient-to-br from-green-50 via-white to-emerald-50"
+        count={10}
+      />
     );
   }
 
@@ -181,19 +39,19 @@ const BestSellingProducts = () => {
   }
 
   return (
-    <section className="py-16 bg-gradient-to-br from-orange-50 via-white to-red-50 relative overflow-hidden">
+    <section className="py-16 bg-gradient-to-br from-green-50 via-white to-emerald-50 relative overflow-hidden">
       {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-orange-200 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-red-200 rounded-full filter blur-3xl opacity-20 translate-x-1/2 translate-y-1/2"></div>
+      <div className="absolute top-0 left-0 w-64 h-64 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2" style={{backgroundColor: '#8ac440'}}></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full filter blur-3xl opacity-20 translate-x-1/2 translate-y-1/2" style={{backgroundColor: '#4ab748'}}></div>
       
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mb-4 shadow-lg animate-bounce">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 shadow-lg animate-bounce" style={{background: 'linear-gradient(to right, #8ac440, #4ab748)'}}>
             <Flame className="w-8 h-8 text-white" />
           </div>
           <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold mb-3 ${isTamil ? 'tamil-text' : ''}`}>
-            <span className="bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 bg-clip-text text-transparent">
+            <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(to right, #0a7f06, #4ab748, #8ac440)'}}>
               {isTamil ? 'சிறந்த விற்பனையான தயாரிப்புகள்' : 'Best Selling Products'}
             </span>
           </h2>
@@ -201,8 +59,8 @@ const BestSellingProducts = () => {
             {isTamil ? 'வாடிக்கையாளர்களால் மிகவும் விரும்பப்படும் தயாரிப்புகள்' : 'Most loved by our customers'}
           </p>
           <div className="flex items-center justify-center gap-2 mt-4">
-            <TrendingUp className="w-5 h-5 text-orange-600" />
-            <span className="text-sm font-semibold text-orange-600 uppercase tracking-wide">
+            <TrendingUp className="w-5 h-5" style={{color: '#0a7f06'}} />
+            <span className="text-sm font-semibold uppercase tracking-wide" style={{color: '#0a7f06'}}>
               {isTamil ? 'டிரெண்டிங் இப்போது' : 'Trending Now'}
             </span>
           </div>
@@ -216,7 +74,7 @@ const BestSellingProducts = () => {
               className="group bg-white hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-orange-200 relative"
             >
               {/* Best Seller Badge */}
-              <div className="absolute top-2 right-2 z-10 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+              <div className="absolute top-2 right-2 z-10 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1" style={{background: 'linear-gradient(to right, #8ac440, #4ab748)'}}>
                 <Flame className="w-3 h-3" />
                 <span>{isTamil ? 'சிறந்தது' : 'Best'}</span>
               </div>
@@ -259,14 +117,14 @@ const BestSellingProducts = () => {
                 </Link>
                 
                 <StarRating 
-                  rating={reviewStats[product.id]?.average || 0} 
-                  count={reviewStats[product.id]?.count || 0} 
+                  rating={reviewStats?.[product.id]?.average || 0} 
+                  count={reviewStats?.[product.id]?.count || 0} 
                   size="sm" 
                   showCount={false} 
                 />
                 
                 <div className="mb-3">
-                  <p className="text-xl md:text-2xl font-bold text-orange-600">
+                  <p className="text-xl md:text-2xl font-bold" style={{color: '#0a7f06'}}>
                     {product.priceRange || formatPrice(product.price)}
                   </p>
                 </div>
@@ -295,6 +153,7 @@ const BestSellingProducts = () => {
                       addToCart(skuid, product.id.toString(), 1, product.name, product.price);
                     }}
                     className={`flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                    style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)'}}
                   >
                     <ShoppingCart className="w-2 sm:w-3 h-2 sm:h-3 mr-0.5 sm:mr-1" />
                     <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-xs'}`}>
@@ -347,7 +206,8 @@ const BestSellingProducts = () => {
                       });
                       navigate('/checkout');
                     }}
-                    className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                    className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                    style={{background: 'linear-gradient(to right, #ff6b35, #f7931e)'}}
                   >
                     <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-xs'}`}>
                       {isTamil ? 'வாங்கு' : 'Buy'}
@@ -364,7 +224,8 @@ const BestSellingProducts = () => {
           <Link to="/products?type=Best Selling">
             <Button 
               size="lg"
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-xl hover:shadow-2xl transition-all px-8 py-6 text-lg"
+              className="text-white shadow-xl hover:shadow-2xl transition-all px-8 py-6 text-lg"
+              style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)'}}
             >
               <span className={isTamil ? 'tamil-text' : ''}>
                 {isTamil ? 'அனைத்து தயாரிப்புகளையும் பார்க்க' : 'View All Products'}

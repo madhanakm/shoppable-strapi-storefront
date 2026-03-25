@@ -70,6 +70,25 @@ const FloatingCart = () => {
     updateShipping();
   }, [cartTotal, ecomSettings, stateRates]);
 
+  // Lock body scroll when modal is open
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [isOpen]);
+
   const handleCloseCart = () => {
     if (cartItems.length > 0) {
       setShowCloseConfirm(true);
@@ -104,15 +123,15 @@ const FloatingCart = () => {
       {isOpen && (
         <>
           <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setIsOpen(false)} />
-          <div className="fixed inset-x-4 top-4 bottom-4 sm:right-4 sm:left-auto sm:top-20 sm:bottom-20 sm:w-96 bg-white shadow-2xl z-50 flex flex-col rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b">
+          <div className="fixed inset-x-4 top-4 bottom-4 sm:right-4 sm:left-auto sm:top-20 sm:bottom-20 sm:w-96 bg-white shadow-2xl z-50 flex flex-col rounded-2xl overflow-hidden max-h-[calc(100vh-2rem)]">
+            <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
               <h2 className="text-lg font-bold">Your Cart ({cartCount})</h2>
               <button onClick={handleCloseCart} className="p-2 hover:bg-gray-100 rounded-full">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-4" style={{WebkitOverflowScrolling: 'touch'}}>
               {cartItems.length === 0 ? (
                 <p className="text-center text-gray-500 mt-8">Your cart is empty</p>
               ) : (
@@ -135,7 +154,7 @@ const FloatingCart = () => {
             </div>
 
             {cartItems.length > 0 && (
-              <div className="border-t p-4 space-y-3">
+              <div className="border-t p-4 space-y-3 flex-shrink-0 bg-white">
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal:</span>

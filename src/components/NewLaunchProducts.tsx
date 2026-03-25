@@ -1,172 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ShoppingCart, Sparkles, Star, Heart } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
-import { getPriceByUserType, getVariablePriceRange } from '@/lib/pricing';
-import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
-import { useWishlistContext } from '@/contexts/WishlistContext';
-import { useCart } from '@/contexts/CartContext';
-import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
-import StarRating from './StarRating';
-import { getBulkProductReviewStats } from '@/services/reviews';
-import { filterPriceFromName } from '@/lib/productUtils';
-
-interface Product {
-  id: number;
-  attributes: {
-    Name: string;
-    skuid: string;
-    photo: string;
-    price: string;
-    customerprice: string;
-    distributorprice: string;
-    tags?: string;
-    variations?: any;
-  };
-}
+import { useNewLaunchProducts } from '@/hooks/useProductData';
 
 const NewLaunchProducts = () => {
-  const [products, setProducts] = useState<any[]>([]);
-  const [reviewStats, setReviewStats] = useState<any>({});
-  const [loading, setLoading] = useState(true);
-  const [userType, setUserType] = useState('customer');
-  const { user } = useAuth();
+  const { products, loading } = useNewLaunchProducts();
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
-  const navigate = useNavigate();
-  const { addToCart } = useCart();
-  const { setQuickCheckoutItem } = useQuickCheckout();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
-
-  useEffect(() => {
-    const fetchUserType = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          const timestamp = new Date().getTime();
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
-          if (response.ok) {
-            const result = await response.json();
-            if (result.data && result.data.attributes) {
-              setUserType(result.data.attributes.userType || 'customer');
-              return;
-            }
-          }
-        }
-        setUserType('customer');
-      } catch (error) {
-        setUserType('customer');
-      }
-    };
-    fetchUserType();
-  }, []);
-
-  useEffect(() => {
-    fetchNewLaunchProducts();
-  }, [userType]);
-
-  const fetchNewLaunchProducts = async () => {
-    try {
-      setLoading(true);
-      const timestamp = new Date().getTime();
-      const response = await fetch(
-        `https://api.dharaniherbbals.com/api/product-masters?filters[newLaunch][$eq]=true&filters[status][$eq]=true&pagination[pageSize]=10&timestamp=${timestamp}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch products: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      const productList = data.data || [];
-      
-      const formattedProducts = productList.map((item: any) => {
-        const attributes = item.attributes || item;
-        const currentUserType = userType || 'customer';
-        
-        let price = getPriceByUserType(attributes, currentUserType);
-        let priceRange = null;
-        
-        if (attributes.isVariableProduct && attributes.variations) {
-          try {
-            const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
-            const prices = variations.map((variation: any) => getPriceByUserType(variation, currentUserType));
-            
-            if (prices.length > 0) {
-              const minPrice = Math.min(...prices);
-              const maxPrice = Math.max(...prices);
-              price = minPrice;
-              priceRange = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
-            }
-          } catch (e) {
-            // Keep default price
-          }
-        }
-        
-        return {
-          id: item.id || Math.random().toString(),
-          name: attributes.Name || attributes.name || 'Product',
-          tamil: attributes.tamil || null,
-          price: price,
-          priceRange: priceRange,
-          image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
-          originalPrice: attributes.originalPrice || null,
-          category: attributes.category,
-          skuid: attributes.skuid || attributes.SKUID,
-          isVariableProduct: attributes.isVariableProduct,
-          variations: attributes.variations,
-          userType: userType || 'customer'
-        };
-      });
-      
-      setProducts(formattedProducts);
-      
-      const productIds = formattedProducts.map((p: any) => parseInt(p.id)).filter((id: number) => !isNaN(id));
-      if (productIds.length > 0) {
-        try {
-          const stats = await getBulkProductReviewStats(productIds);
-          setReviewStats(stats);
-        } catch (reviewError) {
-          // Handle error
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching new launch products:', error);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (
-      <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <section className="py-12 bg-gradient-to-br from-green-50 via-white to-emerald-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-4 animate-pulse">
-              <Sparkles className="w-8 h-8 text-white" />
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-3 animate-pulse" style={{background: 'linear-gradient(to right, #8ac440, #4ab748)'}}>
+              <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <div className="h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-64 mx-auto mb-2 animate-pulse"></div>
-            <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-48 mx-auto animate-pulse"></div>
+            <div className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-48 mx-auto mb-2 animate-pulse"></div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-              <div key={i} className="bg-white rounded-lg shadow-lg overflow-hidden animate-pulse">
-                <div className="aspect-square bg-gray-300"></div>
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                  <div className="h-6 bg-gray-300 rounded w-1/2"></div>
-                  <div className="h-10 bg-gray-300 rounded"></div>
+          <div className="flex justify-center gap-3 sm:gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex-shrink-0 w-32 sm:w-40 animate-pulse">
+                <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+                  <div className="p-3 sm:p-4">
+                    <div className="aspect-square bg-gray-300 rounded-full"></div>
+                  </div>
+                  <div className="text-center pb-3 sm:pb-4 px-2">
+                    <div className="h-3 sm:h-4 bg-gray-300 rounded w-3/4 mx-auto"></div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -176,200 +39,102 @@ const NewLaunchProducts = () => {
     );
   }
 
-  if (products.length === 0 && !loading) {
+  if (products.length === 0) {
     return null;
   }
 
   return (
-    <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
-      {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-blue-200 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-200 rounded-full filter blur-3xl opacity-20 translate-x-1/2 translate-y-1/2"></div>
+    <section className="py-12 bg-gradient-to-br from-green-50 via-white to-emerald-50 relative overflow-hidden">
+      {/* Enhanced Decorative Elements */}
+      <div className="absolute top-0 left-0 w-32 h-32 rounded-full filter blur-2xl opacity-30 -translate-x-1/2 -translate-y-1/2 animate-pulse" style={{backgroundColor: '#8ac440'}}></div>
+      <div className="absolute bottom-0 right-0 w-40 h-40 rounded-full filter blur-2xl opacity-30 translate-x-1/2 translate-y-1/2 animate-pulse" style={{backgroundColor: '#4ab748', animationDelay: '1s'}}></div>
+      <div className="absolute top-1/2 left-1/4 w-20 h-20 rounded-full filter blur-xl opacity-20 animate-pulse" style={{backgroundColor: '#0a7f06', animationDelay: '2s'}}></div>
       
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-4 shadow-lg animate-pulse">
-            <Sparkles className="w-8 h-8 text-white" />
+        {/* Enhanced Section Header */}
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full mb-4 shadow-xl animate-bounce" style={{background: 'linear-gradient(to right, #8ac440, #4ab748)'}}>
+            <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
           </div>
-          <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold mb-3 ${isTamil ? 'tamil-text' : ''}`}>
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold mb-3 ${isTamil ? 'tamil-text' : ''}`}>
+            <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(to right, #0a7f06, #4ab748, #8ac440)'}}>
               {isTamil ? 'புதிய வெளியீடுகள்' : 'New Launches'}
             </span>
           </h2>
-          <p className={`text-gray-600 text-lg max-w-2xl mx-auto ${isTamil ? 'tamil-text' : ''}`}>
-            {isTamil ? 'சமீபத்தில் அறிமுகப்படுத்தப்பட்ட புதிய தயாரிப்புகள்' : 'Fresh arrivals just for you'}
-          </p>
-          <div className="flex items-center justify-center gap-2 mt-4">
-            <Star className="w-5 h-5 text-blue-600" />
-            <span className="text-sm font-semibold text-blue-600 uppercase tracking-wide">
-              {isTamil ? 'புதிய வருகை' : 'Just Arrived'}
-            </span>
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <div className="w-8 h-1 rounded-full" style={{background: 'linear-gradient(to right, #8ac440, #4ab748)'}}></div>
+            <div className="w-12 h-2 rounded-full" style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)'}}></div>
+            <div className="w-8 h-1 rounded-full" style={{background: 'linear-gradient(to right, #4ab748, #8ac440)'}}></div>
           </div>
         </div>
 
-        {/* Products Grid - 5 columns, 2 rows = 10 products */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
-          {products.map((product) => (
-            <Card 
+        {/* Mobile-Optimized Products Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 mb-8">
+          {products.map((product, index) => (
+            <Link 
               key={product.id}
-              className="group bg-white hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-blue-200 relative"
+              to={`/product/${product.id}`}
+              className="group transform transition-all duration-300 hover:scale-105"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
-              {/* New Launch Badge */}
-              <div className="absolute top-2 right-2 z-10 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
-                <Sparkles className="w-3 h-3" />
-                <span>{isTamil ? 'புதிது' : 'New'}</span>
-              </div>
-
-              {/* Product Image */}
-              <div className="aspect-square overflow-hidden bg-gray-100 relative">
-                <Link to={`/product/${product.id}`} className="block w-full h-full relative z-0">
-                  <img
-                    src={product.image || 'https://via.placeholder.com/400x400?text=Product'}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/400x400?text=Product';
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                </Link>
-                
-                {/* Wishlist Button */}
-                <Button 
-                  size="sm" 
-                  className="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-all rounded-full shadow-lg bg-white/95 hover:bg-white border border-gray-100 hover:border-red-200 p-1.5"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const skuid = product.skuid || product.id.toString();
-                    isInWishlist(skuid) ? removeFromWishlist(skuid) : addToWishlist(skuid);
-                  }}
-                >
-                  <Heart className={`w-3 h-3 ${isInWishlist(product.skuid || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
-                </Button>
-              </div>
-
-              {/* Product Info */}
-              <CardContent className="p-4">
-                <Link to={`/product/${product.id}`}>
-                  <h3 className={`font-semibold text-gray-800 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors uppercase text-xs md:text-sm ${isTamil ? 'tamil-text' : ''}`}>
-                    {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
-                  </h3>
-                </Link>
-                
-                <StarRating 
-                  rating={reviewStats[product.id]?.average || 0} 
-                  count={reviewStats[product.id]?.count || 0} 
-                  size="sm" 
-                  showCount={false} 
-                />
-                
-                <div className="mb-3">
-                  <p className="text-xl md:text-2xl font-bold text-blue-600">
-                    {product.priceRange || formatPrice(product.price)}
-                  </p>
-                </div>
-
-                <div className="flex gap-1 sm:gap-2">
-                  <Button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      
-                      if (product.isVariableProduct && product.variations) {
-                        try {
-                          const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
-                          if (variations && variations.length > 0) {
-                            const firstVariation = variations[0];
-                            const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-                            addToCart(skuid, product.id.toString(), 1, product.name, product.price);
-                            return;
-                          }
-                        } catch (e) {
-                          // Handle error silently
-                        }
-                      }
-                      
-                      const skuid = product.skuid || product.id.toString();
-                      addToCart(skuid, product.id.toString(), 1, product.name, product.price);
-                    }}
-                    className={`flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
-                  >
-                    <ShoppingCart className="w-2 sm:w-3 h-2 sm:h-3 mr-0.5 sm:mr-1" />
-                    <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-xs'}`}>
-                      {isTamil ? 'கூடையில் சேர்' : 'Add'}
-                    </span>
-                  </Button>
+              <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-green-100 hover:border-green-200">
+                {/* Product Image with Enhanced Mobile Design */}
+                <div className="relative p-3 sm:p-4">
+                  {/* New Launch Badge */}
+                  <div className="absolute top-1 right-1 z-10 text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1" style={{background: 'linear-gradient(to right, #8ac440, #4ab748)'}}>
+                    <Sparkles className="w-2 h-2 sm:w-3 sm:h-3" />
+                    <span className="hidden sm:inline">{isTamil ? 'புதிய' : 'New'}</span>
+                  </div>
                   
-                  <Button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      
-                      if (product.isVariableProduct && product.variations) {
-                        try {
-                          const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
-                          if (variations && variations.length > 0) {
-                            const firstVariation = variations[0];
-                            const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-                            const variationName = firstVariation.value || firstVariation.attributeValue || Object.values(firstVariation)[0];
-                            
-                            setQuickCheckoutItem({
-                              id: product.id.toString(),
-                              skuid: skuid,
-                              name: `${product.name} - ${variationName}`,
-                              tamil: product.tamil ? `${product.tamil} - ${variationName}` : null,
-                              price: getPriceByUserType(firstVariation, product.userType || 'customer'),
-                              image: product.image,
-                              category: product.category,
-                              variation: variationName,
-                              quantity: 1
-                            });
-                            navigate('/checkout');
-                            return;
-                          }
-                        } catch (e) {
-                          // Handle error silently
-                        }
-                      }
-                      
-                      const skuid = product.skuid || product.id.toString();
-                      setQuickCheckoutItem({
-                        id: product.id.toString(),
-                        skuid: skuid,
-                        name: product.name,
-                        tamil: product.tamil || null,
-                        price: product.price,
-                        image: product.image,
-                        category: product.category,
-                        quantity: 1
-                      });
-                      navigate('/checkout');
-                    }}
-                    className={`flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
-                  >
-                    <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-xs'}`}>
-                      {isTamil ? 'வாங்கு' : 'Buy'}
-                    </span>
-                  </Button>
+                  {/* Circular Product Image */}
+                  <div className="aspect-square rounded-full overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg group-hover:shadow-xl transition-all duration-300 border-2 border-white">
+                    <img
+                      src={product.image || 'https://via.placeholder.com/300x300?text=Product'}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://via.placeholder.com/300x300?text=Product';
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Sparkle Animation Effects */}
+                  <div className="absolute top-2 left-2 w-2 h-2 bg-yellow-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping" style={{animationDelay: '0s'}}></div>
+                  <div className="absolute bottom-2 right-2 w-1.5 h-1.5 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping" style={{animationDelay: '0.5s'}}></div>
                 </div>
-              </CardContent>
-            </Card>
+
+                {/* Enhanced Product Info */}
+                <div className="text-center pb-3 sm:pb-4 px-2">
+                  <h3 className={`font-semibold text-gray-800 text-xs sm:text-sm group-hover:text-green-600 transition-colors duration-300 line-clamp-1 ${isTamil ? 'tamil-text' : ''}`}>
+                    {product.category || 'General'}
+                  </h3>
+                  
+                  {/* Mobile-friendly hover indicator */}
+                  <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
+                      <span>{isTamil ? 'பார்க்க' : 'View'}</span>
+                      <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
 
-        {/* View All Button */}
-        <div className="text-center mt-12">
+        {/* Enhanced View All Button */}
+        <div className="text-center">
           <Link to="/products?newLaunch=true">
-            <Button 
-              size="lg"
-              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-xl hover:shadow-2xl transition-all px-8 py-6 text-lg"
-            >
-              <span className={isTamil ? 'tamil-text' : ''}>
-                {isTamil ? 'அனைத்து புதிய தயாரிப்புகளையும் பார்க்க' : 'View All New Products'}
+            <button className="group relative text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-sm sm:text-base transform hover:scale-105 overflow-hidden" style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)'}}>
+              {/* Button shine effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+              
+              <span className={`relative z-10 flex items-center gap-2 ${isTamil ? 'tamil-text' : ''}`}>
+                <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+                {isTamil ? 'அனைத்தையும் பார்க்க' : 'View All New Launches'}
+                <span className="transform group-hover:translate-x-1 transition-transform duration-300">→</span>
               </span>
-            </Button>
+            </button>
           </Link>
         </div>
       </div>

@@ -828,7 +828,8 @@ const TrendingProductsSection = () => {
                   
                   <div className="flex gap-1">
                     <Button 
-                      className={`flex-1 bg-green-500 hover:bg-green-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
+                      className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
+                      style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)', ':hover': {background: 'linear-gradient(to right, #085d05, #3a9538)'}}}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -1061,22 +1062,22 @@ const DealsOfTheDaySection = () => {
   const sideDeals = shuffledProducts.slice(3, 7);
 
   return (
-    <section className="py-16 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 relative overflow-hidden">
+    <section className="py-16 bg-gradient-to-br from-green-50 via-white to-emerald-100 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-orange-400 to-red-500 rounded-full blur-2xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full blur-2xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-gradient-to-br from-green-300 to-emerald-400 rounded-full blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 mb-6">
-            <div className="p-4 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl shadow-xl animate-bounce">
+            <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl animate-bounce">
               <Tag className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 bg-clip-text text-transparent">
+            <h2 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent">
               {translate('blocks.dealsOfTheDay')}
             </h2>
           </div>
@@ -1084,16 +1085,16 @@ const DealsOfTheDaySection = () => {
             {translate('blocks.dealsDescription')}
           </p>
           <div className="flex justify-center items-center gap-2 mt-4">
-            <div className="w-12 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full"></div>
-            <div className="w-20 h-2 bg-gradient-to-r from-red-500 to-pink-500 rounded-full"></div>
-            <div className="w-12 h-1 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></div>
+            <div className="w-12 h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
+            <div className="w-20 h-2 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full"></div>
+            <div className="w-12 h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
           </div>
         </div>
 
         {/* 2 Column Layout for Mobile, 4 Column for Desktop */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {products.slice(0, 8).map((product, index) => (
-            <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden bg-white rounded-2xl border border-gray-100 hover:border-red-200">
+            <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden bg-white rounded-2xl border border-gray-100 hover:border-green-200">
               <div className="relative overflow-hidden">
                 <Link to={`/product/${product.id}`}>
                   <img 
@@ -1102,7 +1103,7 @@ const DealsOfTheDaySection = () => {
                     className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
-                <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-red-500 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold">
+                <div className="absolute top-2 sm:top-3 left-2 sm:left-3 text-white px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold" style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)'}}>
                   🔥 Deal
                 </div>
                 <Button 
@@ -1121,7 +1122,7 @@ const DealsOfTheDaySection = () => {
               
               <div className="p-2 sm:p-4">
                 <Link to={`/product/${product.id}`}>
-                  <h3 className={`font-bold text-[10px] sm:text-sm text-gray-800 group-hover:text-red-600 transition-colors line-clamp-2 mb-1 sm:mb-2 uppercase ${isTamil ? 'tamil-text' : ''}`}>
+                  <h3 className={`font-bold text-[10px] sm:text-sm text-gray-800 group-hover:text-green-600 transition-colors line-clamp-2 mb-1 sm:mb-2 uppercase ${isTamil ? 'tamil-text' : ''}`}>
                     {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
                   </h3>
                 </Link>
@@ -1134,7 +1135,7 @@ const DealsOfTheDaySection = () => {
                 />
                 
                 <div className="mb-2 sm:mb-3">
-                  <span className="text-sm sm:text-lg font-black text-red-600">
+                  <span className="text-sm sm:text-lg font-black" style={{color: '#0a7f06'}}>
                     {product.priceRange || formatPrice(product.price)}
                   </span>
                   {product.originalPrice && (
@@ -1146,7 +1147,8 @@ const DealsOfTheDaySection = () => {
                 
                 <div className="flex gap-1 sm:gap-2 mt-2 sm:mt-3">
                     <Button 
-                      className={`flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                      className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                      style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)', ':hover': {background: 'linear-gradient(to right, #085d05, #3a9538)'}}}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -1503,7 +1505,8 @@ const PopularChoicesSection = () => {
                   
                   <div className="flex gap-1">
                     <Button 
-                      className={`flex-1 bg-green-500 hover:bg-green-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                      className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                      style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)', ':hover': {background: 'linear-gradient(to right, #085d05, #3a9538)'}}}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();

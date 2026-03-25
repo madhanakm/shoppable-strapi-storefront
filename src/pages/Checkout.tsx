@@ -145,30 +145,49 @@ const Checkout = () => {
     setPendingNavigation(null);
   };
   
-  const [formData, setFormData] = useState({
-    // Billing Info
-    fullName: user?.username || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    
-    // Manual Shipping Address
-    shippingAddress: '',
-    shippingCity: '',
-    shippingState: '',
-    shippingPincode: '',
-    
-    // Manual Billing Address
-    billingAddress: '',
-    billingCity: '',
-    billingState: '',
-    billingPincode: '',
-    
-    // Payment
-    paymentMethod: 'online',
-    
-    // Additional
-    notes: ''
-  });
+  // Load form data from localStorage or initialize with user data
+  const getInitialFormData = () => {
+    const savedFormData = localStorage.getItem('checkoutFormData');
+    if (savedFormData) {
+      try {
+        const parsed = JSON.parse(savedFormData);
+        return {
+          ...parsed,
+          fullName: user?.username || parsed.fullName || '',
+          email: user?.email || parsed.email || '',
+          phone: user?.phone || parsed.phone || ''
+        };
+      } catch (error) {
+        console.error('Error parsing saved form data:', error);
+      }
+    }
+    return {
+      // Billing Info
+      fullName: user?.username || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      
+      // Manual Shipping Address
+      shippingAddress: '',
+      shippingCity: '',
+      shippingState: '',
+      shippingPincode: '',
+      
+      // Manual Billing Address
+      billingAddress: '',
+      billingCity: '',
+      billingState: '',
+      billingPincode: '',
+      
+      // Payment
+      paymentMethod: 'online',
+      
+      // Additional
+      notes: ''
+    };
+  };
+  
+  const [formData, setFormData] = useState(getInitialFormData);
   
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -192,6 +211,25 @@ const Checkout = () => {
     loadAddresses();
     loadEcomUser();
   }, [user?.id, isAuthenticated, navigate, loading, currentUserId]);
+  
+  // Update form data when user changes
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: user.username || prev.fullName,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone
+      }));
+    }
+  }, [user?.username, user?.email, user?.phone]);
+  
+  // Clear form data when user logs out or changes
+  useEffect(() => {
+    if (!isAuthenticated) {
+      localStorage.removeItem('checkoutFormData');
+    }
+  }, [isAuthenticated]);
   
   // Add payment warning when user tries to close tab during payment
   useEffect(() => {
@@ -312,10 +350,14 @@ const Checkout = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({
+    const newFormData = {
       ...formData,
       [e.target.name]: e.target.value
-    });
+    };
+    setFormData(newFormData);
+    
+    // Save to localStorage immediately when user types
+    localStorage.setItem('checkoutFormData', JSON.stringify(newFormData));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -647,6 +689,9 @@ const Checkout = () => {
           localStorage.removeItem('cart');
         }
         
+        // Clear saved form data after successful order
+        localStorage.removeItem('checkoutFormData');
+        
         console.log('Cart cleared, showing toast...');
         
         toast({
@@ -842,6 +887,8 @@ const Checkout = () => {
       } else {
         clearCart();
       }
+      // Clear saved form data after successful order
+      localStorage.removeItem('checkoutFormData');
       // Force page reload to reset all cart-related state
       window.location.href = '/order-success';
     } catch (error) {
