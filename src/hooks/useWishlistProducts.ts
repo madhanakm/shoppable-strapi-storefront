@@ -62,7 +62,7 @@ export const useWishlistProducts = (productIds: string[]) => {
                   priceRange = minPrice === maxPrice ? null : `${minPrice} - ${maxPrice}`;
                 }
               } catch (e) {
-                console.error('Error parsing variations:', e);
+                // Handle error silently
               }
             }
             
@@ -79,17 +79,16 @@ export const useWishlistProducts = (productIds: string[]) => {
             };
           }
         } catch (e) {
-          console.error('Error fetching wishlist product:', e);
+          // Handle error silently
         }
         return null;
       });
 
       const results = await Promise.all(productPromises);
       const validProducts = results.filter(Boolean);
-      console.log('Wishlist products fetched:', validProducts.length, validProducts);
       setProducts(validProducts);
     } catch (error) {
-      console.error('Error fetching wishlist products:', error);
+      // Handle error silently
     } finally {
       setLoading(false);
     }

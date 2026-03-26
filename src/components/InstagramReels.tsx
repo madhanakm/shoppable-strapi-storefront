@@ -389,7 +389,7 @@ const InstagramReels = () => {
                         {isRange ? `${formatPrice(price.minPrice)} - ${formatPrice(price.maxPrice)}` : formatPrice(price)}
                       </p>
                       <Link to={`/product/${product.id}`}>
-                        <Button className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white">
+                        <Button className="w-full text-white" style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}>
                           <ShoppingCart className="w-4 h-4 mr-2" />
                           <span className={isTamil ? 'tamil-text' : ''}>
                             {isTamil ? 'இப்போது வாங்கவும்' : 'Buy Now'}

@@ -82,9 +82,9 @@ const RelatedProducts = () => {
           product => !cartSkuIds.includes(product.skuid)
         );
         
-        // Shuffle and take 8 products
+        // Shuffle and take 6 products
         const shuffled = filteredProducts.sort(() => Math.random() - 0.5);
-        setProducts(shuffled.slice(0, 8));
+        setProducts(shuffled.slice(0, 6));
       }
     } catch (error) {
       console.error('Error fetching related products:', error);
@@ -123,22 +123,22 @@ const RelatedProducts = () => {
   }
 
   return (
-    <section className="mt-16 bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
+    <section className="mt-16 bg-gradient-to-br from-green-50 via-white to-emerald-50 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-20 w-40 h-40 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-full blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-20 left-20 w-40 h-40 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
       </div>
 
       <div className="container mx-auto px-4 py-16 relative z-10">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 mb-6">
-            <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl shadow-xl animate-bounce">
+            <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl animate-bounce">
               <ShoppingCart className="w-8 h-8 text-white" />
             </div>
-            <h2 className={`text-3xl md:text-4xl lg:text-5xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
+            <h2 className={`text-3xl md:text-4xl lg:text-5xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
               {isTamil ? 'நீங்கள் விரும்பக்கூடியவை' : 'You May Also Like'}
             </h2>
           </div>
@@ -146,14 +146,14 @@ const RelatedProducts = () => {
             {isTamil ? 'உங்கள் கூடையில் சேர்க்க இந்த அற்புதமான தயாரிப்புகளையும் பாருங்கள்' : 'Complete your wellness journey with these amazing products'}
           </p>
           <div className="flex justify-center items-center gap-2 mt-4">
-            <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
-            <div className="w-20 h-2 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></div>
-            <div className="w-12 h-1 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full"></div>
+            <div className="w-12 h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
+            <div className="w-20 h-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"></div>
+            <div className="w-12 h-1 bg-gradient-to-r from-teal-500 to-green-500 rounded-full"></div>
           </div>
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
           {products.map((product, index) => {
             const price = getProductPrice(product);
             const isRange = typeof price === 'object' && price.minPrice !== undefined;
@@ -161,11 +161,11 @@ const RelatedProducts = () => {
             return (
               <Card 
                 key={product.id} 
-                className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-2 border-transparent hover:border-blue-200 bg-white rounded-3xl hover:-translate-y-3 hover:rotate-1"
+                className="group hover:shadow-2xl transition-all duration-500 overflow-hidden border-2 border-transparent hover:border-green-200 bg-white rounded-3xl hover:-translate-y-3 hover:rotate-1"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {/* Product Image */}
-                <div className="relative overflow-hidden rounded-t-3xl bg-gradient-to-br from-blue-50 via-white to-purple-50">
+                <div className="relative overflow-hidden rounded-t-3xl bg-gradient-to-br from-green-50 via-white to-emerald-50">
                   <Link to={`/product/${product.id}`} className="block cursor-pointer">
                     <img
                       src={product.image}
@@ -178,7 +178,7 @@ const RelatedProducts = () => {
                   </Link>
                   
                   {/* Floating Badge */}
-                  <div className="absolute top-3 right-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-pulse">
+                  <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-pulse">
                     ✨ New
                   </div>
                   
@@ -186,26 +186,26 @@ const RelatedProducts = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 </div>
                 
-                <CardContent className="p-4 bg-white">
-                  <Link to={`/product/${product.id}`}>
-                    <h3 className={`font-bold text-sm mb-3 line-clamp-2 hover:text-blue-600 transition-colors uppercase leading-tight min-h-[2.5rem] ${isTamil ? 'tamil-text' : ''}`}>
+                <CardContent className="p-2 bg-white flex flex-col items-center">
+                  <Link to={`/product/${product.id}`} className="w-full">
+                    <h3 className={`font-bold text-xs mb-2 line-clamp-2 hover:text-green-600 transition-colors uppercase leading-tight min-h-[1.5rem] text-center ${isTamil ? 'tamil-text' : ''}`}>
                       {product.name}
                     </h3>
                   </Link>
                   
-                  <div className="mb-4">
-                    <p className="text-lg font-black text-blue-600">
+                  <div className="mb-2 w-full text-center">
+                    <p className="text-sm font-black text-green-600">
                       {isRange ? `${formatPrice(price.minPrice)} - ${formatPrice(price.maxPrice)}` : formatPrice(price)}
                     </p>
                   </div>
                   
                   <Button
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl py-2 font-semibold transform hover:scale-105"
+                    className="w-24 bg-gradient-to-r from-[#e6e6e6] to-[#f2f2f2] hover:from-[#f2f2f2] hover:to-[#e6e6e6] text-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl py-1 text-xs font-semibold transform hover:scale-105"
                     onClick={() => handleAddToCart(product)}
                   >
-                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    <ShoppingCart className="w-3 h-3 mr-1" />
                     <span className={isTamil ? 'tamil-text' : ''}>
-                      {isTamil ? 'கூடையில் சேர்' : 'Add to Cart'}
+                      {isTamil ? 'சேர்' : 'Add'}
                     </span>
                   </Button>
                 </CardContent>
@@ -219,7 +219,7 @@ const RelatedProducts = () => {
           <Link to="/products">
             <Button 
               size="lg"
-              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-xl hover:shadow-2xl transition-all px-8 py-4 text-lg font-bold rounded-2xl transform hover:scale-105"
+              className="bg-gradient-to-r from-[#009108] to-[#55bf57] hover:from-[#55bf57] hover:to-[#009108] text-white shadow-xl hover:shadow-2xl transition-all px-8 py-4 text-lg font-bold rounded-2xl transform hover:scale-105"
             >
               <span className={isTamil ? 'tamil-text' : ''}>
                 {isTamil ? 'மேலும் தயாரிப்புகள் பார்க்க' : 'Explore More Products'}

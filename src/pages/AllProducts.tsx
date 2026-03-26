@@ -584,7 +584,8 @@ const AllProducts = () => {
                           viewMode === 'list' ? 'mt-4' : ''
                         }`}>
                           <Button 
-                            className="flex-1 min-w-0 bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl py-2.5 md:py-3 text-xs md:text-sm font-semibold" 
+                            className="flex-1 min-w-0 text-gray-800 shadow-md hover:shadow-lg transition-all duration-200 rounded-xl py-2.5 md:py-3 text-xs md:text-sm font-semibold" 
+                            style={{background: 'linear-gradient(to right, #e6e6e6, #f2f2f2)'}}
                             onClick={() => {
                               if (attrs.isVariableProduct && attrs.variations) {
                                 try {
@@ -610,7 +611,8 @@ const AllProducts = () => {
                           </Button>
                           
                           <Button 
-                            className="flex-1 min-w-0 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl py-2.5 md:py-3 text-xs md:text-sm font-semibold" 
+                            className="flex-1 min-w-0 text-white shadow-md hover:shadow-lg transition-all duration-200 rounded-xl py-2.5 md:py-3 text-xs md:text-sm font-semibold" 
+                            style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}
                             onClick={() => {
                               if (attrs.isVariableProduct && attrs.variations) {
                                 try {

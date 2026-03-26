@@ -100,11 +100,11 @@ const BestSellingProducts = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    const skuid = product.skuid || product.id.toString();
-                    isInWishlist(skuid) ? removeFromWishlist(skuid) : addToWishlist(skuid);
+                    const productId = product.id.toString();
+                    isInWishlist(productId) ? removeFromWishlist(productId) : addToWishlist(productId);
                   }}
                 >
-                  <Heart className={`w-3 h-3 ${isInWishlist(product.skuid || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                  <Heart className={`w-3 h-3 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                 </Button>
               </div>
 
@@ -152,8 +152,8 @@ const BestSellingProducts = () => {
                       const skuid = product.skuid || product.id.toString();
                       addToCart(skuid, product.id.toString(), 1, product.name, product.price);
                     }}
-                    className={`flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
-                    style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)'}}
+                    className={`flex-1 text-gray-800 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                    style={{background: 'linear-gradient(to right, #e6e6e6, #f2f2f2)'}}
                   >
                     <ShoppingCart className="w-2 sm:w-3 h-2 sm:h-3 mr-0.5 sm:mr-1" />
                     <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-xs'}`}>
@@ -207,7 +207,7 @@ const BestSellingProducts = () => {
                       navigate('/checkout');
                     }}
                     className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
-                    style={{background: 'linear-gradient(to right, #ff6b35, #f7931e)'}}
+                    style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}
                   >
                     <span className={`${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : 'text-[9px] sm:text-xs'}`}>
                       {isTamil ? 'வாங்கு' : 'Buy'}

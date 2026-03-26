@@ -25,29 +25,11 @@ const ProductCard = ({ product, reviewStats = {} }) => {
   const isTamil = language === LANGUAGES.TAMIL;
 
   const handleWishlistToggle = () => {
-    let skuid;
-    
-    // For variable products, use first variation's SKU
-    if (product.isVariableProduct && product.variations) {
-      try {
-        const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
-        if (variations && variations.length > 0) {
-          const firstVariation = variations[0];
-          skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-        } else {
-          skuid = product.skuid || product.SKUID || product.id.toString();
-        }
-      } catch (e) {
-        skuid = product.skuid || product.SKUID || product.id.toString();
-      }
+    const productId = product.id.toString();
+    if (isInWishlist(productId)) {
+      removeFromWishlist(productId);
     } else {
-      skuid = product.skuid || product.SKUID || product.id.toString();
-    }
-
-    if (isInWishlist(skuid)) {
-      removeFromWishlist(skuid);
-    } else {
-      addToWishlist(skuid);
+      addToWishlist(productId);
     }
   };
 
@@ -179,25 +161,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
             handleWishlistToggle();
           }}
         >
-          <Heart className={`w-4 h-4 transition-colors ${(() => {
-            let checkSkuid;
-            if (product.isVariableProduct && product.variations) {
-              try {
-                const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
-                if (variations && variations.length > 0) {
-                  const firstVariation = variations[0];
-                  checkSkuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-                } else {
-                  checkSkuid = product.skuid || product.SKUID || product.id.toString();
-                }
-              } catch (e) {
-                checkSkuid = product.skuid || product.SKUID || product.id.toString();
-              }
-            } else {
-              checkSkuid = product.skuid || product.SKUID || product.id.toString();
-            }
-            return isInWishlist(checkSkuid) ? 'fill-red-500 text-red-500' : 'text-gray-600 hover:text-red-500';
-          })()} `} />
+          <Heart className={`w-4 h-4 transition-colors ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600 hover:text-red-500'} `} />
         </Button>
       </div>
       
@@ -242,6 +206,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
                 e.stopPropagation();
                 handleAddToCart();
               }}
+              style={{background: 'linear-gradient(to right, #e6e6e6, #f2f2f2)', color: '#333'}}
             >
               <ShoppingCart className="w-3 h-3 mr-1" />
               <span className={`${isTamil ? 'tamil-text text-[9px]' : 'text-xs'}`}>{translate('products.addToCart')}</span>
@@ -255,6 +220,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
               e.stopPropagation();
               handleBuyNow();
             }}
+            style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}
           >
             <span className={`${isTamil ? 'tamil-text text-[9px]' : 'text-xs'}`}>{translate('product.buyNow')}</span>
           </Button>
@@ -467,11 +433,11 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        const skuid = product.skuid || product.id.toString();
-                        isInWishlist(skuid) ? removeFromWishlist(skuid) : addToWishlist(skuid);
+                        const productId = product.id.toString();
+                        isInWishlist(productId) ? removeFromWishlist(productId) : addToWishlist(productId);
                       }}
                     >
-                      <Heart className={`w-3 h-3 ${isInWishlist(product.skuid || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                      <Heart className={`w-3 h-3 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                     </Button>
                   </div>
                   
@@ -504,7 +470,8 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                     
                     <div className="flex gap-1 sm:gap-2">
                       <Button 
-                        className={`flex-1 bg-primary hover:bg-primary/90 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium min-h-[24px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                        className={`flex-1 text-gray-800 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium min-h-[24px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                        style={{background: 'linear-gradient(to right, #e6e6e6, #f2f2f2)'}}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -534,7 +501,8 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                       </Button>
                       
                       <Button 
-                        className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium min-h-[24px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                        className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium min-h-[24px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                        style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -791,11 +759,11 @@ const TrendingProductsSection = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      const skuid = product.skuid || product.id.toString();
-                      isInWishlist(skuid) ? removeFromWishlist(skuid) : addToWishlist(skuid);
+                      const productId = product.id.toString();
+                      isInWishlist(productId) ? removeFromWishlist(productId) : addToWishlist(productId);
                     }}
                   >
-                    <Heart className={`w-3 h-3 ${isInWishlist(product.skuid || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                    <Heart className={`w-3 h-3 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                   </Button>
                 </div>
                 
@@ -828,8 +796,8 @@ const TrendingProductsSection = () => {
                   
                   <div className="flex gap-1">
                     <Button 
-                      className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
-                      style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)', ':hover': {background: 'linear-gradient(to right, #085d05, #3a9538)'}}}
+                      className={`flex-1 text-gray-800 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
+                      style={{background: 'linear-gradient(to right, #e6e6e6, #f2f2f2)'}}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -859,7 +827,8 @@ const TrendingProductsSection = () => {
                     </Button>
                     
                     <Button 
-                      className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
+                      className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1.5 text-xs font-medium min-h-[28px] ${isTamil ? 'tamil-text text-[9px]' : ''}`}
+                      style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -1112,11 +1081,11 @@ const DealsOfTheDaySection = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    const skuid = product.skuid || product.id.toString();
-                    isInWishlist(skuid) ? removeFromWishlist(skuid) : addToWishlist(skuid);
+                    const productId = product.id.toString();
+                    isInWishlist(productId) ? removeFromWishlist(productId) : addToWishlist(productId);
                   }}
                 >
-                  <Heart className={`w-3 h-3 ${isInWishlist(product.skuid || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                  <Heart className={`w-3 h-3 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                 </Button>
               </div>
               
@@ -1147,8 +1116,8 @@ const DealsOfTheDaySection = () => {
                 
                 <div className="flex gap-1 sm:gap-2 mt-2 sm:mt-3">
                     <Button 
-                      className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
-                      style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)', ':hover': {background: 'linear-gradient(to right, #085d05, #3a9538)'}}}
+                      className={`flex-1 text-gray-800 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                      style={{background: 'linear-gradient(to right, #e6e6e6, #f2f2f2)'}}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -1176,7 +1145,8 @@ const DealsOfTheDaySection = () => {
                   </Button>
                   
                   <Button 
-                    className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 sm:py-1.5 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                    className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                    style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -1468,11 +1438,11 @@ const PopularChoicesSection = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      const skuid = product.skuid || product.id.toString();
-                      isInWishlist(skuid) ? removeFromWishlist(skuid) : addToWishlist(skuid);
+                      const productId = product.id.toString();
+                      isInWishlist(productId) ? removeFromWishlist(productId) : addToWishlist(productId);
                     }}
                   >
-                    <Heart className={`w-3 h-3 ${isInWishlist(product.skuid || product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                    <Heart className={`w-3 h-3 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                   </Button>
                 </div>
                 
@@ -1505,8 +1475,8 @@ const PopularChoicesSection = () => {
                   
                   <div className="flex gap-1">
                     <Button 
-                      className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
-                      style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)', ':hover': {background: 'linear-gradient(to right, #085d05, #3a9538)'}}}
+                      className={`flex-1 text-gray-800 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                      style={{background: 'linear-gradient(to right, #e6e6e6, #f2f2f2)'}}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -1536,7 +1506,8 @@ const PopularChoicesSection = () => {
                     </Button>
                     
                     <Button 
-                      className={`flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                      className={`flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg py-1 text-[9px] sm:text-xs font-medium min-h-[22px] sm:min-h-[28px] ${isTamil ? 'tamil-text text-[8px] sm:text-[9px]' : ''}`}
+                      style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();

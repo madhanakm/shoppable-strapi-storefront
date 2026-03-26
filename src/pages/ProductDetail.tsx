@@ -751,7 +751,8 @@ const ProductDetail = () => {
               <div className="mb-6">
                 <div className="flex gap-3">
                   <Button 
-                    className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all duration-300 py-2.5 text-sm font-medium rounded-xl border border-primary/20"
+                    className="flex-1 text-gray-800 shadow-md hover:shadow-lg transition-all duration-300 py-2.5 text-sm font-medium rounded-xl border border-gray-200"
+                    style={{background: 'linear-gradient(to right, #e6e6e6, #f2f2f2)'}}
                     onClick={handleAddToCart}
                   >
                     <ShoppingCart className="mr-2 h-4 w-4" />
@@ -759,7 +760,8 @@ const ProductDetail = () => {
                   </Button>
                   
                   <Button 
-                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-300 py-2.5 text-sm font-medium rounded-xl border border-red-400/20"
+                    className="flex-1 text-white shadow-md hover:shadow-lg transition-all duration-300 py-2.5 text-sm font-medium rounded-xl border border-green-400/20"
+                    style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}
                     onClick={handleBuyNow}
                   >
                     <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.buyNow')}</span>
@@ -1164,7 +1166,8 @@ const ProductDetail = () => {
               <div className="mb-8">
                 <div className="flex gap-4">
                   <Button 
-                    className="flex-1 bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all duration-300 py-3 text-base font-medium rounded-xl border border-primary/20"
+                    className="flex-1 text-gray-800 shadow-md hover:shadow-lg transition-all duration-300 py-3 text-base font-medium rounded-xl border border-gray-200"
+                    style={{background: 'linear-gradient(to right, #e6e6e6, #f2f2f2)'}}
                     onClick={handleAddToCart}
                   >
                     <ShoppingCart className="mr-2 h-5 w-5" />
@@ -1172,7 +1175,8 @@ const ProductDetail = () => {
                   </Button>
                   
                   <Button 
-                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-md hover:shadow-lg transition-all duration-300 py-3 text-base font-medium rounded-xl border border-red-400/20"
+                    className="flex-1 text-white shadow-md hover:shadow-lg transition-all duration-300 py-3 text-base font-medium rounded-xl border border-green-400/20"
+                    style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}
                     onClick={handleBuyNow}
                   >
                     <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.buyNow')}</span>
