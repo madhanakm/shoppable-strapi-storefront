@@ -191,7 +191,7 @@ const Checkout = () => {
   
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      navigate('/login?redirect=checkout');
+      navigate('/otp-login?redirect=checkout');
       return;
     }
     

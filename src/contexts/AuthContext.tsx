@@ -42,28 +42,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
-          
-          // Only validate if user data has required fields
           if (userData.id && userData.username && userData.email) {
             setUser(userData);
           } else {
-            // Invalid user data, clear storage
             localStorage.removeItem('user');
             localStorage.removeItem('loginTime');
             localStorage.removeItem('lastActivity');
           }
         } catch (error) {
-          // JSON parse error, clear corrupted data
           localStorage.removeItem('user');
           localStorage.removeItem('loginTime');
           localStorage.removeItem('lastActivity');
         }
+      } else {
+        setUser(null);
       }
       
       setLoading(false);
     };
     
     validateUser();
+    window.addEventListener('storage', validateUser);
+    return () => window.removeEventListener('storage', validateUser);
   }, []);
 
   const login = async (identifier: string, password: string): Promise<boolean | { requirePasswordReset: boolean; userId: number; phone: string } | { requireOTPVerification: boolean; userId: number; phone: string }> => {

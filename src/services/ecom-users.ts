@@ -10,8 +10,14 @@ export interface EcomUser {
   userType?: UserType;
   creditPayment?: boolean;
   creditLimit?: string;
+  // Password Reset OTP
   otp?: string;
   otpExpiresAt?: string;
+  // Login OTP
+  loginOtp?: string;
+  loginOtpExpiresAt?: string;
+  loginOtpAttempts?: number;
+  // Verification
   isVerified?: boolean;
 }
 

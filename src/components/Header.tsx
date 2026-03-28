@@ -72,7 +72,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/otp-login');
   };
 
   const onSearchSubmit = (e: React.FormEvent) => {
@@ -274,7 +274,7 @@ const Header = () => {
                   </Button>
                 </div>
               ) : (
-                <Link to="/login" className="hidden md:block">
+                <Link to="/otp-login" className="hidden md:block">
                   <Button variant="ghost" size="icon" title={translate('header.login')} className="hover:bg-primary/10 p-2">
                     <User className="w-4 h-4 md:w-5 md:h-5" />
                   </Button>
@@ -404,7 +404,7 @@ const Header = () => {
                     </>
                   ) : (
                     <Link 
-                      to="/login" 
+                      to="/otp-login" 
                       className={`text-foreground hover:text-primary transition-colors font-medium text-base ${isTamil ? 'tamil-text' : ''}`}
                       onClick={() => setIsMenuOpen(false)}
                     >

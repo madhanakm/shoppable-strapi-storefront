@@ -31,7 +31,7 @@ const Profile = () => {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate('/otp-login');
     }
   }, [isAuthenticated, navigate]);
   

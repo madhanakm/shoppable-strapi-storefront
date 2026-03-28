@@ -105,7 +105,7 @@ const Register = () => {
           title: "Account Verified",
           description: "Your account has been created successfully!",
         });
-        navigate('/login');
+        navigate('/otp-login');
       } else {
         toast({
           title: "Invalid OTP",

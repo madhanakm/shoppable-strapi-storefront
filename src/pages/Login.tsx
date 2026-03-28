@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, LogIn, Eye, EyeOff, Phone } from 'lucide-react';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 
 const Login = () => {
@@ -439,6 +439,23 @@ const Login = () => {
               )}
               
               <div className="mt-8 pt-6 border-t border-gray-200">
+                <div className="text-center">
+                  <p className="text-gray-600 mb-4 text-sm">
+                    Prefer OTP login?
+                  </p>
+                  <Link to="/otp-login">
+                    <Button 
+                      type="button"
+                      className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg text-lg font-semibold"
+                    >
+                      <Phone className="w-5 h-5 mr-2" />
+                      Login with OTP (Recommended)
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              
+              <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="text-center">
                   <p className="text-gray-600 mb-4">
                     Don't have an account?

@@ -18,6 +18,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import Login from "./pages/Login";
+import OTPLogin from "./pages/OTPLogin";
 import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
@@ -64,6 +65,7 @@ const App = () => (
                   <Route path="/terms" element={<TermsConditions />} />
                   <Route path="/shipping" element={<ShippingPolicy />} />
                   <Route path="/login" element={<Login />} />
+                  <Route path="/otp-login" element={<OTPLogin />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />
