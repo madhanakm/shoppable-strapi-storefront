@@ -379,12 +379,12 @@ const enTranslations = {
   'blocks.save': 'Save',
   
   // Footer Content
-  'footer.stayUpdated': 'Stay Updated with Natural Wellness',
-  'footer.updatesDescription': 'Get the latest updates on herbal products, health tips, and exclusive offers via WhatsApp',
+  'footer.stayUpdated': '🌿 STAY CONNECTED WITH NATURAL WELLNESS',
+  'footer.updatesDescription': 'Receive Herbal Tips, Product Updates, and Exclusive Offers Directly on WhatsApp',
   'footer.whatsappPlaceholder': 'Enter your WhatsApp number',
-  'footer.subscribe': 'Subscribe',
+  'footer.subscribe': 'JOIN NOW ON WHATSAPP',
   'footer.subscribing': 'Subscribing...',
-  'footer.whatsappUpdates': 'I want to receive WhatsApp updates',
+  'footer.whatsappUpdates': 'I Agree to Receive WhatsApp Updates',
   'footer.enterNumber': 'Please enter your WhatsApp number',
   'footer.invalidNumber': 'Please enter a valid 10-digit Indian mobile number',
   'footer.subscribeSuccess': 'Successfully subscribed for WhatsApp updates!',
@@ -756,12 +756,12 @@ const taTranslations = {
   'blocks.save': 'சேமி',
   
   // Footer Content
-  'footer.stayUpdated': 'இயற்கை நலவாழ்வுடன் அப்டேட் இருங்கள்',
-  'footer.updatesDescription': 'வாட்ஸ்ஆப் வழியாக மூலிகை தயாரிப்புகள், ஆரோக்கிய குறிப்புகள் மற்றும் பிரத்யேக சலுகைகளின் செய்திகளை பெறுங்கள்',
+  'footer.stayUpdated': '🌿 இயற்கை நலவாழ்வுடன் இணைந்திருங்கள்',
+  'footer.updatesDescription': 'மூலிகை குறிப்புகள், தயாரிப்பு புதுப்பிப்புகள் மற்றும் பிரத்யேக சலுகைகளை நேரடியாக வாட்ஸ்ஆப்பில் பெறுங்கள்',
   'footer.whatsappPlaceholder': 'உங்கள் வாட்ஸ்ஆப் எண்ணை உள்ளிடவும்',
-  'footer.subscribe': 'சந்தா பெறுங்கள்',
+  'footer.subscribe': 'வாட்ஸ்ஆப்பில் இப்போதே சேருங்கள்',
   'footer.subscribing': 'சந்தா பெறுகிறோம்...',
-  'footer.whatsappUpdates': 'நான் வாட்ஸ்ஆப் அப்டேட்களை பெற விரும்புகிறேன்',
+  'footer.whatsappUpdates': 'வாட்ஸ்ஆப் புதுப்பிப்புகளை பெற ஒப்புக்கொள்கிறேன்',
   'footer.enterNumber': 'தயவு செய்து உங்கள் வாட்ஸ்ஆப் எண்ணை உள்ளிடவும்',
   'footer.invalidNumber': 'தயவு செய்து சரியான 10 இலக்க இந்திய மொபைல் எண்ணை உள்ளிடவும்',
   'footer.subscribeSuccess': 'வாட்ஸ்ஆப் அப்டேட்களுக்காக வெற்றிகரமாக சந்தா பெற்றீர்கள்!',

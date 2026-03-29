@@ -89,13 +89,18 @@ const AllProducts = () => {
     if (categoryParam && categoryParam !== selectedCategory) {
       setSelectedCategory(categoryParam);
       hasChanges = true;
-    }
-    if (typeParam && typeParam !== selectedType) {
-      setSelectedType(typeParam);
+    } else if (!categoryParam && selectedCategory !== 'all') {
+      setSelectedCategory('all');
       hasChanges = true;
     }
     if (newLaunchParam === 'true' && selectedType !== 'newLaunch') {
       setSelectedType('newLaunch');
+      hasChanges = true;
+    } else if (typeParam && typeParam !== selectedType) {
+      setSelectedType(typeParam);
+      hasChanges = true;
+    } else if (!newLaunchParam && !typeParam && selectedType !== 'all') {
+      setSelectedType('all');
       hasChanges = true;
     }
     if (searchParam !== searchQuery) {

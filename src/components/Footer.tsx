@@ -128,8 +128,8 @@ const Footer = () => {
             <p className={`text-sm md:text-lg mb-8 opacity-90 ${isTamil ? 'tamil-text' : ''}`}>
               {translate('footer.updatesDescription')}
             </p>
-            <form onSubmit={handleNewsletterSubmit} className="max-w-md mx-auto space-y-4">
-              <div className="flex flex-col sm:flex-row gap-4">
+            <form onSubmit={handleNewsletterSubmit} className="max-w-2xl mx-auto space-y-4">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Input
                   type="tel"
                   placeholder={translate('footer.whatsappPlaceholder')}
@@ -141,7 +141,7 @@ const Footer = () => {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="bg-white text-primary hover:bg-gray-100 h-12 px-6 font-semibold disabled:opacity-50"
+                  className="h-12 px-8 font-semibold disabled:opacity-50 whitespace-nowrap bg-white text-primary hover:bg-gray-100"
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   {isSubmitting ? translate('footer.subscribing') : translate('footer.subscribe')}

@@ -293,15 +293,15 @@ const OTPLogin = () => {
                     {isLoading ? (
                       <>
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        {isTamil ? 'OTP அனுப்பப்படுகிறது...' : 'Sending OTP...'}
+                        {isTamil ? 'OTP பெறப்படுகிறது...' : 'Getting OTP...'}
                       </>
                     ) : (
-                      isTamil ? 'OTP அனுப்பவும்' : 'Send OTP'
+                      isTamil ? 'OTP பெறவும்' : 'Get OTP'
                     )}
                   </Button>
 
                   <Link to="/login" className="flex items-center justify-center gap-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full border border-gray-300 transition-colors">
-                    🔑 {isTamil ? 'கடவுச்சொல்லுடன் உள்நுழைக' : 'Login with Password instead'}
+                    🔑 {isTamil ? 'கடவுச்சொல்லுடன் உள்நுழைக' : 'Login with Password'}
                   </Link>
                 </form>
               )}
@@ -377,9 +377,9 @@ const OTPLogin = () => {
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <div className="text-center">
                   <p className="text-sm text-gray-600">
-                    {isTamil ? 'கணக்கு இல்லையா?' : "Don't have an account?"}
+                    {isTamil ? 'புதியவரா?' : 'New Here?'}
                     <Link to="/register" className="text-green-600 font-semibold hover:text-green-700 ml-1">
-                      {isTamil ? 'பதிவு செய்யவும்' : 'Register'}
+                      {isTamil ? 'கணக்கு உருவாக்கவும்' : 'Create an Account'}
                     </Link>
                   </p>
                 </div>
@@ -387,7 +387,7 @@ const OTPLogin = () => {
               
               <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
                 <p className="text-xs text-green-700 text-center">
-                  🔒 {isTamil ? 'OTP 30 நிமிடங்களுக்கு செல்லுபடி ஆகும்' : 'OTP expires in 30 minutes for security'}
+                  🔒 {isTamil ? 'OTP 30 நிமிடங்களுக்கு செல்லுபடியாகும்' : 'OTP is valid for 30 minutes for your security'}
                 </p>
               </div>
             </CardContent>

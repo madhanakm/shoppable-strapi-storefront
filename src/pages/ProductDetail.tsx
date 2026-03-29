@@ -1276,39 +1276,21 @@ const ProductDetail = () => {
         
         {/* Enhanced Related Products */}
         {relatedProducts.length > 0 && (
-          <div className="mt-20 py-12 bg-gradient-to-br from-blue-50 via-white to-blue-100 relative overflow-hidden">
-            {/* Enhanced Background Pattern */}
+          <div className="mt-8 py-6 bg-gradient-to-br from-blue-50 via-white to-blue-100 relative overflow-hidden">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-20 left-20 w-40 h-40 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 blur-3xl animate-pulse"></div>
               <div className="absolute bottom-20 right-20 w-32 h-32 rounded-full bg-gradient-to-br from-primary to-emerald-400 blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
-              <div className="absolute top-1/2 left-1/4 w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
             </div>
             
             <div className="container mx-auto px-4 relative z-10">
-              <div className="text-center mb-12">
-                <div className="flex flex-col items-center mb-8">
-                  <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-500 to-purple-600 shadow-2xl mb-6 transform hover:scale-110 hover:rotate-6 transition-all duration-500 relative cursor-pointer">
-                    <div className="absolute inset-0 rounded-3xl bg-white/20 blur-xl"></div>
-                    <div className="relative">
-                      <Sparkles className="w-8 h-8 text-white" />
-                    </div>
-                  </div>
-                  <h2 className={`text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-4 tracking-tight ${isTamil ? 'tamil-text' : ''}`}>
-                    {translate('product.youMightAlsoLike')}
-                  </h2>
-                  <p className={`text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
-                    {isTamil ? 'உங்கள் தேர்வுக்கு நிரப்பும் மேலும் தயாரிப்புகளைக் கண்டறியுங்கள்' : 'Discover more products that complement your selection'}
-                  </p>
-                  {loading && (
-                    <div className="mt-4 flex items-center justify-center gap-2 text-primary">
-                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '300ms' }}></div>
-                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse" style={{ animationDelay: '600ms' }}></div>
-                      <span className={`ml-2 text-sm font-medium ${isTamil ? 'tamil-text' : ''}`}>{translate('common.loading')}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex justify-center items-center gap-2 mb-4">
+              <div className="text-center mb-6">
+                <h2 className={`text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent mb-2 tracking-tight ${isTamil ? 'tamil-text' : ''}`}>
+                  {translate('product.youMightAlsoLike')}
+                </h2>
+                <p className={`text-sm text-gray-500 max-w-xl mx-auto ${isTamil ? 'tamil-text' : ''}`}>
+                  {isTamil ? 'உங்கள் தேர்வுக்கு நிரப்பும் மேலும் தயாரிப்புகளைக் கண்டறியுங்கள்' : 'Discover more products that complement your selection'}
+                </p>
+                <div className="flex justify-center items-center gap-2 mt-3">
                   <div className="w-8 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
                   <div className="w-16 h-2 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 rounded-full"></div>
                   <div className="w-8 h-1 bg-gradient-to-r from-purple-400 to-blue-400 rounded-full"></div>

@@ -217,21 +217,21 @@ const Login = () => {
       <main className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-md mx-auto">
           <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
-            <CardHeader className="bg-gradient-to-r from-primary/10 to-green-500/10 rounded-t-lg">
+            <CardHeader className="bg-gradient-to-r from-primary/10 to-green-500/10 rounded-t-lg pb-4">
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-primary to-green-500 rounded-full mb-6 shadow-lg">
-                  <LogIn className="w-10 h-10 text-white" />
+                <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-r from-primary to-green-500 rounded-full mb-3 shadow-lg">
+                  <LogIn className="w-7 h-7 text-white" />
                 </div>
-                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent mb-2">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent mb-1">
                   Welcome Back
                 </CardTitle>
-                <p className="text-gray-600">
+                <p className="text-gray-500 text-sm">
                   Sign in to your account to continue
                 </p>
               </div>
             </CardHeader>
             
-            <CardContent className="p-8 md:p-10">
+            <CardContent className="p-6">
               {otpVerificationFlow ? (
                 <form onSubmit={handleOTPVerification} className="space-y-6">
                   <div className="bg-blue-50 p-4 rounded-lg mb-6">
@@ -287,9 +287,9 @@ const Login = () => {
                   </button>
                 </form>
               ) : !resetFlow ? (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-2 block">
+                    <Label htmlFor="email" className="text-sm font-medium text-gray-700 mb-1.5 block">
                       Email or Phone
                     </Label>
                     <div className="relative">
@@ -307,7 +307,7 @@ const Login = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="password" className="text-sm font-medium text-gray-700 mb-2 block">
+                    <Label htmlFor="password" className="text-sm font-medium text-gray-700 mb-1.5 block">
                       Password
                     </Label>
                     <div className="relative">
@@ -331,7 +331,7 @@ const Login = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-end">
                     <Link 
                       to="/forgot-password" 
                       className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
@@ -438,52 +438,25 @@ const Login = () => {
                 </form>
               )}
               
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="text-center">
-                  <p className="text-gray-600 mb-4 text-sm">
-                    Prefer OTP login?
-                  </p>
-                  <Link to="/otp-login">
-                    <Button 
-                      type="button"
-                      className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg text-lg font-semibold"
-                    >
-                      <Phone className="w-5 h-5 mr-2" />
-                      Login with OTP (Recommended)
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-              
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="text-center">
-                  <p className="text-gray-600 mb-4">
-                    Don't have an account?
-                  </p>
+              <div className="mt-5 pt-5 border-t border-gray-100 space-y-3">
+                <Link to="/otp-login">
+                  <Button 
+                    type="button"
+                    className="w-full h-11 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-md font-semibold"
+                  >
+                    <Phone className="w-4 h-4 mr-2" />
+                    Login with OTP (Recommended)
+                  </Button>
+                </Link>
+                <div className="pt-1">
                   <Link to="/register">
                     <Button 
                       variant="outline" 
                       className="w-full border-2 border-primary/30 text-primary hover:bg-primary/5 hover:border-primary/50 transition-all"
                     >
-                      Create New Account
+                      New Here? Create an Account
                     </Button>
                   </Link>
-                </div>
-              </div>
-              
-              {/* Trust Indicators */}
-              <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <div className="text-green-600 font-semibold text-sm">🔒</div>
-                  <div className="text-xs text-green-700 mt-1">Secure</div>
-                </div>
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <div className="text-blue-600 font-semibold text-sm">⚡</div>
-                  <div className="text-xs text-blue-700 mt-1">Fast</div>
-                </div>
-                <div className="p-3 bg-purple-50 rounded-lg">
-                  <div className="text-purple-600 font-semibold text-sm">🛡️</div>
-                  <div className="text-xs text-purple-700 mt-1">Protected</div>
                 </div>
               </div>
             </CardContent>

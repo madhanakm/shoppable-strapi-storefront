@@ -73,7 +73,7 @@ const NewLaunchProducts = () => {
           {products.map((product, index) => (
             <Link 
               key={product.id}
-              to={`/product/${product.id}`}
+              to={`/products?newLaunch=true&category=${encodeURIComponent(product.category || '')}`}
               className="group transform transition-all duration-300 hover:scale-105"
               style={{ animationDelay: `${index * 100}ms` }}
             >
