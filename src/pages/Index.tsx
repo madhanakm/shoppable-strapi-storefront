@@ -97,7 +97,7 @@ const Index = () => {
         
         {/* New Launch Products Section */}
         <ErrorBoundary>
-          <NewLaunchProducts />
+          {/* <NewLaunchProducts /> */}
         </ErrorBoundary>
         
         {/* Best Selling Products Section */}
