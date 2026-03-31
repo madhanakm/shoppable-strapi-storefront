@@ -54,10 +54,10 @@ const AboutUs = () => {
   ];
 
   const stats = [
-    { number: '15+', label: isTamil ? 'மகிமையான ஆண்டுகள்' : 'Glorious years' },
-    { number: '6L+', label: isTamil ? 'மகிழ்ச்சியான வாடிக்கையாளர்கள்' : 'Customers' },
-    { number: '350+', label: isTamil ? 'தயாரிப்புகள்' : 'Products' },
-    { number: '24+', label: isTamil ? 'குழு ஆலோசகர்கள்' : 'Team advisor' },
+    { number: '15+', label: isTamil ? 'நம்பகத்தின் வரலாறு' : 'Legacy of Trust' },
+    { number: '6L+', label: isTamil ? 'வாடிக்கையாளர்கள் சேவை' : 'Customers Served' },
+    { number: '350+', label: isTamil ? 'தயாரிப்புகள் உருவாக்கப்பட்டன' : 'Products Crafted' },
+    { number: '24+', label: isTamil ? 'குழு ஆலோசகர்கள்' : 'Team Advisors' },
     { number: '7,500+', label: isTamil ? 'மறுவிற்பனையாளர்கள்' : 'Resellers' }
   ];
 

@@ -220,7 +220,7 @@ const InstagramReels = () => {
         <div className="container mx-auto px-4">
           {/* Loading Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full mb-4 animate-pulse">
+            <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full mb-4 animate-pulse" style={{background: '#6D4C41'}}>
               <Play className="w-6 h-6 md:w-8 md:h-8 text-white" />
             </div>
             <div className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg w-64 mx-auto mb-2 animate-pulse"></div>
@@ -284,11 +284,11 @@ const InstagramReels = () => {
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full mb-4" style={{background: '#6D4C41'}}>
             <Play className="w-6 h-6 md:w-8 md:h-8 text-white" />
           </div>
-          <h2 className={`text-xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent mb-2 ${isTamil ? 'tamil-text' : ''}`}>
-            {isTamil ? 'விளம்பர வீடியோக்கள்' : 'Featured Videos'}
+          <h2 className={`text-xl md:text-3xl lg:text-4xl font-bold mb-2 ${isTamil ? 'tamil-text' : ''}`} style={{color: '#6D4C41'}}>
+            {isTamil ? 'வித்யாசத்தை கண்டறியுங்கள்' : 'Discover the Difference'}
           </h2>
           <p className={`text-gray-600 text-xs md:text-base ${isTamil ? 'tamil-text' : ''}`}>
             {isTamil ? 'எங்கள் சிறப்பு தயாரிப்புகளைப் பாருங்கள்' : 'Watch our featured products'}

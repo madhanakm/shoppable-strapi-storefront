@@ -16,10 +16,10 @@ const OurStorySection = () => {
   const isTamil = language === LANGUAGES.TAMIL;
 
   const stats = [
-    { number: '15+', label: isTamil ? 'ஆண்டுகள் அனுபவம்' : 'Years Experience' },
-    { number: '6L+', label: isTamil ? 'மகிழ்ச்சியான வாடிக்கையாளர்கள்' : 'Happy Customers' },
-    { number: '350+', label: isTamil ? 'தயாரிப்புகள்' : 'Products' },
-    { number: '100%', label: isTamil ? 'இயற்கை' : 'Natural' }
+    { number: '15+', label: isTamil ? 'நம்பகத்தின் வரலாறு' : 'Legacy of Trust' },
+    { number: '6L+', label: isTamil ? 'வாடிக்கையாளர்கள் சேவை' : 'Customers Served' },
+    { number: '350+', label: isTamil ? 'தயாரிப்புகள் உருவாக்கப்பட்டன' : 'Products Crafted' },
+    { number: '100%', label: isTamil ? 'ராசாயனம் இல்லாத' : 'Chemical-Free' }
   ];
 
   return (

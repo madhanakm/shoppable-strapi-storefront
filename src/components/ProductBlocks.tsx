@@ -1318,17 +1318,6 @@ const ProductBlocks = () => {
       <TrendingProductsSection />
       
       <BannerSection />
-      
-      <ProductBlock 
-        type="hot"
-        title={translate('blocks.hotSelling')} 
-        description={translate('blocks.hotDescription')}
-        icon={<Flame className="w-8 h-8 text-white" />}
-        bgColor="bg-gradient-to-br from-red-50 via-white to-red-100"
-        accentColor="bg-gradient-to-r from-red-500 to-red-600"
-      />
-      
-      <PopularChoicesSection />
     </>
   );
 };

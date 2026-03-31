@@ -67,12 +67,10 @@ const removePreloader = () => {
 
   const shownAt = (window as any).__preloaderShownAt || Date.now();
   const elapsed = Date.now() - shownAt;
-  const minDuration = 6000;
+  const minDuration = 2500;
   const delay = Math.max(0, minDuration - elapsed);
 
-  setTimeout(async () => {
-    // Wait for fonts before revealing page — eliminates FOUT
-    try { await (document as any).fonts?.ready; } catch {}
+  setTimeout(() => {
     document.body.classList.remove('preloader-active');
     preloader.style.opacity = '0';
     preloader.style.pointerEvents = 'none';

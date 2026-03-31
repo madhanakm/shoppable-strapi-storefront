@@ -43,52 +43,7 @@ const Cart = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [cartCount]);
   
-  // Override navigation using history API
-  React.useEffect(() => {
-    const originalPushState = window.history.pushState;
-    const originalReplaceState = window.history.replaceState;
-    
-    const handleNavigation = (url) => {
-      if (cartCount > 0 && !url.includes('/cart') && !url.includes('/checkout')) {
-        setShowNavigationConfirm(true);
-        setPendingNavigation(() => () => {
-          window.location.href = url;
-        });
-        return false;
-      }
-      return true;
-    };
-    
-    window.history.pushState = function(state, title, url) {
-      if (handleNavigation(url)) {
-        originalPushState.apply(this, arguments);
-      }
-    };
-    
-    window.history.replaceState = function(state, title, url) {
-      if (handleNavigation(url)) {
-        originalReplaceState.apply(this, arguments);
-      }
-    };
-    
-    const handlePopState = (e) => {
-      if (cartCount > 0) {
-        e.preventDefault();
-        setShowNavigationConfirm(true);
-        setPendingNavigation(() => () => {
-          window.history.back();
-        });
-      }
-    };
-    
-    window.addEventListener('popstate', handlePopState);
-    
-    return () => {
-      window.history.pushState = originalPushState;
-      window.history.replaceState = originalReplaceState;
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [cartCount]);
+  // Override navigation using history API - removed (was blocking React Router globally)
   
   const handleNavigationConfirm = () => {
     setShowNavigationConfirm(false);

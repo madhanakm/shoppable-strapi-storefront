@@ -18,9 +18,9 @@ const TranslationContext = createContext({
 const enTranslations = {
   // Header
   'header.home': 'Home',
-  'header.products': 'All Products',
+  'header.products': 'Shop All',
   'header.about': 'About Us',
-  'header.contact': 'Contact Us',
+  'header.contact': 'Contact',
   'header.login': 'Login',
   'header.register': 'Register',
   'header.cart': 'Cart',
@@ -36,7 +36,7 @@ const enTranslations = {
   'hero.knowMoreButton': 'Know more',
   'hero.stats.products': 'Herbal Products',
   'hero.stats.customers': 'Happy Customers',
-  'hero.stats.experience': 'Years Experience',
+  'hero.stats.experience': 'Legacy of Trust',
   'hero.categories.ayurvedic.title': 'Ayurvedic',
   'hero.categories.ayurvedic.description': 'Traditional remedies',
   'hero.categories.organic.title': 'Organic',
@@ -247,8 +247,8 @@ const enTranslations = {
   'search.clearAllFilters': 'Clear All Filters',
   
   // Product Blocks
-  'blocks.dealsOfTheDay': 'Deals of the Day',
-  'blocks.dealsDescription': 'Limited time offers with amazing discounts on our best herbal products. Don\'t miss out on these incredible savings!',
+  'blocks.dealsOfTheDay': 'Handpicked Deals for You',
+  'blocks.dealsDescription': 'Enjoy special offers on our most loved herbal products - only for a limited time.',
   'blocks.trendingProducts': 'Trending Products',
   'blocks.trendingDescription': 'Discover what\'s popular right now - products that are making waves in the herbal wellness market',
   'blocks.hotSelling': 'Hot Selling',
@@ -276,7 +276,7 @@ const enTranslations = {
   // About Us Page
   'about.title': 'About Dharani Herbals',
   'about.subtitle': 'Your trusted partner in natural wellness and herbal healthcare solutions',
-  'about.ourStory': 'Our Story',
+  'about.ourStory': 'Our Journey',
   'about.ourMission': 'Our Mission',
   'about.ourVision': 'Our Vision',
   'about.coreValues': 'Our Core Values',
@@ -354,15 +354,15 @@ const enTranslations = {
   
   // Home Page Content
   'home.shopByCategory': 'Shop by Category',
-  'home.categoryDescription': 'Discover our carefully curated collection of natural and organic herbal products, each category designed to support your wellness journey',
-  'home.ourValuableCustomerReviews': 'Our Valuable Customer Reviews',
+  'home.categoryDescription': 'Explore our thoughtfully curated range of natural herbal products, crafted to support your journey to wellness.',
+  'home.ourValuableCustomerReviews': 'What Our Customers Say',
   'home.basedOnReviews': 'Based on {count}+ Google reviews',
   'home.writeReview': 'Write a Review',
-  'home.viewAllReviews': 'View All Google Reviews',
+  'home.viewAllReviews': 'View All Reviews',
   'home.loadingCategories': 'Loading categories...',
   'home.viewProducts': 'View products',
   'home.explore': 'Explore',
-  'home.viewAllProducts': 'View All Products',
+  'home.viewAllProducts': 'Browse All Products',
   
   // Product Blocks Additional Content
   'blocks.megaDeal': 'MEGA DEAL',
@@ -371,7 +371,7 @@ const enTranslations = {
   'blocks.moreHotDeals': 'More Hot Deals',
   'blocks.viewAllDeals': 'View All Deals',
   'blocks.shopNow': 'Shop Now',
-  'blocks.viewAllTrendingProducts': 'View All Trending Products',
+  'blocks.viewAllTrendingProducts': 'Browse Trending Items',
   'blocks.viewAllPopularProducts': 'View All Popular Products',
   'blocks.add': 'Add',
   'blocks.buy': 'Buy',
@@ -396,7 +396,7 @@ const enTranslations = {
 const taTranslations = {
   // Header
   'header.home': 'முகப்பு',
-  'header.products': 'அனைத்து தயாரிப்புகளும்',
+  'header.products': 'அனைத்தும் வாங்க',
   'header.about': 'எங்களை பற்றி',
   'header.contact': 'தொடர்பு',
   'header.login': 'உள்நுழைய',
@@ -414,7 +414,7 @@ const taTranslations = {
   'hero.knowMoreButton': 'மேலும் அறிய',
   'hero.stats.products': 'மூலிகை தயாரிப்புகள்',
   'hero.stats.customers': 'மகிழ்ச்சியான வாடிக்கையாளர்கள்',
-  'hero.stats.experience': 'ஆண்டுகள் அனுபவம்',
+  'hero.stats.experience': 'நம்பகத்தின் வரலாறு',
   'hero.categories.ayurvedic.title': 'ஆயுர்வேதம்',
   'hero.categories.ayurvedic.description': 'பாரம்பரிய மருந்துகள்',
   'hero.categories.organic.title': 'ஆர்கானிக்',
@@ -624,8 +624,8 @@ const taTranslations = {
   'search.clearAllFilters': 'அனைத்து வடிகட்டிகளையும் அழிக்கவும்',
   
   // Product Blocks
-  'blocks.dealsOfTheDay': 'இன்றைய சலுகைகள்',
-  'blocks.dealsDescription': 'எங்கள் சிறந்த மூலிகை தயாரிப்புகளில் அற்புதமான தள்ளுபடிகளுடன் வரையறுக்கப்பட்ட கால சலுகைகள். இந்த நம்பமுடியாத சேமிப்புகளை தவறவிடாதீர்கள்!',
+  'blocks.dealsOfTheDay': 'உங்களுக்காக தேர்ந்தெடுக்கப்பட்ட சிறப்பு சலுகைகள்',
+  'blocks.dealsDescription': 'எங்கள் மிகவும் விரும்பப்படும் மூலிகை தயாரிப்புகளில் சிறப்பு சலுகைகளை அனுபவியுங்கள் - குறிப்பிட்ட நேரத்திற்கு மட்டுமே.',
   'blocks.trendingProducts': 'டிரெண்டிங் தயாரிப்புகள்',
   'blocks.trendingDescription': 'இப்போது பிரபலமானவற்றைக் கண்டறியுங்கள் - மூலிகை நலவாழ்வு சந்தையில் அலைகளை உருவாக்கும் தயாரிப்புகள்',
   'blocks.hotSelling': 'அதிகம் விற்பனையாகும்',
@@ -653,7 +653,7 @@ const taTranslations = {
   // About Us Page
   'about.title': 'தரணி ஹெர்பல்ஸ் பற்றி',
   'about.subtitle': 'இயற்கை நலவாழ்வு மற்றும் மூலிகை ஆரோக்கிய தீர்வுகளில் உங்கள் நம்பகமான பங்காளி',
-  'about.ourStory': 'எங்கள் கதை',
+  'about.ourStory': 'எங்கள் பயணம்',
   'about.ourMission': 'எங்கள் நோக்கம்',
   'about.ourVision': 'எங்கள் நோக்கு',
   'about.coreValues': 'எங்கள் மூல மதிப்புகள்',
@@ -731,15 +731,15 @@ const taTranslations = {
   
   // Home Page Content
   'home.shopByCategory': 'வகை வாரியாக வாங்குங்கள்',
-  'home.categoryDescription': 'உங்கள் நலவாழ்வு பயணத்தை ஆதரிக்க வடிவமைக்கப்பட்ட ஒவ்வொரு வகையும், இயற்கை மற்றும் ஆர்கானிக் மூலிகை தயாரிப்புகளின் எங்கள் கவனமாக தேர்ந்தெடுக்கப்பட்ட தொகுப்பைக் கண்டறியுங்கள்',
-  'home.ourValuableCustomerReviews': 'எங்கள் மதிப்புமிக்க வாடிக்கையாளர் விமர்சனங்கள்',
+  'home.categoryDescription': 'உங்கள் ஆரோக்கிய பயணத்திற்கு துணையாக உருவாக்கப்பட்ட இயற்கை மூலிகை தயாரிப்புகளின் எங்கள் கவனமாக தேர்ந்தெடுக்கப்பட்ட தொகுப்பை ஆராயுங்கள்.',
+  'home.ourValuableCustomerReviews': 'எங்கள் வாடிக்கையாளர்கள் சோல்வது',
   'home.basedOnReviews': '{count}+ கூகுள் விமர்சனங்களின் அடிப்படையில்',
   'home.writeReview': 'விமர்சனம் எழுதுங்கள்',
-  'home.viewAllReviews': 'கூகுள் விமர்சனங்கள்',
+  'home.viewAllReviews': 'அனைத்து விமர்சனங்களை பார்க்க',
   'home.loadingCategories': 'வகைகளை ஏற்றுகிறது...',
   'home.viewProducts': 'தயாரிப்புகளைப் பார்க்கவும்',
   'home.explore': 'ஆராயுங்கள்',
-  'home.viewAllProducts': 'அனைத்து தயாரிப்புகளையும் பார்க்கவும்',
+  'home.viewAllProducts': 'அனைத்து தயாரிப்புகளை உலாவுக',
   
   // Product Blocks Additional Content
   'blocks.megaDeal': 'மெகா டீல்',
@@ -748,7 +748,7 @@ const taTranslations = {
   'blocks.moreHotDeals': 'மேலும் சூடான டீல்கள்',
   'blocks.viewAllDeals': 'அனைத்து டீல்களையும் பார்க்கவும்',
   'blocks.shopNow': 'இப்போது வாங்குங்கள்',
-  'blocks.viewAllTrendingProducts': 'டிரெண்டிங் தயாரிப்புகள்',
+  'blocks.viewAllTrendingProducts': 'டிரெண்டிங் பொருட்களை உலாவுக',
   'blocks.viewAllPopularProducts': 'பிரபலமான தயாரிப்புகள்',
   'blocks.add': 'சேர்',
   'blocks.buy': 'வாங்கு',

@@ -78,7 +78,7 @@ const Hero = () => {
                 <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-lg p-3 hover:scale-105 transition-all duration-300">
                   <div className="text-xl md:text-2xl font-black bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">350+</div>
                   <div className={`text-xs text-green-300 font-medium ${isTamil ? 'tamil-text' : ''}`}>
-                    Herbal Products
+                    {isTamil ? 'தயாரிப்புகள் உருவாக்கப்பட்டன' : 'Products Crafted'}
                   </div>
                 </div>
               </div>
@@ -86,7 +86,7 @@ const Hero = () => {
                 <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-lg p-3 hover:scale-105 transition-all duration-300">
                   <div className="text-xl md:text-2xl font-black bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">6L+</div>
                   <div className={`text-xs text-green-300 font-medium ${isTamil ? 'tamil-text' : ''}`}>
-                    Happy Customers
+                    {isTamil ? 'வாடிக்கையாளர்கள் சேவை' : 'Customers Served'}
                   </div>
                 </div>
               </div>
@@ -108,7 +108,7 @@ const Hero = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <Sparkles className="w-5 h-5 text-green-400" />
-                <span className="text-green-300 font-medium">100% Natural</span>
+                <span className="text-green-300 font-medium">100% Chemical-Free</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Zap className="w-5 h-5 text-emerald-400" />

@@ -29,7 +29,7 @@ const BestSellingProducts = () => {
   if (loading) {
     return (
       <ProductSectionSkeleton 
-        title="Best Selling Products"
+        title="Our Most Loved Picks"
         icon="flame"
         gradient="bg-gradient-to-br from-green-50 via-white to-emerald-50"
         count={10}
@@ -55,11 +55,11 @@ const BestSellingProducts = () => {
           </div>
           <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold mb-3 ${isTamil ? 'tamil-text' : ''}`}>
             <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(to right, #0a7f06, #4ab748, #8ac440)'}}>
-              {isTamil ? 'சிறந்த விற்பனையான தயாரிப்புகள்' : 'Best Selling Products'}
+              {isTamil ? 'எங்கள் அனைவராலும் விரும்பப்படும் தேர்வுகள்' : 'Our Most Loved Picks'}
             </span>
           </h2>
           <p className={`text-gray-600 text-lg max-w-2xl mx-auto ${isTamil ? 'tamil-text' : ''}`}>
-            {isTamil ? 'வாடிக்கையாளர்களால் மிகவும் விரும்பப்படும் தயாரிப்புகள்' : 'Most loved by our customers'}
+            {isTamil ? 'எங்கள் வாடிக்கையாளர்களால் மிகவும் விரும்பப்படும் தயாரிப்புகள்' : 'Handpicked favourites that our customers keep coming back for'}
           </p>
           <div className="flex items-center justify-center gap-2 mt-4">
             <TrendingUp className="w-5 h-5" style={{color: '#0a7f06'}} />
@@ -220,7 +220,7 @@ const BestSellingProducts = () => {
               style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)'}}
             >
               <span className={isTamil ? 'tamil-text' : ''}>
-                {isTamil ? 'அனைத்து தயாரிப்புகளையும் பார்க்க' : 'View All Products'}
+                {isTamil ? 'அனைத்து தயாரிப்புகளை உலாவுக' : 'Browse All Products'}
               </span>
             </Button>
           </Link>
