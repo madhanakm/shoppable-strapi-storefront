@@ -33,58 +33,56 @@ const RelatedProducts = () => {
 
   const fetchRelatedProducts = async () => {
     try {
-      const timestamp = new Date().getTime();
-      
-      // Get cart product IDs to exclude (using id field which is skuid)
-      const cartSkuIds = cartItems.map(item => item.id);
-      
-      // Fetch random products
-      const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?pagination[pageSize]=20&populate=variations&timestamp=${timestamp}`);
-      
+      const token = import.meta.env.VITE_STRAPI_API_TOKEN;
+      const fields = 'fields[0]=Name&fields[1]=skuid&fields[2]=customerprice&fields[3]=price&fields[4]=isVariableProduct&fields[5]=variations&fields[6]=tamil&fields[7]=category';
+      const response = await fetch(
+        `https://api.dharaniherbbals.com/api/product-masters?pagination[pageSize]=12&filters[status][$eq]=true&${fields}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+
       if (!response.ok) throw new Error('Failed to fetch products');
-      
+
       const data = await response.json();
-      
+
       if (data.data && data.data.length > 0) {
-        const formattedProducts = data.data.map((item: any) => {
-          const attrs = item.attributes;
-          
-          let variationsData = [];
-          if (attrs.variations) {
-            if (typeof attrs.variations === 'string') {
-              try {
-                variationsData = JSON.parse(attrs.variations);
-              } catch (e) {
-                console.error('Failed to parse variations:', e);
-              }
-            } else if (Array.isArray(attrs.variations)) {
-              variationsData = attrs.variations;
-            } else if (attrs.variations.data) {
-              variationsData = attrs.variations.data;
+        const cartSkuIds = cartItems.map(item => item.id);
+
+        const formattedProducts = data.data
+          .filter((item: any) => !cartSkuIds.includes(item.attributes?.skuid))
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 6)
+          .map((item: any) => {
+            const attrs = item.attributes;
+            let variationsData = [];
+            if (attrs.variations) {
+              try { variationsData = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations; } catch {}
             }
-          }
-          
-          const isVariable = variationsData.length > 0;
-          
-          return {
-            id: item.id,
-            name: attrs.Name,
-            price: parseFloat(attrs.customerprice || attrs.price || '0'),
-            image: attrs.photo,
-            skuid: attrs.skuid || attrs.SKUID || item.id?.toString(),
-            isVariable,
-            variations: variationsData
-          };
+            return {
+              id: item.id,
+              name: attrs.Name,
+              price: parseFloat(attrs.customerprice || attrs.price || '0'),
+              image: '',
+              skuid: attrs.skuid || item.id?.toString(),
+              isVariable: variationsData.length > 0,
+              variations: variationsData
+            };
+          });
+
+        setProducts(formattedProducts);
+
+        // Lazy-load photos
+        formattedProducts.forEach(async (p: Product) => {
+          try {
+            const r = await fetch(
+              `https://api.dharaniherbbals.com/api/product-masters/${p.id}?fields[0]=photo`,
+              { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            if (!r.ok) return;
+            const d = await r.json();
+            const photo = d.data?.attributes?.photo || '';
+            setProducts(prev => prev.map(x => x.id === p.id ? { ...x, image: photo } : x));
+          } catch {}
         });
-        
-        // Filter out products that are already in cart (by skuid)
-        const filteredProducts = formattedProducts.filter(
-          product => !cartSkuIds.includes(product.skuid)
-        );
-        
-        // Shuffle and take 6 products
-        const shuffled = filteredProducts.sort(() => Math.random() - 0.5);
-        setProducts(shuffled.slice(0, 6));
       }
     } catch (error) {
       console.error('Error fetching related products:', error);
@@ -123,33 +121,16 @@ const RelatedProducts = () => {
   }
 
   return (
-    <section className="mt-16 bg-gradient-to-br from-green-50 via-white to-emerald-50 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-20 w-40 h-40 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full blur-xl animate-pulse" style={{animationDelay: '2s'}}></div>
-      </div>
-
-      <div className="container mx-auto px-4 py-16 relative z-10">
+    <section className="mt-6 bg-gradient-to-br from-green-50 via-white to-emerald-50 rounded-2xl overflow-hidden">
+      <div className="px-4 py-6">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl animate-bounce">
-              <ShoppingCart className="w-8 h-8 text-white" />
-            </div>
-            <h2 className={`text-3xl md:text-4xl lg:text-5xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
-              {isTamil ? 'நீங்கள் விரும்பக்கூடியவை' : 'You May Also Like'}
-            </h2>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl shadow">
+            <ShoppingCart className="w-5 h-5 text-white" />
           </div>
-          <p className={`text-lg text-gray-600 max-w-2xl mx-auto ${isTamil ? 'tamil-text' : ''}`}>
-            {isTamil ? 'உங்கள் கூடையில் சேர்க்க இந்த அற்புதமான தயாரிப்புகளையும் பாருங்கள்' : 'Complete your wellness journey with these amazing products'}
-          </p>
-          <div className="flex justify-center items-center gap-2 mt-4">
-            <div className="w-12 h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
-            <div className="w-20 h-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"></div>
-            <div className="w-12 h-1 bg-gradient-to-r from-teal-500 to-green-500 rounded-full"></div>
-          </div>
+          <h2 className={`text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
+            {isTamil ? 'நீங்கள் விரும்பக்கூடியவை' : 'You May Also Like'}
+          </h2>
         </div>
 
         {/* Products Grid */}
@@ -215,16 +196,12 @@ const RelatedProducts = () => {
         </div>
 
         {/* View More Button */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-4">
           <Link to="/products">
-            <Button 
-              size="lg"
-              className="bg-gradient-to-r from-[#009108] to-[#55bf57] hover:from-[#55bf57] hover:to-[#009108] text-white shadow-xl hover:shadow-2xl transition-all px-8 py-4 text-lg font-bold rounded-2xl transform hover:scale-105"
-            >
+            <Button size="sm" className="bg-gradient-to-r from-[#009108] to-[#55bf57] text-white shadow px-6 py-2 rounded-xl font-semibold">
               <span className={isTamil ? 'tamil-text' : ''}>
-                {isTamil ? 'மேலும் தயாரிப்புகள் பார்க்க' : 'Explore More Products'}
+                {isTamil ? 'மேலும் தயாரிப்புகள் பார்க்க' : 'Explore More'}
               </span>
-              <ShoppingCart className="w-5 h-5 ml-2" />
             </Button>
           </Link>
         </div>

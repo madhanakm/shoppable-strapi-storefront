@@ -11,6 +11,7 @@ interface AuthContextType {
   register: (name: string, email: string, mobile: string, password: string) => Promise<{ success: boolean; userId?: number; message?: string }>;
   verifyOTP: (userId: number, mobile: string, otp: string) => Promise<boolean>;
   resendOTP: (mobile: string) => Promise<boolean>;
+  loginWithUserData: (userData: { id: number; username: string; email: string; phone: string; userType?: string }) => void;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -34,11 +35,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check for existing token on mount
+  // Initialize auth state from localStorage
   useEffect(() => {
-    const validateUser = async () => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        if (userData.id && userData.username && userData.email) {
+          setUser(userData);
+        } else {
+          localStorage.removeItem('user');
+        }
+      } catch (e) {
+        localStorage.removeItem('user');
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  // Listen for storage changes (e.g. OTP login sets localStorage)
+  useEffect(() => {
+    const validateUser = () => {
       const storedUser = localStorage.getItem('user');
-      
       if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
@@ -46,22 +64,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUser(userData);
           } else {
             localStorage.removeItem('user');
-            localStorage.removeItem('loginTime');
-            localStorage.removeItem('lastActivity');
+            setUser(null);
           }
-        } catch (error) {
+        } catch (e) {
           localStorage.removeItem('user');
-          localStorage.removeItem('loginTime');
-          localStorage.removeItem('lastActivity');
+          setUser(null);
         }
       } else {
         setUser(null);
       }
-      
-      setLoading(false);
     };
-    
-    validateUser();
     window.addEventListener('storage', validateUser);
     return () => window.removeEventListener('storage', validateUser);
   }, []);
@@ -308,6 +320,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 
 
+  const loginWithUserData = (userData: { id: number; username: string; email: string; phone: string; userType?: string }) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData as any);
+  };
+
   const logout = () => {
     localStorage.removeItem('jwt');
     localStorage.removeItem('user');
@@ -326,6 +343,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       register,
       verifyOTP,
       resendOTP,
+      loginWithUserData,
       logout,
       isAuthenticated: !!user,
       loading

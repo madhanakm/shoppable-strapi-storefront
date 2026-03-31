@@ -9,20 +9,17 @@ export const getCategories = async (): Promise<StrapiResponse<Category>> => {
 };
 
 /**
- * Get product categories with images
+ * Get product categories with images (photo fetched separately)
  */
 export const getProductCategories = async () => {
-  return get('/product-categories?populate=*');
+  return get('/product-categories?fields[0]=Name&fields[1]=menuItem&fields[2]=status');
 };
 
 /**
- * Get active menu categories (menuItem: true)
+ * Get active menu categories (menuItem: true) - no photo for speed
  */
 export const getActiveMenuCategories = async () => {
-  return get('/product-categories', {
-    'filters[menuItem][$eq]': 'true',
-    'populate': '*'
-  });
+  return get('/product-categories?filters[menuItem][$eq]=true&fields[0]=Name&fields[1]=menuItem');
 };
 
 /**

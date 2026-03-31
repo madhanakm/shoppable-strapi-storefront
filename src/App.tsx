@@ -1,9 +1,10 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
+import { useEffect } from 'react';
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -36,11 +37,16 @@ import ScrollToTopButton from "./components/ScrollToTopButton";
 import FloatingCart from "@/components/FloatingCart";
 import SitePopup from "@/components/SitePopup";
 
-const queryClient = new QueryClient();
+// const queryClient = new QueryClient();
 
-const App = () => (
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
+const App = ({ onAppMount }: { onAppMount?: () => void }) => {
+  useEffect(() => {
+    // Call the preloader removal function when app mounts
+    onAppMount?.();
+  }, [onAppMount]);
+
+  return (
+    <HelmetProvider>
       <TranslationProvider>
       <AuthProvider>
         <QuickCheckoutProvider>
@@ -86,8 +92,8 @@ const App = () => (
         </QuickCheckoutProvider>
       </AuthProvider>
       </TranslationProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
-);
+    </HelmetProvider>
+  );
+};
 
 export default App;

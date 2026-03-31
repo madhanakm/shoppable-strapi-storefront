@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
-import { useNewLaunchProducts } from '@/hooks/useProductData';
+import { useNewLaunchProducts } from '@/hooks/useProductQueries';
+import { useUserType } from '@/hooks/useUserTypeQuery';
 
 const NewLaunchProducts = () => {
-  const { products, loading } = useNewLaunchProducts();
+  const { data: userType = 'customer' } = useUserType();
+  const { data: { products = [] } = {}, isLoading: loading } = useNewLaunchProducts(userType, 5);
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
 

@@ -1,221 +1,162 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Star, ShoppingCart, Heart, Flame } from 'lucide-react';
+import { ShoppingCart, Flame, Heart } from 'lucide-react';
+import { formatPrice } from '@/lib/utils';
+import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
-import { getProducts } from '@/services/products';
-import { Product, StrapiData } from '@/types/strapi';
-import { getStrapiMedia } from '@/services/api';
-import { formatPrice } from '@/lib/utils';
-import { getPriceByUserType } from '@/lib/pricing';
-import { getBulkProductReviewStats } from '@/services/reviews';
+import { useQuickCheckout } from '@/hooks/useQuickCheckout';
 import StarRating from './StarRating';
-import { LoadingWithStatus } from './ProductSkeleton';
+import { filterPriceFromName } from '@/lib/productUtils';
+import ProductSectionSkeleton from './ProductSectionSkeleton';
+import { useBestSellingProducts } from '@/hooks/useProductQueries';
+import { useUserType } from '@/hooks/useUserTypeQuery';
 
 const HotSellingProducts = () => {
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
+  const { data: userType = 'customer' } = useUserType();
+  const { data: { products = [], reviewStats = {} } = {}, isLoading: loading } = useBestSellingProducts(userType, 12);
+  const { language } = useTranslation();
+  const isTamil = language === LANGUAGES.TAMIL;
+  const navigate = useNavigate();
   const { addToCart } = useCart();
-  const [products, setProducts] = useState<StrapiData<Product>[]>([]);
-  const [reviewStats, setReviewStats] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [userType, setUserType] = useState(null);
-
-  // Fetch user type from local storage
-  useEffect(() => {
-    const fetchUserType = async () => {
-      try {
-        // Get user from local storage
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          // Fetch user type from API using user ID
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
-          if (response.ok) {
-            const result = await response.json();
-            if (result.data && result.data.attributes) {
-              setUserType(result.data.attributes.userType || 'customer');
-            }
-          }
-        } else {
-          setUserType('customer'); // Default user type
-        }
-      } catch (error) {
-        
-        setUserType('customer'); // Default to customer on error
-      }
-    };
-    
-    fetchUserType();
-  }, []);
-
-  useEffect(() => {
-    // Skip loading products if userType is not set yet
-    if (userType === null) return;
-    
-    const loadProducts = async () => {
-      try {
-        const response = await getProducts(1, 12, { hot_selling: true });
-        
-        
-        let productList = [];
-        if (Array.isArray(response)) {
-          productList = response;
-        } else if (response.data && Array.isArray(response.data)) {
-          productList = response.data;
-        } else if (response.products && Array.isArray(response.products)) {
-          productList = response.products;
-        }
-        
-        const formattedProducts = productList.map(item => ({
-          id: item.id,
-          name: item.title || item.name || 'Product',
-          price: getPriceByUserType(item, userType),
-          image: item.image_base64 || item.image || '/placeholder.svg',
-          badge: item.badge || null,
-          originalPrice: item.originalPrice || null,
-          skuId: item.skuid || item.SKUID || item.id?.toString()
-        }));
-        
-        setProducts(formattedProducts);
-        
-        // Fetch review stats for all products
-        const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
-        if (productIds.length > 0) {
-          try {
-            const stats = await getBulkProductReviewStats(productIds);
-            setReviewStats(stats);
-          } catch (reviewError) {
-            
-          }
-        }
-      } catch (error) {
-        
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProducts();
-  }, [userType]);
-
-  const handleWishlistToggle = (product: any) => {
-    const skuid = product.skuId || product.id.toString();
-
-    if (isInWishlist(skuid)) {
-      removeFromWishlist(skuid);
-    } else {
-      addToWishlist(skuid);
-    }
-  };
-
-  const handleAddToCart = (product: any) => {
-    const skuid = product.skuId || product.id.toString();
-    addToCart(skuid, product.id.toString(), 1);
-  };
-
-
+  const { setQuickCheckoutItem } = useQuickCheckout();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
 
   if (loading) {
     return (
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Flame className="w-8 h-8 text-orange-500" />
-              <h2 className="text-3xl font-bold">Hot Selling Products</h2>
-            </div>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Our best-selling items that customers can't get enough of
-            </p>
-          </div>
-          <LoadingWithStatus 
-            message="Loading Hot Selling Products" 
-            stage="Finding bestsellers"
-            showProgress={true}
-            progress={75}
-            showSteps={true}
-            currentStep={3}
-          />
-        </div>
-      </section>
+      <ProductSectionSkeleton 
+        title="Hot Selling Products"
+        icon="flame"
+        gradient="bg-gradient-to-br from-red-50 via-white to-orange-50"
+        count={12}
+      />
     );
   }
 
+  if (products.length === 0 && !loading) {
+    return null;
+  }
+
   return (
-    <section className="py-16">
-      <div className="container mx-auto px-4">
+    <section className="py-16 bg-gradient-to-br from-red-50 via-white to-orange-50 relative overflow-hidden">
+      {/* Decorative Elements */}
+      <div className="absolute top-0 left-0 w-80 h-80 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2" style={{backgroundColor: '#f97316'}}></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full filter blur-3xl opacity-20 translate-x-1/2 translate-y-1/2" style={{backgroundColor: '#ea580c'}}></div>
+      
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Section Header */}
         <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Flame className="w-8 h-8 text-orange-500" />
-            <h2 className="text-3xl font-bold">Hot Selling Products</h2>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 shadow-lg animate-pulse" style={{background: 'linear-gradient(to right, #f97316, #ea580c)'}}>
+            <Flame className="w-8 h-8 text-white" />
           </div>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Our best-selling items that customers can't get enough of
+          <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold mb-3 ${isTamil ? 'tamil-text' : ''}`}>
+            <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(to right, #dc2626, #ea580c, #f97316)'}}>
+              {isTamil ? 'சூடான விற்பனை தயாரிப்புகள்' : 'Hot Selling Products'}
+            </span>
+          </h2>
+          <p className={`text-gray-600 text-lg max-w-2xl mx-auto ${isTamil ? 'tamil-text' : ''}`}>
+            {isTamil ? 'সবচেয়ে বেশি চাহিদাসম্পন্ন পণ্য' : 'Top trending items everyone loves'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* Products Grid - 6 columns, 2 rows = 12 products */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
           {products.map((product) => (
-            <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
-              <div className="relative overflow-hidden">
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                {product.badge && (
-                  <span className={`absolute top-3 left-3 px-2 py-1 text-xs font-semibold rounded-full ${
-                    product.badge === 'Best Seller' ? 'bg-orange-500 text-white' : 'bg-red-500 text-white'
-                  }`}>
-                    {product.badge}
-                  </span>
-                )}
+            <Card 
+              key={product.id}
+              className="group bg-white hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-orange-200 relative"
+            >
+              {/* Hot Badge */}
+              <div className="absolute top-2 right-2 z-10 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1" style={{background: 'linear-gradient(to right, #f97316, #ea580c)'}}>
+                <Flame className="w-3 h-3" />
+                <span className="hidden sm:inline">{isTamil ? 'சூடان' : 'Hot'}</span>
+              </div>
+
+              {/* Product Image */}
+              <div className="aspect-square overflow-hidden bg-gray-100 relative">
+                <Link to={`/product/${product.id}`} className="block w-full h-full relative z-0">
+                  <img
+                    src={product.image || 'https://via.placeholder.com/300x300?text=Hot'}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/300x300?text=Hot';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                </Link>
+                
+                {/* Wishlist Button */}
                 <Button 
                   size="sm" 
-                  variant="secondary" 
-                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleWishlistToggle(product)}
+                  className="absolute top-1 left-1 z-20 opacity-0 group-hover:opacity-100 transition-all rounded-full shadow-lg bg-white/95 hover:bg-white border border-gray-100 hover:border-red-200 p-1"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const productId = product.id.toString();
+                    isInWishlist(productId) ? removeFromWishlist(productId) : addToWishlist(productId);
+                  }}
                 >
-                  <Heart className={`w-4 h-4 ${isInWishlist(product.skuId || product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
+                  <Heart className={`w-3 h-3 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                 </Button>
               </div>
-              
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors uppercase">{product.name}</h3>
+
+              {/* Product Info */}
+              <CardContent className="p-2 sm:p-3">
+                <Link to={`/product/${product.id}`}>
+                  <h3 className={`font-semibold text-gray-800 line-clamp-1 group-hover:text-orange-600 transition-colors text-xs md:text-sm ${isTamil ? 'tamil-text' : ''}`}>
+                    {isTamil && product.tamil ? filterPriceFromName(product.tamil) : filterPriceFromName(product.name)}
+                  </h3>
+                </Link>
                 
-                <div className="flex items-center mb-3">
-                  <StarRating 
-                    rating={reviewStats[product.id]?.average || 0} 
-                    count={reviewStats[product.id]?.count || 0} 
-                    size="sm" 
-                    showCount={true} 
-                  />
+                <StarRating 
+                  rating={reviewStats?.[product.id]?.average || 0} 
+                  count={reviewStats?.[product.id]?.count || 0} 
+                  size="sm" 
+                  showCount={false} 
+                />
+                
+                <div className="my-1">
+                  <p className="text-sm md:text-base font-bold" style={{color: '#dc2626'}}>
+                    {product.priceRange || formatPrice(product.displayPrice)}
+                  </p>
                 </div>
-                
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-2xl font-bold text-primary">{formatPrice(getPriceByUserType(product, userType))}</span>
-                    {product.originalPrice && (
-                      <span className="text-lg text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
-                    )}
-                  </div>
-                </div>
-                
-                <Button className="w-full group/btn" onClick={() => handleAddToCart(product)}>
-                  <ShoppingCart className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
-                  Add to Cart
+
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (product.isVariableProduct && product.variations) {
+                      try {
+                        const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+                        if (variations && variations.length > 0) {
+                          const firstVariation = variations[0];
+                          const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
+                          addToCart(skuid, product.id.toString(), 1, product.name, product.price);
+                          return;
+                        }
+                      } catch (e) {
+                        // Handle error silently
+                      }
+                    }
+                    
+                    const skuid = product.skuid || product.id.toString();
+                    addToCart(skuid, product.id.toString(), 1, product.name, product.price);
+                  }}
+                  className="w-full text-white shadow-sm hover:shadow-md transition-all duration-300 rounded py-1 text-[10px] font-medium min-h-[24px]"
+                  style={{background: 'linear-gradient(to right, #f97316, #ea580c)'}}
+                >
+                  <ShoppingCart className="w-2.5 h-2.5 mr-0.5 flex-shrink-0 md:w-3 md:h-3" />
+                  <span className="hidden sm:inline text-[10px]">{isTamil ? 'சேர்' : 'Add'}</span>
                 </Button>
               </CardContent>
             </Card>
           ))}
-        </div>
-
-        <div className="text-center mt-12">
-          <Button variant="outline" size="lg">
-            View All Hot Products
-          </Button>
         </div>
       </div>
     </section>

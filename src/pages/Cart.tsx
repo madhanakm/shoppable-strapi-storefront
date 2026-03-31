@@ -12,7 +12,7 @@ import { useCartProducts } from '@/hooks/useCartProducts';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { getEcommerceSettings, EcommerceSettings } from '@/services/ecommerce-settings';
-import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
+import { useQuickCheckout } from '@/hooks/useQuickCheckout';
 import { getStateShippingRates } from '@/services/state-shipping';
 import { calculateShipping, calculateShippingSync } from '@/lib/shipping';
 import RelatedProducts from '@/components/RelatedProducts';
@@ -208,7 +208,7 @@ const Cart = () => {
           
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-6">
               <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-6 md:p-8">
                   <div className="space-y-6">
@@ -305,6 +305,9 @@ const Cart = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* You May Also Like - directly below cart items */}
+              <RelatedProducts />
             </div>
             
             {/* Order Summary */}
@@ -383,18 +386,6 @@ const Cart = () => {
             </div>
           </div>
           
-          {/* Continue Shopping */}
-          <div className="text-center mt-12">
-            <Link to="/products">
-              <Button variant="outline" size="lg" className="border-2 border-gray-300 hover:bg-gray-50 px-8 py-3">
-                <ShoppingBag className="w-5 h-5 mr-2" />
-                <span className={isTamil ? 'tamil-text' : ''}>{translate('cart.continueShopping')}</span>
-              </Button>
-            </Link>
-          </div>
-
-          {/* Related Products */}
-          <RelatedProducts />
         </div>
       </main>
       

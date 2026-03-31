@@ -92,18 +92,33 @@ const AboutUs = () => {
               <h2 className={`text-3xl font-bold text-gray-800 mb-6 ${isTamil ? 'tamil-text' : ''}`}>
                 {translate('about.ourStory')}
               </h2>
-              <div className="space-y-4 text-gray-600 leading-relaxed">
+              <div className="space-y-5 text-gray-600 leading-relaxed">
+                <p className="text-lg font-semibold italic text-green-700">
+                  {isTamil ? 'இது ஒரு தயாரிப்பிலிருந்து தொடங்கவில்லை. இது ஒரு கேள்வியிலிருந்து தொடங்கியது.' : "It didn't start with a product. It started with a question."}
+                </p>
+                <p className="text-xl font-bold text-gray-800">
+                  {isTamil ? 'குணப்படுத்துதல் மீண்டும் எளிமையாக இருந்தால் என்ன?' : 'What if healing could be simple again?'}
+                </p>
                 <p className={isTamil ? 'tamil-text' : ''}>
-                  {isTamil ? 
-                    'தரணி ஹெர்பல்ஸ் 2004 ஆம் ஆண்டில் சித்தா மற்றும் ஆயுர்வேதத்தில் ஆராய்ச்சி செய்வதற்காக உருவாக்கப்பட்டது. இதன் விளைவாக, தரணி ஹெர்பல்ஸ் 2007 இல் நிறுவப்பட்டது. ராம்கேர் செம்பருத்தி மூலிகை தலைமுடி எண்ணெய், ராம்கேர் மூடகத்ரன் மூலிகை வலி நிவாரண எண்ணெய், ராம்கேர் லக்ஸ்னா மூலிகை தோல் எண்ணெய் - பிராண்ட் காப்புரிமை பெறாத மருந்துகள் உருவாக்கப்பட்டன.' :
-                    'Dharani Herbbals commenced research initiatives in Siddha and Ayurveda in 2004, culminating in the company\'s formal incorporation in 2007. Ramcare Chemparuthi herbal hair oil, Ramcare Moodakattran herbal pain reliever oil, Ramcare Luxsna herbal skin oil- Brand Non patented medicines were developed.'
+                  {isTamil ?
+                    'எங்கள் பயணம் 2004 இல் சித்தா மற்றும் ஆயுர்வேதத்தில் அர்ப்பணிப்புடன் ஆராய்ச்சி செய்வதன் மூலம் தொடங்கியது, இயற்கை குணப்படுத்தல் மற்றும் காலத்தால் சோதிக்கப்பட்ட மரபுகளின் ஆழத்தை ஆராய்ந்தது. தரணி ஹெர்பல்ஸ் 2007 இல் முறையாக நிறுவப்பட்டது, உண்மையான ஆரோக்கியம் இயற்கையாக, நேர்மையாக மற்றும் சிக்கலற்றதாக இருக்க வேண்டும் என்ற எளிய நம்பிக்கையின் அடிப்படையில்.' :
+                    'Our journey began in 2004 with dedicated research into Siddha and Ayurveda, exploring the depth of natural healing and time-tested traditions. Dharani Herbals was formally incorporated in 2007, built on a simple belief that true wellness should be natural, honest, and uncomplicated.'
                   }
                 </p>
                 <p className={isTamil ? 'tamil-text' : ''}>
-                  {isTamil ? 
-                    '100% மூலிகை மருந்துகளை அறிமுகப்படுத்துவதன் மூலம் இயற்கை சிகிச்சைக்கான விழிப்புணர்வை ஊக்குவிக்கவும். மூலிகை மருந்துகள் இயற்கையானவை மற்றும் பக்க விளைவுகள் இல்லாமல் தீங்கு விளைவிக்காதவை. எனவே இந்த மருந்துகள் உலகம் முழுவதும் உள்ள மக்களிடையே அன்பான வரவேற்பைப் பெற்றுள்ளன. நாங்கள் மூலிகைகளில் அதிகமான ஆராய்ச்சி செய்து வருகிறோம். நாம் மாசுபட்ட சூழலில் வாழ்ந்து கொண்டிருப்பதால், நமது ஆரோக்கியத்தைப் பாதுகாக்க ஒரே வழி இயற்கை சிகிச்சையை நோக்கி திரும்புவதுதான்.' :
-                    'Promote awareness for nature cure by introducing 100% Herbal Medicines. Herbal medicines are Natural and harmless with no side effects.Hence these medicines have warm welcome among people all over the world. We are doing more and more research in herbs. As we are living in polluted atmosphere, the only way to safe-guard our health is to turn back to nature cure.'
+                  {isTamil ?
+                    'செயற்கை தீர்வுகள் மற்றும் விரைவான தீர்வுகளால் நிரம்பிய உலகில், நாங்கள் வேறு ஒரு பாதையை தேர்ந்தெடுத்தோம் — தூய்மைக்கு, மரபுக்கு மற்றும் இயற்கையின் அமைதியான சக்திக்கு திரும்பும் பாதை.' :
+                    'In a world overwhelmed by artificial solutions and quick fixes, we chose a different path — one that returns to purity, to tradition, and to the quiet power of nature.'
                   }
+                </p>
+                <p className={isTamil ? 'tamil-text' : ''}>
+                  {isTamil ?
+                    'நாங்கள் உருவாக்கும் ஒவ்வொரு தயாரிப்பும் இந்த அர்ப்பணிப்பை பிரதிபலிக்கிறது — பாதுகாப்பான, பயனுள்ள மற்றும் உண்மையிலேயே இயற்கையான குணப்படுத்தலை வழங்க பண்டைய ஞானத்தை நவீன கவனிப்புடன் இணைக்கிறது.' :
+                    'Every product we create reflects this commitment, blending ancient wisdom with modern care to deliver safe, effective, and truly natural healing.'
+                  }
+                </p>
+                <p className="text-lg font-semibold italic text-green-700">
+                  {isTamil ? 'வேர்களுக்கு திரும்பு. சிறந்த வாழ்க்கையை நோக்கி முன்னேறு.' : 'Back to roots. Forward to better living.'}
                 </p>
               </div>
             </div>

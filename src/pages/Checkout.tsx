@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useCart } from '@/contexts/CartContext';
 import { useCartProducts } from '@/hooks/useCartProducts';
 import { useAuth } from '@/contexts/AuthContext';
-import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
+import { useQuickCheckout } from '@/hooks/useQuickCheckout';
 import { useToast } from '@/hooks/use-toast';
 import { formatPrice } from '@/lib/utils';
 import { getAddresses } from '@/services/profile';
@@ -194,23 +194,12 @@ const Checkout = () => {
       navigate('/otp-login?redirect=checkout');
       return;
     }
-    
-    // Recover any pending payments on checkout load
     recoverPendingPayments();
-    
     if (user?.id) {
-      if (currentUserId !== null && user.id !== currentUserId) {
-        
-        setAddresses([]);
-        setSelectedShippingAddress(null);
-        setSelectedBillingAddress(null);
-      }
-      setCurrentUserId(user.id);
+      loadAddresses();
+      loadEcomUser();
     }
-    
-    loadAddresses();
-    loadEcomUser();
-  }, [user?.id, isAuthenticated, navigate, loading, currentUserId]);
+  }, [isAuthenticated, loading]);
   
   // Update form data when user changes
   useEffect(() => {
@@ -224,14 +213,7 @@ const Checkout = () => {
     }
   }, [user?.username, user?.email, user?.phone]);
   
-  // Clear form data when user logs out or changes
-  useEffect(() => {
-    if (!isAuthenticated) {
-      localStorage.removeItem('checkoutFormData');
-    }
-  }, [isAuthenticated]);
-  
-  // Add payment warning when user tries to close tab during payment
+// Add payment warning when user tries to close tab during payment
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (isPaymentInProgress) {
@@ -926,11 +908,15 @@ const Checkout = () => {
       </div>
     );
   }
-  
+
   if (!isAuthenticated) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
   }
-  
+
   if (!isQuickCheckout && cartLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center">

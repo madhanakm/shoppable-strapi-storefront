@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingCart, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
+import { useQuickCheckout } from '@/hooks/useQuickCheckout';
 import { useCartProducts } from '@/hooks/useCartProducts';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '@/lib/utils';

@@ -2,37 +2,35 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, TrendingUp, Flame, Heart } from 'lucide-react';
+import { ShoppingCart, Zap, Heart, AlertCircle } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { useQuickCheckout } from '@/hooks/useQuickCheckout';
-import { useBuyNow } from '@/hooks/useBuyNow';
 import StarRating from './StarRating';
 import { filterPriceFromName } from '@/lib/productUtils';
 import ProductSectionSkeleton from './ProductSectionSkeleton';
-import { useBestSellingProducts } from '@/hooks/useProductQueries';
+import { useNewLaunchProducts } from '@/hooks/useProductQueries';
 import { useUserType } from '@/hooks/useUserTypeQuery';
 
-const BestSellingProducts = () => {
+const DealsOfTheDay = () => {
   const { data: userType = 'customer' } = useUserType();
-  const { data: { products = [], reviewStats = {} } = {}, isLoading: loading } = useBestSellingProducts(userType, 10);
+  const { data: { products = [], reviewStats = {} } = {}, isLoading: loading } = useNewLaunchProducts(userType as string, 8);
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
-  const { buyNow } = useBuyNow();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
 
   if (loading) {
     return (
       <ProductSectionSkeleton 
-        title="Best Selling Products"
+        title="Deals of the Day"
         icon="flame"
-        gradient="bg-gradient-to-br from-green-50 via-white to-emerald-50"
-        count={10}
+        gradient="bg-gradient-to-br from-orange-50 via-white to-yellow-50"
+        count={8}
       />
     );
   }
@@ -41,56 +39,66 @@ const BestSellingProducts = () => {
     return null;
   }
 
+  // Calculate discount percentage (mock - you can implement actual discount logic)
+  const getDiscount = (index: number) => Math.floor(Math.random() * 30) + 5;
+
   return (
-    <section className="py-16 bg-gradient-to-br from-green-50 via-white to-emerald-50 relative overflow-hidden">
+    <section className="py-16 bg-gradient-to-br from-orange-50 via-white to-yellow-50 relative overflow-hidden">
       {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 w-64 h-64 rounded-full filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2" style={{backgroundColor: '#8ac440'}}></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full filter blur-3xl opacity-20 translate-x-1/2 translate-y-1/2" style={{backgroundColor: '#4ab748'}}></div>
+      <div className="absolute top-0 right-0 w-80 h-80 rounded-full filter blur-3xl opacity-20 translate-x-1/3 -translate-y-1/2" style={{backgroundColor: '#fb923c'}}></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full filter blur-3xl opacity-15 -translate-x-1/3 translate-y-1/2" style={{backgroundColor: '#f59e0b'}}></div>
       
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 shadow-lg animate-bounce" style={{background: 'linear-gradient(to right, #8ac440, #4ab748)'}}>
-            <Flame className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 shadow-lg animate-pulse" style={{background: 'linear-gradient(to right, #fb923c, #f59e0b)'}}>
+            <Zap className="w-8 h-8 text-white" />
           </div>
           <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold mb-3 ${isTamil ? 'tamil-text' : ''}`}>
-            <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(to right, #0a7f06, #4ab748, #8ac440)'}}>
-              {isTamil ? 'சிறந்த விற்பனையான தயாரிப்புகள்' : 'Best Selling Products'}
+            <span className="bg-clip-text text-transparent" style={{backgroundImage: 'linear-gradient(to right, #d97706, #f59e0b, #fb923c)'}}>
+              {isTamil ? 'இன்றைய ஒப்பந்தங்கள்' : 'Deals of the Day'}
             </span>
           </h2>
           <p className={`text-gray-600 text-lg max-w-2xl mx-auto ${isTamil ? 'tamil-text' : ''}`}>
-            {isTamil ? 'வாடிக்கையாளர்களால் மிகவும் விரும்பப்படும் தயாரிப்புகள்' : 'Most loved by our customers'}
+            {isTamil ? 'সীমিত সময়ের জন্য বিশাল ছাড়' : 'Exclusive products with amazing discounts'}
           </p>
           <div className="flex items-center justify-center gap-2 mt-4">
-            <TrendingUp className="w-5 h-5" style={{color: '#0a7f06'}} />
-            <span className="text-sm font-semibold uppercase tracking-wide" style={{color: '#0a7f06'}}>
-              {isTamil ? 'டிரெண்டிங் இப்போது' : 'Trending Now'}
+            <AlertCircle className="w-5 h-5" style={{color: '#d97706'}} />
+            <span className="text-sm font-semibold uppercase tracking-wide" style={{color: '#d97706'}}>
+              {isTamil ? 'সীমিত সময়' : 'Limited Time'}
             </span>
           </div>
         </div>
 
-        {/* Products Grid - 5 columns, 2 rows = 10 products */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
-          {products.map((product) => (
+        {/* Products Grid - 4 columns, 2 rows = 8 products */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+          {products.map((product, index) => (
             <Card 
               key={product.id}
               className="group bg-white hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-orange-200 relative"
             >
-              {/* Best Seller Badge */}
-              <div className="absolute top-2 right-2 z-10 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1" style={{background: 'linear-gradient(to right, #8ac440, #4ab748)'}}>
-                <Flame className="w-3 h-3" />
-                <span>{isTamil ? 'சிறந்தது' : 'Best'}</span>
+              {/* Deal Badge with Discount */}
+              <div className="absolute top-2 right-2 z-10 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex flex-col items-center gap-0.5" style={{background: 'linear-gradient(to right, #dc2626, #b91c1c)'}}>
+                <span className="text-lg leading-none">-{getDiscount(index)}%</span>
+                <span className="text-[10px]">{isTamil ? 'ছাড়' : 'Deal'}</span>
+              </div>
+
+              {/* Limited Quantity Badge */}
+              <div className="absolute top-12 right-2 z-10 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md bg-blue-500/90 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                {isTamil ? 'சীমিত' : 'Limited'}
               </div>
 
               {/* Product Image */}
               <div className="aspect-square overflow-hidden bg-gray-100 relative">
                 <Link to={`/product/${product.id}`} className="block w-full h-full relative z-0">
                   <img
-                    src={product.image || 'https://via.placeholder.com/400x400?text=Product'}
+                    src={product.image || 'https://via.placeholder.com/400x400?text=Deal'}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
                     onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/400x400?text=Product';
+                      e.currentTarget.src = 'https://via.placeholder.com/400x400?text=Deal';
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
@@ -127,7 +135,10 @@ const BestSellingProducts = () => {
                 />
                 
                 <div className="mb-3">
-                  <p className="text-xl md:text-2xl font-bold" style={{color: '#0a7f06'}}>
+                  <p className="text-sm text-gray-500 line-through">
+                    {formatPrice((product.displayPrice || 0) * 1.2)}
+                  </p>
+                  <p className="text-lg md:text-xl font-bold" style={{color: '#dc2626'}}>
                     {product.priceRange || formatPrice(product.displayPrice)}
                   </p>
                 </div>
@@ -155,8 +166,8 @@ const BestSellingProducts = () => {
                       const skuid = product.skuid || product.id.toString();
                       addToCart(skuid, product.id.toString(), 1, product.name, product.price);
                     }}
-                    className="flex-1 text-gray-800 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 text-[10px] font-medium min-h-[26px]"
-                    style={{background: 'linear-gradient(to right, #e6e6e6, #f2f2f2)'}}
+                    className="flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 text-[10px] font-medium min-h-[26px]"
+                    style={{background: 'linear-gradient(to right, #f59e0b, #fb923c)'}}
                   >
                     <ShoppingCart className="w-2.5 h-2.5 mr-0.5 flex-shrink-0" />
                     <span className="text-[10px] leading-none">{isTamil ? 'சேர்' : 'Add'}</span>
@@ -166,44 +177,12 @@ const BestSellingProducts = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      
-                      if (product.isVariableProduct && product.variations) {
-                        try {
-                          const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
-                          if (variations && variations.length > 0) {
-                            const firstVariation = variations[0];
-                            const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
-                            const variationName = firstVariation.value || firstVariation.attributeValue || Object.values(firstVariation)[0];
-                            buyNow({
-                              id: product.id.toString(),
-                              skuid: skuid,
-                              name: `${product.name} - ${variationName}`,
-                              tamil: product.tamil ? `${product.tamil} - ${variationName}` : null,
-                              price: getPriceByUserType(firstVariation, product.userType || 'customer'),
-                              image: product.image,
-                              category: product.category,
-                              variation: variationName,
-                              quantity: 1
-                            });
-                            return;
-                          }
-                        } catch (e) {}
-                      }
-                      buyNow({
-                        id: product.id.toString(),
-                        skuid: product.skuid || product.id.toString(),
-                        name: product.name,
-                        tamil: product.tamil || null,
-                        price: product.price,
-                        image: product.image,
-                        category: product.category,
-                        quantity: 1
-                      });
+                      navigate(`/product/${product.id}`);
                     }}
-                    className="flex-1 text-white shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 text-[10px] font-medium min-h-[26px]"
-                    style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}
+                    className="flex-1 text-gray-800 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg sm:rounded-xl py-1 text-[10px] font-medium min-h-[26px]"
+                    style={{background: 'linear-gradient(to right, #fef3c7, #fde68a)'}}
                   >
-                    <span className="text-[10px] leading-none">{isTamil ? 'வாங்கு' : 'Buy'}</span>
+                    <span className="text-[10px] leading-none">{isTamil ? 'பார்' : 'View'}</span>
                   </Button>
                 </div>
               </CardContent>
@@ -211,17 +190,14 @@ const BestSellingProducts = () => {
           ))}
         </div>
 
-        {/* View All Button */}
+        {/* CTA Button */}
         <div className="text-center mt-12">
-          <Link to="/products?type=Best Selling">
+          <Link to="/products">
             <Button 
-              size="lg"
-              className="text-white shadow-xl hover:shadow-2xl transition-all px-8 py-6 text-lg"
-              style={{background: 'linear-gradient(to right, #0a7f06, #4ab748)'}}
+              className="px-8 py-6 text-lg font-bold rounded-full shadow-lg hover:shadow-xl transition-all"
+              style={{background: 'linear-gradient(to right, #dc2626, #b91c1c)'}}
             >
-              <span className={isTamil ? 'tamil-text' : ''}>
-                {isTamil ? 'அனைத்து தயாரிப்புகளையும் பார்க்க' : 'View All Products'}
-              </span>
+              {isTamil ? 'மேலும் ஒப்பந்தங்கள் பார்க்கவும்' : 'View More Deals'}
             </Button>
           </Link>
         </div>
@@ -230,4 +206,4 @@ const BestSellingProducts = () => {
   );
 };
 
-export default BestSellingProducts;
+export default DealsOfTheDay;

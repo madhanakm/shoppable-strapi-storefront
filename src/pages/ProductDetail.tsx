@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, Heart, Star, Sparkles } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlistContext } from '@/contexts/WishlistContext';
-import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
+import { useQuickCheckout } from '@/hooks/useQuickCheckout';
+import { useBuyNow } from '@/hooks/useBuyNow';
 import { formatPrice } from '@/lib/utils';
 import { getPriceByUserType } from '@/lib/pricing';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
@@ -17,6 +18,8 @@ import ProductReviews from '@/components/ProductReviews';
 import StarRating from '@/components/StarRating';
 import { getProductReviewStats } from '@/services/reviews';
 import { ProductDetailSkeleton } from '@/components/ProductSkeleton';
+import { useProduct, useRelatedProducts, useProductReviewStats } from '@/hooks/useProductQueries';
+import { useUserType } from '@/hooks/useUserTypeQuery';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -24,242 +27,98 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
   const { setQuickCheckoutItem } = useQuickCheckout();
+  const { buyNow } = useBuyNow();
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  
+  // ===== USE REACT QUERY HOOKS FOR PARALLEL DATA FETCHING =====
+  const { data: userType = 'customer', isLoading: userTypeLoading } = useUserType();
+  const { data: product, isLoading: productLoading, isError: productError } = useProduct(id, userType);
+  const { data: relatedProducts = [], isLoading: relatedLoading } = useRelatedProducts(
+    product?.category,
+    product?.brand,
+    parseInt(id!),
+    userType
+  );
+  const { data: reviewStats = { average: 0, count: 0 }, isLoading: reviewsLoading } = useProductReviewStats(
+    parseInt(id!),
+    product?.skuid || product?.SKUID
+  );
+  // ===== END REACT QUERY HOOKS =====
+
+  // Local state for UI interactions only
   const [quantity, setQuantity] = useState(1);
   const [zoomActive, setZoomActive] = useState(false);
-  const [categories, setCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
-  const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
-  const [reviewStats, setReviewStats] = useState({ average: 0, count: 0 });
   const [reviewsRefreshKey, setReviewsRefreshKey] = useState(0);
   const [selectedVariation, setSelectedVariation] = useState(null);
   const [variations, setVariations] = useState([]);
-  const [currentPrice, setCurrentPrice] = useState(0);
-  const [userType, setUserType] = useState(null);
+  const [allCategories, setAllCategories] = useState<string[]>([]);
+  const [allBrands, setAllBrands] = useState<string[]>([]);
+  
+  // Derived loading state
+  const loading = productLoading || userTypeLoading;
   
   // Refs for image zoom
   const imageContainerRef = useRef(null);
   const zoomedImageRef = useRef(null);
 
-  // Always fetch fresh user type from API
+  // Fetch all categories and brands for sidebar
   useEffect(() => {
-    const fetchUserType = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}`);
-          if (response.ok) {
-            const result = await response.json();
-            if (result.data && result.data.attributes) {
-              const newUserType = result.data.attributes.userType || 'customer';
-              setUserType(newUserType);
-            }
-          }
-        } else {
-          setUserType('customer');
-        }
-      } catch (error) {
-        console.error('Error fetching user type:', error);
-        setUserType('customer');
-      }
-    };
-    
-    fetchUserType();
+    const token = import.meta.env.VITE_STRAPI_API_TOKEN;
+    Promise.all([
+      fetch('https://api.dharaniherbbals.com/api/product-categories?fields[0]=Name&pagination[pageSize]=100', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json()),
+      fetch('https://api.dharaniherbbals.com/api/brands?fields[0]=Name&fields[1]=name&pagination[pageSize]=100', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json())
+    ]).then(([catData, brandData]) => {
+      setAllCategories((catData.data || []).map((c: any) => (c.attributes?.Name || c.attributes?.name || '').trim().toUpperCase()).filter(Boolean));
+      setAllBrands((brandData.data || []).map((b: any) => (b.attributes?.Name || b.attributes?.name || '').trim().toUpperCase()).filter(Boolean));
+    }).catch(() => {});
   }, []);
 
+  // Update gallery images when product changes
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true); // Set loading state when fetching new product
-        
-        // Reset gallery images and selected image when changing products
-        setGalleryImages([]);
-        setSelectedImage(null);
-        setReviewStats({ average: 0, count: 0 });
-        
-        // Scroll to top when changing products
-        window.scrollTo(0, 0);
-        
-        // Add timestamp to prevent caching
-        const timestamp = new Date().getTime();
-        
-        // Fetch only the specific product
-        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters/${id}?timestamp=${timestamp}`, {
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
+    if (product) {
+      setGalleryImages([]);
+      setSelectedImage(null);
+      setReviewsRefreshKey(prev => prev + 1);
+      window.scrollTo(0, 0);
+      
+      // Set gallery images if available
+      if (product.gallery && Array.isArray(product.gallery)) {
+        setGalleryImages(product.gallery);
+      } else if (product.gallery && typeof product.gallery === 'string') {
+        try {
+          const parsedGallery = JSON.parse(product.gallery);
+          if (Array.isArray(parsedGallery)) {
+            setGalleryImages(parsedGallery);
           }
-        });
-        const data = await response.json();
-        
-        // Get the product data
-        const foundProduct = data.data || data;
-        
-        if (foundProduct) {
-          // Format product data
-          const productData = {
-            id: foundProduct.id,
-            ...foundProduct.attributes
-          };
-          
-          setProduct(productData);
-          
-          // Handle variable products
-          if (foundProduct.attributes?.isVariableProduct && foundProduct.attributes?.variations) {
-            try {
-              const variationsData = typeof foundProduct.attributes.variations === 'string' 
-                ? JSON.parse(foundProduct.attributes.variations) 
-                : foundProduct.attributes.variations;
-              
-              setVariations(variationsData || []);
-              
-              // Don't set first variation as default - let user choose
-              // Just set the price based on first variation for display
-              if (variationsData && variationsData.length > 0) {
-                const firstVariationPrice = getPriceByUserType(variationsData[0], userType || 'customer');
-                setCurrentPrice(firstVariationPrice);
-              } else {
-                setCurrentPrice(getPriceByUserType(foundProduct.attributes, userType || 'customer'));
-              }
-            } catch (e) {
-              
-              setCurrentPrice(foundProduct.attributes.mrp || foundProduct.attributes.price || 0);
-            }
-          } else {
-            setCurrentPrice(getPriceByUserType(foundProduct.attributes, userType || 'customer'));
-          }
-          
-          // Set gallery images if available
-          if (foundProduct.attributes?.gallery && Array.isArray(foundProduct.attributes.gallery)) {
-            setGalleryImages(foundProduct.attributes.gallery);
-          } else if (foundProduct.attributes?.gallery && typeof foundProduct.attributes.gallery === 'string') {
-            try {
-              const parsedGallery = JSON.parse(foundProduct.attributes.gallery);
-              if (Array.isArray(parsedGallery)) {
-                setGalleryImages(parsedGallery);
-              }
-            } catch (e) {
-              
-            }
-          } else {
-            // If no gallery images, set empty array
-            setGalleryImages([]);
-          }
-          
-          // Load categories and brands with limited pagination
-          const [categoriesRes, brandsRes] = await Promise.all([
-            fetch(`https://api.dharaniherbbals.com/api/product-categories?pagination[pageSize]=100&timestamp=${timestamp}`, {
-              headers: {
-                'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
-              }
-            }),
-            fetch(`https://api.dharaniherbbals.com/api/brands?pagination[pageSize]=100&timestamp=${timestamp}`, {
-              headers: {
-                'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
-              }
-            })
-          ]);
-          
-          // Process categories
-          if (categoriesRes.ok) {
-            const categoriesData = await categoriesRes.json();
-            let categoryNames = [];
-            if (Array.isArray(categoriesData)) {
-              categoryNames = categoriesData.map(cat => cat.name || cat.Name || cat.title || cat).filter(Boolean);
-            } else if (categoriesData.data) {
-              categoryNames = categoriesData.data.map(cat => {
-                const attrs = cat.attributes || cat;
-                return attrs.name || attrs.Name || attrs.title;
-              }).filter(Boolean);
-            }
-            setCategories(categoryNames);
-          }
-          
-          // Process brands
-          if (brandsRes.ok) {
-            const brandsData = await brandsRes.json();
-            let brandNames = [];
-            if (Array.isArray(brandsData)) {
-              brandNames = brandsData.map(brand => brand.name || brand.Name || brand.title || brand).filter(Boolean);
-            } else if (brandsData.data) {
-              brandNames = brandsData.data.map(brand => {
-                const attrs = brand.attributes || brand;
-                return attrs.name || attrs.Name || attrs.title;
-              }).filter(Boolean);
-            }
-            setBrands(brandNames);
-          }
-          
-          // Fetch related products separately with filters
-          const currentCategory = foundProduct.attributes?.category;
-          const currentBrand = foundProduct.attributes?.brand;
-          
-          if (currentCategory || currentBrand) {
-            let relatedFilters = 'filters[status][$eq]=true';
-            if (currentCategory) {
-              relatedFilters += `&filters[category][$eq]=${encodeURIComponent(currentCategory)}`;
-            }
-            if (currentBrand) {
-              relatedFilters += `&filters[brand][$eq]=${encodeURIComponent(currentBrand)}`;
-            }
-            
-            const relatedResponse = await fetch(`https://api.dharaniherbbals.com/api/product-masters?${relatedFilters}&pagination[pageSize]=5&timestamp=${timestamp}`, {
-              headers: {
-                'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}`
-              }
-            });
-            if (relatedResponse.ok) {
-              const relatedData = await relatedResponse.json();
-              const relatedList = Array.isArray(relatedData) ? relatedData : relatedData.data || [];
-              // Filter out current product and limit to 4
-              const related = relatedList.filter(p => p.id !== foundProduct.id).slice(0, 4);
-              setRelatedProducts(related);
-            }
-          }
-          
-          // Fetch review stats
-          try {
-            const skuId = foundProduct.attributes?.skuid || foundProduct.attributes?.SKUID || foundProduct.id.toString();
-            // Ensure skuId is always a string
-            const stats = await getProductReviewStats(foundProduct.id, skuId.toString());
-            setReviewStats(stats);
-          } catch (reviewError) {
-            
-          }
-          
-          // Track ViewContent event - moved to separate useEffect to ensure userType is loaded
-          const productPrice = getPriceByUserType(foundProduct.attributes, userType || 'customer');
-          
-          // Store product data for tracking
-          if (typeof window !== 'undefined') {
-            window._pendingProductView = {
-              id: foundProduct.id.toString(),
-              name: foundProduct.attributes?.Name || foundProduct.attributes?.name,
-              price: productPrice
-            };
-          }
-        }
-      } catch (error) {
-        
-      } finally {
-        setLoading(false);
+        } catch {}
       }
-    };
 
-    if (id && userType !== null) {
-      fetchData();
+      // Handle variations if variable product
+      if (product.isVariableProduct && product.variations) {
+        try {
+          const variationsData = typeof product.variations === 'string'
+            ? JSON.parse(product.variations)
+            : product.variations;
+          setVariations(variationsData || []);
+        } catch {}
+      }
     }
-  }, [id, userType]);
-  
+  }, [product]);
+
+  // Set default image when product loads
+  useEffect(() => {
+    if (product && product.photo && !selectedImage) {
+      setSelectedImage(product.photo);
+    }
+  }, [product, selectedImage]);
+
   // Track ViewContent event after product and userType are loaded
   useEffect(() => {
     if (product && userType !== null && typeof window !== 'undefined') {
-      const productPrice = getPriceByUserType(product, userType);
+      const productPrice = product?.displayPrice || 0;
       
       if (window.fbq) {
         window.fbq('track', 'ViewContent', {
@@ -286,36 +145,22 @@ const ProductDetail = () => {
     }
   }, [product, userType]);
   
-  // Update prices when userType changes
-  useEffect(() => {
-    if (product && userType !== null) {
-      
-      let newPrice;
-      if (product.isVariableProduct && selectedVariation) {
-        newPrice = getPriceByUserType(selectedVariation, userType || 'customer');
-      } else {
-        newPrice = getPriceByUserType(product, userType || 'customer');
-      }
-      setCurrentPrice(newPrice);
-    }
-  }, [userType, product, selectedVariation]);
-  
-  useEffect(() => {
-    // Set main product image as default, only change when variation is manually selected
-    if (product && product.photo) {
-      setSelectedImage(product.photo);
-    }
-  }, [product]);
   
   const handleVariationChange = (variation) => {
     setSelectedVariation(variation);
-    // Use getPriceByUserType to get the correct price based on user type
-    setCurrentPrice(getPriceByUserType(variation, userType || 'customer'));
     
     // Update selected image if variation has an image
     if (variation.image) {
       setSelectedImage(variation.image);
     }
+  };
+
+  // Helper function to get current display price
+  const getCurrentPrice = () => {
+    if (selectedVariation) {
+      return getPriceByUserType(selectedVariation, userType || 'customer');
+    }
+    return product?.displayPrice || 0;
   };
 
   // Handle mouse move for zoom effect
@@ -342,15 +187,12 @@ const ProductDetail = () => {
       }
       
       const productName = product.Name || product.name || product.title;
-      addToCart(skuid, productId, quantity, productName, currentPrice);
+      addToCart(skuid, productId, quantity, productName, getCurrentPrice());
     }
   };
   
   const handleBuyNow = () => {
     if (product) {
-      // Clear any existing quick checkout data first
-      setQuickCheckoutItem(null);
-      
       let skuid, productId;
       
       if (product.isVariableProduct && selectedVariation) {
@@ -366,7 +208,7 @@ const ProductDetail = () => {
         skuid: skuid,
         name: product.Name || product.name || product.title,
         tamil: product.tamil || null,
-        price: currentPrice,
+        price: getCurrentPrice(),
         image: selectedImage || product.photo || product.image,
         category: product.category,
         quantity: quantity
@@ -378,11 +220,7 @@ const ProductDetail = () => {
         checkoutItem.name = `${checkoutItem.name} - ${variationName}`;
       }
       
-      // Set the new quick checkout item
-      setTimeout(() => {
-        setQuickCheckoutItem(checkoutItem);
-        navigate('/checkout');
-      }, 10);
+      buyNow(checkoutItem);
     }
   };
 
@@ -541,7 +379,7 @@ const ProductDetail = () => {
     const productName = product?.Name || product?.name || 'Premium Herbal Product';
     const productDesc = product?.description || product?.desc || 'Premium natural herbal product from Dharani Herbbals';
     const productImage = selectedImage || product?.photo || 'https://api.dharaniherbbals.com/uploads/favicon_b04c8c6af4.png';
-    const price = currentPrice || 0;
+    const price = getCurrentPrice() || 0;
     
     return (
       <Helmet>
@@ -683,7 +521,7 @@ const ProductDetail = () => {
               <div className="mb-6 p-4 bg-gradient-to-r from-primary/5 to-green-50 rounded-2xl border border-primary/10">
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
-                    {formatPrice(currentPrice)}
+                    {formatPrice(getCurrentPrice())}
                   </span>
                   {product.originalPrice && (
                     <span className="text-lg text-gray-500 line-through">
@@ -694,7 +532,7 @@ const ProductDetail = () => {
                 {product.originalPrice && (
                   <div className="mt-2">
                     <span className="bg-red-100 text-red-600 px-2 py-1 rounded-full text-xs font-semibold">
-                      Save {Math.round(((product.originalPrice - currentPrice) / product.originalPrice) * 100)}%
+                      Save {Math.round(((product.originalPrice - getCurrentPrice()) / product.originalPrice) * 100)}%
                     </span>
                   </div>
                 )}
@@ -841,37 +679,30 @@ const ProductDetail = () => {
                 <div className="p-4">
                   <ul className="space-y-2">
                     <li>
-                      <Link 
-                        to="/products"
-                        className="flex items-center px-3 py-2 rounded-xl hover:bg-primary/5 hover:text-primary transition-all duration-300 group"
-                      >
+                      <Link to="/products" className="flex items-center px-3 py-2 rounded-xl hover:bg-primary/5 hover:text-primary transition-all duration-300 group">
                         <div className="w-2 h-2 bg-gray-300 rounded-full mr-2 group-hover:bg-primary transition-colors"></div>
-                        <span className={`font-medium text-sm ${isTamil ? 'tamil-text' : ''}`}>
-                          All Categories
-                        </span>
+                        <span className="font-medium text-sm">All Categories</span>
                       </Link>
                     </li>
-                    {categories.map(category => (
-                      <li key={category}>
-                        <Link 
-                          to={`/products?category=${encodeURIComponent(category)}`}
+                    {allCategories.map(cat => (
+                      <li key={cat}>
+                        <Link
+                          to={`/products?category=${encodeURIComponent(cat.trim())}`}
                           className={`flex items-center px-3 py-2 rounded-xl transition-all duration-300 group ${
-                            product.category === category 
-                              ? 'bg-primary/10 text-primary font-semibold' 
+                            product?.category?.trim().toUpperCase() === cat
+                              ? 'bg-primary/10 text-primary font-semibold'
                               : 'hover:bg-primary/5 hover:text-primary'
                           }`}
                         >
-                          <div className={`w-2 h-2 rounded-full mr-2 transition-colors ${
-                            product.category === category ? 'bg-primary' : 'bg-gray-300 group-hover:bg-primary'
-                          }`}></div>
-                          <span className="font-medium text-sm">{category}</span>
+                          <div className={`w-2 h-2 rounded-full mr-2 ${product?.category?.trim().toUpperCase() === cat ? 'bg-primary' : 'bg-gray-300 group-hover:bg-primary transition-colors'}`}></div>
+                          <span className="font-medium text-sm">{cat}</span>
                         </Link>
                       </li>
                     ))}
                   </ul>
                 </div>
               </div>
-              
+
               {/* Brands Card */}
               <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
@@ -885,27 +716,22 @@ const ProductDetail = () => {
                 <div className="p-4">
                   <ul className="space-y-2">
                     <li>
-                      <Link 
-                        to="/products"
-                        className="flex items-center px-3 py-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 group"
-                      >
+                      <Link to="/products" className="flex items-center px-3 py-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 group">
                         <div className="w-2 h-2 bg-gray-300 rounded-full mr-2 group-hover:bg-blue-500 transition-colors"></div>
                         <span className="font-medium text-sm">All Brands</span>
                       </Link>
                     </li>
-                    {brands.map(brand => (
+                    {allBrands.map(brand => (
                       <li key={brand}>
-                        <Link 
+                        <Link
                           to={`/products?brand=${encodeURIComponent(brand)}`}
                           className={`flex items-center px-3 py-2 rounded-xl transition-all duration-300 group ${
-                            product.brand === brand 
-                              ? 'bg-blue-50 text-blue-600 font-semibold' 
+                            product?.brand === brand
+                              ? 'bg-blue-50 text-blue-600 font-semibold'
                               : 'hover:bg-blue-50 hover:text-blue-600'
                           }`}
                         >
-                          <div className={`w-2 h-2 rounded-full mr-2 transition-colors ${
-                            product.brand === brand ? 'bg-blue-500' : 'bg-gray-300 group-hover:bg-blue-500'
-                          }`}></div>
+                          <div className={`w-2 h-2 rounded-full mr-2 ${product?.brand === brand ? 'bg-blue-500' : 'bg-gray-300 group-hover:bg-blue-500 transition-colors'}`}></div>
                           <span className="font-medium text-sm">{brand}</span>
                         </Link>
                       </li>
@@ -1096,7 +922,7 @@ const ProductDetail = () => {
               <div className="mb-8 p-6 bg-gradient-to-r from-primary/5 to-green-50 rounded-2xl border border-primary/10">
                 <div className="flex items-baseline gap-3">
                   <span className="text-4xl font-bold bg-gradient-to-r from-primary to-green-600 bg-clip-text text-transparent">
-                    {formatPrice(currentPrice)}
+                    {formatPrice(getCurrentPrice())}
                   </span>
                   {product.originalPrice && (
                     <span className="text-xl text-gray-500 line-through">
@@ -1107,7 +933,7 @@ const ProductDetail = () => {
                 {product.originalPrice && (
                   <div className="mt-2">
                     <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
-                      Save {Math.round(((product.originalPrice - currentPrice) / product.originalPrice) * 100)}%
+                      Save {Math.round(((product.originalPrice - getCurrentPrice()) / product.originalPrice) * 100)}%
                     </span>
                   </div>
                 )}
@@ -1299,8 +1125,7 @@ const ProductDetail = () => {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {relatedProducts.map((relatedProduct, index) => {
-                  // Get the main product image
-                  const productImage = relatedProduct.attributes?.photo || null;
+                  const productImage = relatedProduct.photo || null;
                   
                   return (
                     <div 
@@ -1329,12 +1154,12 @@ const ProductDetail = () => {
                             {productImage ? (
                               <img 
                                 src={productImage} 
-                                alt={relatedProduct.attributes?.Name || 'Product'} 
-                                className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                                alt={relatedProduct.name || 'Product'} 
+                                className="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-500"
                                 loading="lazy"
                               />
                             ) : (
-                              <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                              <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                                 <span className={`text-gray-400 text-sm ${isTamil ? 'tamil-text' : ''}`}>{translate('product.noImageAvailable')}</span>
                               </div>
                             )}
@@ -1342,24 +1167,24 @@ const ProductDetail = () => {
                           </div>
                           <div className="p-6 relative z-20">
                             <h3 className={`font-semibold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 uppercase ${isTamil ? 'tamil-text' : ''}`}>
-                              {isTamil && relatedProduct.attributes?.tamil ? relatedProduct.attributes.tamil : (relatedProduct.attributes?.Name || 'Product')}
+                              {isTamil && relatedProduct.tamil ? relatedProduct.tamil : (relatedProduct.name || 'Product')}
                             </h3>
                             <div className="flex items-center justify-between">
                               <p className="text-lg font-bold text-primary group-hover:scale-105 origin-left transition-transform">
-                                {relatedProduct.attributes?.isVariableProduct && relatedProduct.attributes?.variations ? 
+                                {relatedProduct.isVariableProduct && relatedProduct.variations ? 
                                   (() => {
                                     try {
-                                      const variations = typeof relatedProduct.attributes.variations === 'string' ? JSON.parse(relatedProduct.attributes.variations) : relatedProduct.attributes.variations;
+                                      const variations = typeof relatedProduct.variations === 'string' ? JSON.parse(relatedProduct.variations) : relatedProduct.variations;
                                       const prices = variations.map(v => getPriceByUserType(v, userType)).filter(p => p > 0);
-                                      if (prices.length === 0) return formatPrice(relatedProduct.attributes?.mrp || 0);
+                                      if (prices.length === 0) return formatPrice(relatedProduct.mrp || 0);
                                       const minPrice = Math.min(...prices);
                                       const maxPrice = Math.max(...prices);
                                       return minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
                                     } catch {
-                                      return formatPrice(getPriceByUserType(relatedProduct.attributes, userType));
+                                      return formatPrice(getPriceByUserType(relatedProduct, userType));
                                     }
                                   })()
-                                  : formatPrice(getPriceByUserType(relatedProduct.attributes, userType))
+                                  : formatPrice(getPriceByUserType(relatedProduct, userType))
                                 }
                               </p>
                               <StarRating 

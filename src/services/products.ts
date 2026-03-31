@@ -13,6 +13,14 @@ interface ProductSortOptions {
   sortBy?: 'name' | 'price-low' | 'price-high';
 }
 
+const PRODUCT_FIELDS = [
+  'fields[0]=Name', 'fields[1]=skuid', 'fields[2]=mrp', 'fields[3]=resellerprice',
+  'fields[4]=customerprice', 'fields[5]=retailprice', 'fields[6]=sarvoprice',
+  'fields[7]=distributorprice', 'fields[8]=price', 'fields[9]=type', 'fields[10]=status',
+  'fields[11]=tamil', 'fields[12]=isVariableProduct', 'fields[13]=variations',
+  'fields[14]=category', 'fields[15]=newLaunch', 'fields[16]=brand'
+];
+
 export const getProducts = async (
   page = 1, 
   pageSize = 12, 
@@ -20,8 +28,7 @@ export const getProducts = async (
   sortOptions: ProductSortOptions = {}
 ) => {
   try {
-    const timestamp = new Date().getTime();
-    let queryParams = [];
+    let queryParams = [...PRODUCT_FIELDS];
     
     queryParams.push(`pagination[page]=${page}`);
     queryParams.push(`pagination[pageSize]=${pageSize}`);
@@ -60,8 +67,6 @@ export const getProducts = async (
     } else {
       queryParams.push('sort=Name:asc');
     }
-    
-    queryParams.push(`timestamp=${timestamp}`);
     
     const response = await fetch(
       `https://api.dharaniherbbals.com/api/product-masters?${queryParams.join('&')}`,

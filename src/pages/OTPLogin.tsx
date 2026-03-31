@@ -24,7 +24,7 @@ const OTPLogin = () => {
   const [otpTimer, setOtpTimer] = useState(0);
   const [resendTimer, setResendTimer] = useState(0);
   const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loginWithUserData } = useAuth();
   const navigate = useNavigate();
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
@@ -157,15 +157,14 @@ const OTPLogin = () => {
           isVerified: true
         });
 
-        const userData = {
+        const loginData = {
           id: userId,
           username: user.name,
           email: user.email,
           phone: user.phone,
           userType: user.userType || 'customer'
         };
-        localStorage.setItem('user', JSON.stringify(userData));
-        window.dispatchEvent(new Event('storage'));
+        loginWithUserData(loginData);
         
         toast({
           title: isTamil ? "வெற்றிகரமாக உள்நுழைந்தீர்கள்" : "Login Successful",

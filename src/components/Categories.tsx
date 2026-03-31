@@ -50,46 +50,48 @@ const Categories = () => {
   ];
 
   useEffect(() => {
-    // Fetch product categories with images
+    // Fetch product categories without photo for speed
     getProductCategories()
-      .then(categoryData => {
-        // Process category data
-        
-        let formattedCategories = [];
+      .then(async categoryData => {
+        let rawCategories = [];
         
         if (Array.isArray(categoryData)) {
-          // Direct array format
-          formattedCategories = categoryData.map((item, index) => ({
-            id: index,
-            name: item.Name,
-            count: '0+ items',
-            color: bgColors[index % bgColors.length],
-            photo: item.photo
-          }));
+          rawCategories = categoryData;
         } else if (categoryData && Array.isArray(categoryData.data)) {
-          // Strapi format
-          formattedCategories = categoryData.data.map((item, index) => ({
-            id: item.id || index,
-            name: item.Name || item.name || item.attributes?.Name || item.attributes?.name,
-            count: '0+ items',
-            color: bgColors[index % bgColors.length],
-            photo: item.photo || item.attributes?.photo
-          }));
+          rawCategories = categoryData.data;
         }
         
-        // Show categories without counts for faster loading
-        const categoriesWithGenericCounts = formattedCategories.map(category => ({
-          ...category,
-          count: translate('home.viewProducts')
+        const categoriesWithGenericCounts = rawCategories.map((item, index) => ({
+          id: item.id || index,
+          name: item.Name || item.name || item.attributes?.Name || item.attributes?.name,
+          count: translate('home.viewProducts'),
+          color: bgColors[index % bgColors.length],
+          photo: null
         }));
         
         setCategories(categoriesWithGenericCounts);
         setLoading(false);
+
+        // Fetch photos lazily in parallel
+        const photoPromises = rawCategories.map(async (item) => {
+          try {
+            const res = await fetch(
+              `https://api.dharaniherbbals.com/api/product-categories/${item.id}?fields[0]=photo`,
+              { headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` } }
+            );
+            if (!res.ok) return { id: item.id, photo: null };
+            const d = await res.json();
+            return { id: item.id, photo: d.data?.attributes?.photo || null };
+          } catch { return { id: item.id, photo: null }; }
+        });
+
+        const photos = await Promise.all(photoPromises);
+        setCategories(prev => prev.map(cat => {
+          const found = photos.find(p => p.id === cat.id);
+          return found ? { ...cat, photo: found.photo } : cat;
+        }));
       })
-      .catch(error => {
-        // Handle category fetch error
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, []);
 
   return (

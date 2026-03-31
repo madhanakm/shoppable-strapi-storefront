@@ -191,7 +191,7 @@ export const initiatePayment = async (orderData: OrderData, orderNumber: string,
       }
       
       const options = {
-        key: 'rzp_live_RoueJU66A0iiz5',
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: Math.round(orderData.total * 100),
         currency: 'INR',
         name: 'Dharani Herbbals',

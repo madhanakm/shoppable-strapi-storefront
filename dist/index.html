@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://dharaniherbbals.in/" />
 
     <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    <script async>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
@@ -57,6 +57,24 @@
     <meta name="apple-mobile-web-app-title" content="Dharani Herbbals" />
     <meta name="application-name" content="Dharani Herbbals" />
     <link rel="icon" type="image/png" href="/favicon.png" />
+
+    <!-- Fonts: preconnect + inline critical CSS to avoid FOUT -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <style>
+      /* System font stack as fallback — matches Montserrat metrics to prevent layout shift */
+      @font-face {
+        font-family: 'Montserrat';
+        font-style: normal;
+        font-weight: 400 800;
+        font-display: swap;
+        src: local('Montserrat');
+      }
+      body {
+        font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Anek+Tamil:wght@400;500;600;700&display=swap" />
     
     <!-- Structured Data for Google -->
     <script type="application/ld+json">
@@ -81,7 +99,7 @@
     }
     </script>
     
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
     
     <!-- Meta Pixel Code -->
     <script>
@@ -97,14 +115,247 @@
     fbq('track', 'PageView');
     </script>
     <!-- End Meta Pixel Code -->
-    <script type="module" crossorigin src="/assets/index-DUXfZqxA.js"></script>
+
+    <!-- Site Preloader Styles -->
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      #site-preloader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: #0a0a0a;
+        transition: opacity 0.6s ease;
+      }
+
+      /* Animated gradient background */
+      #site-preloader::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 20% 50%, rgba(10,127,6,0.15) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 20%, rgba(74,183,72,0.1) 0%, transparent 50%),
+                    radial-gradient(ellipse at 60% 80%, rgba(138,196,64,0.08) 0%, transparent 50%);
+        animation: bg-shift 4s ease-in-out infinite alternate;
+      }
+
+      @keyframes bg-shift {
+        0%   { opacity: 0.6; transform: scale(1); }
+        100% { opacity: 1;   transform: scale(1.05); }
+      }
+
+      /* Particle dots */
+      .pl-particles {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .pl-particle {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(74,183,72,0.4);
+        animation: float-up linear infinite;
+      }
+      .pl-particle:nth-child(1)  { width:4px;  height:4px;  left:10%; animation-duration:6s;  animation-delay:0s;   }
+      .pl-particle:nth-child(2)  { width:6px;  height:6px;  left:25%; animation-duration:8s;  animation-delay:1s;   }
+      .pl-particle:nth-child(3)  { width:3px;  height:3px;  left:40%; animation-duration:7s;  animation-delay:2s;   }
+      .pl-particle:nth-child(4)  { width:5px;  height:5px;  left:55%; animation-duration:9s;  animation-delay:0.5s; }
+      .pl-particle:nth-child(5)  { width:4px;  height:4px;  left:70%; animation-duration:6s;  animation-delay:1.5s; }
+      .pl-particle:nth-child(6)  { width:7px;  height:7px;  left:85%; animation-duration:8s;  animation-delay:3s;   }
+      .pl-particle:nth-child(7)  { width:3px;  height:3px;  left:15%; animation-duration:10s; animation-delay:2.5s; }
+      .pl-particle:nth-child(8)  { width:5px;  height:5px;  left:60%; animation-duration:7s;  animation-delay:4s;   }
+
+      @keyframes float-up {
+        0%   { transform: translateY(110vh) scale(0); opacity: 0; }
+        10%  { opacity: 1; }
+        90%  { opacity: 0.6; }
+        100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+      }
+
+      /* Center content */
+      .pl-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+
+      /* Logo container */
+      .pl-logo-wrap {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 32px;
+      }
+
+      /* Rotating ring */
+      .pl-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        border-top-color: #4ab748;
+        border-right-color: rgba(74,183,72,0.3);
+        animation: spin-ring 1.2s linear infinite;
+      }
+      .pl-ring-2 {
+        position: absolute;
+        inset: 8px;
+        border-radius: 50%;
+        border: 1.5px solid transparent;
+        border-bottom-color: #8ac440;
+        border-left-color: rgba(138,196,64,0.3);
+        animation: spin-ring 1.8s linear infinite reverse;
+      }
+
+      @keyframes spin-ring {
+        to { transform: rotate(360deg); }
+      }
+
+      /* Glow pulse behind logo */
+      .pl-glow {
+        position: absolute;
+        inset: 16px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(74,183,72,0.15) 0%, transparent 70%);
+        animation: glow-pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes glow-pulse {
+        0%, 100% { transform: scale(0.9); opacity: 0.5; }
+        50%       { transform: scale(1.1); opacity: 1; }
+      }
+
+      /* Logo image */
+      .pl-logo {
+        position: relative;
+        z-index: 1;
+        width: 90px;
+        height: 90px;
+        -o-object-fit: contain;
+           object-fit: contain;
+        animation: logo-breathe 3s ease-in-out infinite;
+        filter: drop-shadow(0 0 12px rgba(74,183,72,0.5));
+      }
+
+      @keyframes logo-breathe {
+        0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 12px rgba(74,183,72,0.5)); }
+        50%       { transform: scale(1.06); filter: drop-shadow(0 0 20px rgba(74,183,72,0.8)); }
+      }
+
+      /* Brand name */
+      .pl-brand {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, #4ab748 0%, #8ac440 50%, #4ab748 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shimmer 2.5s linear infinite;
+        margin-bottom: 6px;
+      }
+
+      @keyframes shimmer {
+        to { background-position: 200% center; }
+      }
+
+      .pl-tagline {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 400;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 36px;
+      }
+
+      /* Progress bar */
+      .pl-bar-wrap {
+        width: 200px;
+        height: 2px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+      .pl-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #0a7f06, #4ab748, #8ac440);
+        border-radius: 2px;
+        animation: progress 2s ease-out forwards;
+        box-shadow: 0 0 8px rgba(74,183,72,0.6);
+      }
+
+      @keyframes progress {
+        0%   { width: 0%; }
+        60%  { width: 75%; }
+        100% { width: 100%; }
+      }
+
+      .pl-status {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 0.65rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.3);
+        animation: blink 1.5s ease-in-out infinite;
+      }
+
+      @keyframes blink {
+        0%, 100% { opacity: 0.3; }
+        50%       { opacity: 0.8; }
+      }
+
+      body.preloader-active { overflow: hidden; }
+    </style>
+    <script type="module" crossorigin src="/assets/index-B7tI6WGg.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-DU8b7Rjc.js">
     <link rel="modulepreload" crossorigin href="/assets/ui-CInc0UBg.js">
     <link rel="modulepreload" crossorigin href="/assets/router-7aI0NJe4.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-BmorPOnC.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-gKw2WSKU.css">
   </head>
 
-  <body>
+  <body class="preloader-active">
+    <!-- Site Preloader -->
+    <div id="site-preloader">
+      <div class="pl-particles">
+        <div class="pl-particle"></div>
+        <div class="pl-particle"></div>
+        <div class="pl-particle"></div>
+        <div class="pl-particle"></div>
+        <div class="pl-particle"></div>
+        <div class="pl-particle"></div>
+        <div class="pl-particle"></div>
+        <div class="pl-particle"></div>
+      </div>
+      <div class="pl-content">
+        <div class="pl-logo-wrap">
+          <div class="pl-glow"></div>
+          <div class="pl-ring"></div>
+          <div class="pl-ring-2"></div>
+          <img class="pl-logo" src="https://api.dharaniherbbals.com/uploads/logo_12f2d3e78e.png" alt="Dharani Herbbals" />
+        </div>
+        <div class="pl-brand">Dharani Herbbals</div>
+        <div class="pl-tagline">Natural &bull; Pure &bull; Authentic</div>
+        <div class="pl-bar-wrap"><div class="pl-bar"></div></div>
+        <div class="pl-status">Loading</div>
+      </div>
+    </div>
+
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P6VBCF2B"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -116,5 +367,14 @@
     /></noscript>
     
     <div id="root"></div>
+    <script>
+      window.__preloaderShownAt = Date.now();
+      // Safety fallback: hide preloader after 6s even if JS is slow
+      setTimeout(function() {
+        var p = document.getElementById('site-preloader');
+        if (p) { p.style.opacity = '0'; p.style.pointerEvents = 'none'; setTimeout(function(){ p.remove(); }, 600); }
+        document.body.classList.remove('preloader-active');
+      }, 8000);
+    </script>
   </body>
 </html>

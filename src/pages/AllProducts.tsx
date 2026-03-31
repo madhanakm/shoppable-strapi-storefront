@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ShoppingCart, Filter, Grid, List, Heart, Search, X, CreditCard } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlistContext } from '@/contexts/WishlistContext';
-import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
+import { useQuickCheckout } from '@/hooks/useQuickCheckout';
 import { formatPrice } from '@/lib/utils';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
@@ -16,6 +16,7 @@ import { getProducts } from '@/services/products';
 import StarRating from '@/components/StarRating';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPriceByUserType, getVariablePriceRange } from '@/lib/pricing';
+import { useBuyNow } from '@/hooks/useBuyNow';
 import { CompactLoadingStatus } from '@/components/ProductSkeleton';
 import FloatingCart from '@/components/FloatingCart';
 
@@ -23,6 +24,7 @@ const AllProducts = () => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
   const { setQuickCheckoutItem } = useQuickCheckout();
+  const { buyNow } = useBuyNow();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
@@ -86,8 +88,8 @@ const AllProducts = () => {
     
     let hasChanges = false;
     
-    if (categoryParam && categoryParam !== selectedCategory) {
-      setSelectedCategory(categoryParam);
+    if (categoryParam && categoryParam.trim().toUpperCase() !== selectedCategory) {
+      setSelectedCategory(categoryParam.trim().toUpperCase());
       hasChanges = true;
     } else if (!categoryParam && selectedCategory !== 'all') {
       setSelectedCategory('all');
@@ -149,12 +151,12 @@ const AllProducts = () => {
       
       const brandNames = (brandsData.data || []).map(brand => {
         const attrs = brand.attributes || brand;
-        return attrs.name || attrs.Name || attrs.title;
+        return (attrs.name || attrs.Name || attrs.title || '').trim().toUpperCase();
       }).filter(Boolean);
       
       const categoryNames = (categoriesData.data || []).map(cat => {
         const attrs = cat.attributes || cat;
-        return attrs.name || attrs.Name || attrs.title;
+        return (attrs.name || attrs.Name || attrs.title || '').trim().toUpperCase();
       }).filter(Boolean);
       
       setBrands(brandNames);
@@ -207,6 +209,24 @@ const AllProducts = () => {
             .catch(() => {});
         }, 100);
       }
+
+      // Fetch photos in parallel
+      Promise.all(
+        productList.map(p =>
+          fetch(`https://api.dharaniherbbals.com/api/product-masters/${p.id}?fields[0]=photo`, {
+            headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
+          })
+            .then(r => r.ok ? r.json() : null)
+            .then(d => ({ id: p.id, photo: d?.data?.attributes?.photo || '' }))
+            .catch(() => ({ id: p.id, photo: '' }))
+        )
+      ).then(photos => {
+        const photoMap = Object.fromEntries(photos.map(p => [p.id, p.photo]));
+        setProducts(prev => prev.map(p => ({
+          ...p,
+          attributes: { ...(p.attributes || p), photo: photoMap[p.id] || (p.attributes || p).photo || '' }
+        })));
+      });
 
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -624,7 +644,7 @@ const AllProducts = () => {
                                   const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
                                   if (variations && variations.length > 0) {
                                     const firstVariation = variations[0];
-                                    setQuickCheckoutItem({
+                                    buyNow({
                                       id: product.id.toString(),
                                       name: `${attrs.Name || attrs.name} - ${firstVariation.attributeValue}`,
                                       tamil: attrs.tamil ? `${attrs.tamil} - ${firstVariation.attributeValue}` : null,
@@ -635,15 +655,11 @@ const AllProducts = () => {
                                       variation: firstVariation.attributeValue,
                                       quantity: 1
                                     });
-                                    navigate('/checkout');
                                     return;
                                   }
-                                } catch (e) {
-                                  
-                                }
+                                } catch (e) {}
                               }
-                              
-                              setQuickCheckoutItem({
+                              buyNow({
                                 id: product.id.toString(),
                                 name: attrs.Name || attrs.name,
                                 tamil: attrs.tamil || null,
@@ -653,7 +669,6 @@ const AllProducts = () => {
                                 skuid: attrs.skuid || attrs.SKUID || product.id.toString(),
                                 quantity: 1
                               });
-                              navigate('/checkout');
                             }}
                           >
                             <CreditCard className="w-3 h-3 md:w-4 md:h-4" />

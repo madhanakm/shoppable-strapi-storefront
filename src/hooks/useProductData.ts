@@ -3,6 +3,19 @@ import { getPriceByUserType } from '@/lib/pricing';
 import { formatPrice } from '@/lib/utils';
 import { getBulkProductReviewStats } from '@/services/reviews';
 
+const PRODUCT_FIELDS = 'fields[0]=Name&fields[1]=skuid&fields[2]=mrp&fields[3]=resellerprice&fields[4]=customerprice&fields[5]=retailprice&fields[6]=sarvoprice&fields[7]=distributorprice&fields[8]=price&fields[9]=type&fields[10]=status&fields[11]=tamil&fields[12]=isVariableProduct&fields[13]=variations&fields[14]=category&fields[15]=newLaunch';
+const API_TOKEN = import.meta.env.VITE_STRAPI_API_TOKEN;
+
+const fetchProductPhoto = async (productId: number): Promise<string> => {
+  const response = await fetch(
+    `https://api.dharaniherbbals.com/api/product-masters/${productId}?fields[0]=photo`,
+    { headers: { 'Authorization': `Bearer ${API_TOKEN}` } }
+  );
+  if (!response.ok) return '';
+  const data = await response.json();
+  return data.data?.attributes?.photo || '';
+};
+
 // Cache with proper structure
 const cache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_DURATION = 3 * 60 * 1000; // 3 minutes
@@ -113,9 +126,9 @@ export const useOptimizedProducts = (apiUrl: string, cacheKey: string, limit: nu
       // Fetch user type and products in parallel
       const [userType, response] = await Promise.all([
         fetchUserType(),
-        fetch(`${apiUrl}&pagination[pageSize]=${limit}`, {
+        fetch(`${apiUrl}&pagination[pageSize]=${limit}&${PRODUCT_FIELDS}`, {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_TOKEN}` },
         })
       ]);
 
@@ -126,19 +139,18 @@ export const useOptimizedProducts = (apiUrl: string, cacheKey: string, limit: nu
       const data = await response.json();
       const formattedProducts = formatProducts(data.data || [], userType);
       
-      // Fetch review stats
+      // Fetch review stats and photos in parallel
       let reviewStatsData = {};
       const productIds = formattedProducts
         .map((p: any) => parseInt(p.id))
         .filter((id: number) => !isNaN(id));
       
-      if (productIds.length > 0) {
-        try {
-          reviewStatsData = await getBulkProductReviewStats(productIds);
-        } catch (reviewError) {
-          console.error('Error fetching review stats:', reviewError);
-        }
-      }
+      const [reviewResult, ...photos] = await Promise.all([
+        productIds.length > 0 ? getBulkProductReviewStats(productIds).catch(() => ({})) : Promise.resolve({}),
+        ...formattedProducts.map((p: any) => fetchProductPhoto(p.id))
+      ]);
+      reviewStatsData = reviewResult;
+      formattedProducts.forEach((p: any, i: number) => { p.image = photos[i] || ''; });
       
       // Cache the results
       setCachedData(cacheKey, {

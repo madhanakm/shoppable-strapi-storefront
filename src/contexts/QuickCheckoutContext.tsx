@@ -1,46 +1,30 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-interface QuickCheckoutItem {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category?: string;
-  skuid?: string;
-  quantity: number;
-  tamil?: string;
-  variation?: string;
-}
-
-interface QuickCheckoutContextType {
-  quickCheckoutItem: QuickCheckoutItem | null;
-  setQuickCheckoutItem: (item: QuickCheckoutItem | null) => void;
-  clearQuickCheckout: () => void;
-}
-
-const QuickCheckoutContext = createContext<QuickCheckoutContextType | undefined>(undefined);
-
-export const useQuickCheckout = () => {
-  const context = useContext(QuickCheckoutContext);
-  if (!context) {
-    throw new Error('useQuickCheckout must be used within a QuickCheckoutProvider');
-  }
-  return context;
-};
+import React, { useState, ReactNode } from 'react';
+import { QuickCheckoutContext, QuickCheckoutItem } from '@/hooks/useQuickCheckout';
 
 export const QuickCheckoutProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [quickCheckoutItem, setQuickCheckoutItem] = useState<QuickCheckoutItem | null>(null);
+  const [quickCheckoutItem, setQuickCheckoutItemState] = useState<QuickCheckoutItem | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('quickCheckoutItem');
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  });
+
+  const setQuickCheckoutItem = (item: QuickCheckoutItem | null) => {
+    setQuickCheckoutItemState(item);
+    if (item) {
+      sessionStorage.setItem('quickCheckoutItem', JSON.stringify(item));
+    } else {
+      sessionStorage.removeItem('quickCheckoutItem');
+    }
+  };
 
   const clearQuickCheckout = () => {
-    setQuickCheckoutItem(null);
+    setQuickCheckoutItemState(null);
+    sessionStorage.removeItem('quickCheckoutItem');
   };
 
   return (
-    <QuickCheckoutContext.Provider value={{
-      quickCheckoutItem,
-      setQuickCheckoutItem,
-      clearQuickCheckout
-    }}>
+    <QuickCheckoutContext.Provider value={{ quickCheckoutItem, setQuickCheckoutItem, clearQuickCheckout }}>
       {children}
     </QuickCheckoutContext.Provider>
   );

@@ -5,7 +5,7 @@ import { Star, ShoppingCart, Heart, TrendingUp, Flame, Zap, Tag, ArrowRight, Eye
 import StarRating from './StarRating';
 import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
-import { useQuickCheckout } from '@/contexts/QuickCheckoutContext';
+import { useQuickCheckout } from '@/hooks/useQuickCheckout';
 import { useNavigate } from 'react-router-dom';
 import { formatPrice } from '@/lib/utils';
 import { Link } from 'react-router-dom';
@@ -14,12 +14,77 @@ import { getBulkProductReviewStats } from '@/services/reviews';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPriceByUserType, getVariablePriceRange } from '@/lib/pricing';
 import { filterPriceFromName } from '@/lib/productUtils';
+import { useUserType } from '@/hooks/useUserTypeQuery';
+import { useBuyNow } from '@/hooks/useBuyNow';
+
+const API_URL = 'https://api.dharaniherbbals.com/api';
+const API_TOKEN = import.meta.env.VITE_STRAPI_API_TOKEN;
+const PRODUCT_FIELDS = 'fields[0]=Name&fields[1]=skuid&fields[2]=mrp&fields[3]=resellerprice&fields[4]=customerprice&fields[5]=retailprice&fields[6]=sarvoprice&fields[7]=distributorprice&fields[8]=price&fields[9]=type&fields[10]=status&fields[11]=tamil&fields[12]=isVariableProduct&fields[13]=variations&fields[14]=category&fields[15]=newLaunch';
+
+const fetchProductPhoto = async (productId: number): Promise<string> => {
+  const response = await fetch(`${API_URL}/product-masters/${productId}?fields[0]=photo`, {
+    headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+  });
+  if (!response.ok) return '';
+  const data = await response.json();
+  return data.data?.attributes?.photo || '';
+};
+
+const formatProductList = (productList: any[], userType: string) =>
+  productList.map(item => {
+    const attributes = item.attributes || item;
+    let price = getPriceByUserType(attributes, userType);
+    let priceRange = null;
+    if (attributes.isVariableProduct && attributes.variations) {
+      try {
+        const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
+        const prices = variations.map((v: any) => getPriceByUserType(v, userType));
+        if (prices.length > 0) {
+          const minPrice = Math.min(...prices);
+          const maxPrice = Math.max(...prices);
+          price = minPrice;
+          priceRange = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+        }
+      } catch (e) {}
+    }
+    return {
+      id: item.id || Math.random().toString(),
+      name: attributes.Name || attributes.name || 'Product',
+      tamil: attributes.tamil || null,
+      price,
+      priceRange,
+      image: '',
+      originalPrice: attributes.originalPrice || null,
+      category: attributes.category,
+      skuid: attributes.skuid || attributes.SKUID,
+      isVariableProduct: attributes.isVariableProduct,
+      variations: attributes.variations,
+      userType
+    };
+  });
+
+const fetchProductsWithPhotos = async (url: string, userType: string) => {
+  const response = await fetch(`${url}&${PRODUCT_FIELDS}`, {
+    headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+  });
+  if (!response.ok) throw new Error(`API error: ${response.status}`);
+  const data = await response.json();
+  const formatted = formatProductList(data.data || [], userType);
+  const productIds = formatted.map((p: any) => parseInt(p.id)).filter((id: number) => !isNaN(id));
+  const [reviewStats, ...photos] = await Promise.all([
+    productIds.length > 0 ? getBulkProductReviewStats(productIds).catch(() => ({})) : Promise.resolve({}),
+    ...formatted.map((p: any) => fetchProductPhoto(p.id))
+  ]);
+  formatted.forEach((p: any, i: number) => { p.image = photos[i] || ''; });
+  return { products: formatted, reviewStats };
+};
 
 // Product Card Component
 const ProductCard = ({ product, reviewStats = {} }) => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
+  const { buyNow } = useBuyNow();
   const navigate = useNavigate();
   const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
@@ -65,7 +130,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
           const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
           const variationName = firstVariation.value || firstVariation.attributeValue || Object.values(firstVariation)[0];
           
-          setQuickCheckoutItem({
+          buyNow({
             id: product.id.toString(),
             skuid: skuid,
             name: `${product.name} - ${variationName}`,
@@ -76,7 +141,6 @@ const ProductCard = ({ product, reviewStats = {} }) => {
             variation: variationName,
             quantity: 1
           });
-          navigate('/checkout');
           return;
         }
       } catch (e) {
@@ -86,7 +150,7 @@ const ProductCard = ({ product, reviewStats = {} }) => {
     
     // For regular products
     const skuid = product.skuid || product.id.toString();
-    setQuickCheckoutItem({
+    buyNow({
       id: product.id.toString(),
       skuid: skuid,
       name: product.name,
@@ -96,7 +160,6 @@ const ProductCard = ({ product, reviewStats = {} }) => {
       category: product.category,
       quantity: 1
     });
-    navigate('/checkout');
   };
 
 
@@ -235,142 +298,33 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
   const [products, setProducts] = useState([]);
   const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
-  const [userType, setUserType] = useState('customer');
   const [showAll, setShowAll] = useState(false);
-  const { user } = useAuth();
+  const { data: userType = 'customer' } = useUserType();
   const { language, translate } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
+  const { buyNow } = useBuyNow();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
 
-  // Always fetch fresh user type from API - exactly like AllProducts page
   useEffect(() => {
-    const fetchUserType = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          const timestamp = new Date().getTime();
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
-          if (response.ok) {
-            const result = await response.json();
-            if (result.data && result.data.attributes) {
-              const newUserType = result.data.attributes.userType || 'customer';
-              
-              setUserType(newUserType);
-              return;
-            }
-          }
-        }
-        setUserType('customer');
-      } catch (error) {
-        
-        setUserType('customer');
-      }
-    };
-    fetchUserType();
-  }, []);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
+    const load = async () => {
       try {
         setLoading(true);
-        // Add timestamp to prevent caching
-        const timestamp = new Date().getTime();
-        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[type][$eq]=${type}&filters[status][$eq]=true&pagination[pageSize]=20&timestamp=${timestamp}`);
-        
-        if (!response.ok) {
-          throw new Error(`API responded with status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        let productList = [];
-        if (Array.isArray(data)) {
-          productList = data;
-        } else if (data && data.data && Array.isArray(data.data)) {
-          productList = data.data;
-        }
-        
-        // Products are already filtered by API, no need to filter again
-        const filteredProducts = productList;
-        
-        const formattedProducts = filteredProducts.map(item => {
-          const attributes = item.attributes || item;
-          // Use the userType from state - exactly like AllProducts page
-          const currentUserType = userType || 'customer';
-          
-          
-          let price = getPriceByUserType(attributes, currentUserType);
-          
-          let priceRange = null;
-          
-          if (attributes.isVariableProduct && attributes.variations) {
-            try {
-              const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
-              
-              // Calculate price range for each variation based on user type
-              const prices = variations.map(variation => getPriceByUserType(variation, currentUserType));
-              
-              if (prices.length > 0) {
-                const minPrice = Math.min(...prices);
-                const maxPrice = Math.max(...prices);
-                
-                price = minPrice; // Use min price as default
-                priceRange = minPrice === maxPrice ? 
-                  formatPrice(minPrice) : 
-                  `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
-                  
-                
-              }
-            } catch (e) {
-              
-              // Keep default price
-            }
-          }
-          
-          return {
-            id: item.id || Math.random().toString(),
-            name: attributes.Name || attributes.name || 'Product',
-            tamil: attributes.tamil || null,
-            price: price,
-            priceRange: priceRange,
-            image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
-            rating: attributes.rating || 4,
-            reviews: attributes.reviews || 10,
-            badge: attributes.type || type,
-            originalPrice: attributes.originalPrice || null,
-            category: attributes.category,
-            skuid: attributes.skuid || attributes.SKUID,
-            isVariableProduct: attributes.isVariableProduct,
-            variations: attributes.variations,
-            userType: userType || 'customer'
-          };
-        });
-        
-        setProducts(formattedProducts);
-        
-        // Fetch review stats
-        const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
-        if (productIds.length > 0) {
-          try {
-            const stats = await getBulkProductReviewStats(productIds);
-            setReviewStats(stats);
-          } catch (reviewError) {
-            
-          }
-        }
+        const { products: p, reviewStats: r } = await fetchProductsWithPhotos(
+          `${API_URL}/product-masters?filters[type][$eq]=${type}&filters[status][$eq]=true&pagination[pageSize]=20`,
+          userType
+        );
+        setProducts(p);
+        setReviewStats(r);
       } catch (err) {
-        
         setProducts([]);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchProducts();
+    load();
   }, [type, userType]);
 
   if (loading) {
@@ -516,7 +470,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                                 const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
                                 const variationName = firstVariation.value || firstVariation.attributeValue || Object.values(firstVariation)[0];
                                 
-                                setQuickCheckoutItem({
+                                buyNow({
                                   id: product.id.toString(),
                                   skuid: skuid,
                                   name: `${product.name} - ${variationName}`,
@@ -527,7 +481,6 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                                   variation: variationName,
                                   quantity: 1
                                 });
-                                navigate('/checkout');
                                 return;
                               }
                             } catch (e) {
@@ -537,7 +490,7 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                           
                           // For regular products
                           const skuid = product.skuid || product.id.toString();
-                          setQuickCheckoutItem({
+                          buyNow({
                             id: product.id.toString(),
                             skuid: skuid,
                             name: product.name,
@@ -547,7 +500,6 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
                             category: product.category,
                             quantity: 1
                           });
-                          navigate('/checkout');
                         }}
                       >
                         <span className="text-xs">{translate('blocks.buy')}</span>
@@ -592,109 +544,32 @@ const TrendingProductsSection = () => {
   const [products, setProducts] = useState([]);
   const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
-  const [userType, setUserType] = useState('customer');
-  const { user } = useAuth();
+  const { data: userType = 'customer' } = useUserType();
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
+  const { buyNow } = useBuyNow();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
 
   useEffect(() => {
-    const fetchUserType = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          const timestamp = new Date().getTime();
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
-          if (response.ok) {
-            const result = await response.json();
-            if (result.data && result.data.attributes) {
-              setUserType(result.data.attributes.userType || 'customer');
-              return;
-            }
-          }
-        }
-        setUserType('customer');
-      } catch (error) {
-        setUserType('customer');
-      }
-    };
-    fetchUserType();
-  }, []);
-
-  useEffect(() => {
-    const fetchTrending = async () => {
+    const load = async () => {
       try {
         setLoading(true);
-        const timestamp = new Date().getTime();
-        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[type][$eq]=trending&filters[status][$eq]=true&pagination[pageSize]=8&timestamp=${timestamp}`);
-        
-        if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
-        
-        const data = await response.json();
-        let productList = Array.isArray(data) ? data : (data?.data || []);
-        
-        const formattedProducts = productList.map(item => {
-          const attributes = item.attributes || item;
-          const currentUserType = userType || 'customer';
-          
-          let price = getPriceByUserType(attributes, currentUserType);
-          let priceRange = null;
-          
-          if (attributes.isVariableProduct && attributes.variations) {
-            try {
-              const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
-              const prices = variations.map(variation => getPriceByUserType(variation, currentUserType));
-              
-              if (prices.length > 0) {
-                const minPrice = Math.min(...prices);
-                const maxPrice = Math.max(...prices);
-                price = minPrice;
-                priceRange = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
-              }
-            } catch (e) {
-              // Keep default price
-            }
-          }
-          
-          return {
-            id: item.id || Math.random().toString(),
-            name: attributes.Name || attributes.name || 'Product',
-            tamil: attributes.tamil || null,
-            price: price,
-            priceRange: priceRange,
-            image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
-            originalPrice: attributes.originalPrice || null,
-            category: attributes.category,
-            skuid: attributes.skuid || attributes.SKUID,
-            isVariableProduct: attributes.isVariableProduct,
-            variations: attributes.variations,
-            userType: userType || 'customer'
-          };
-        });
-        
-        setProducts(formattedProducts);
-        
-        const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
-        if (productIds.length > 0) {
-          try {
-            const stats = await getBulkProductReviewStats(productIds);
-            setReviewStats(stats);
-          } catch (reviewError) {
-            // Handle error
-          }
-        }
+        const { products: p, reviewStats: r } = await fetchProductsWithPhotos(
+          `${API_URL}/product-masters?filters[type][$eq]=trending&filters[status][$eq]=true&pagination[pageSize]=8`,
+          userType
+        );
+        setProducts(p);
+        setReviewStats(r);
       } catch (err) {
         setProducts([]);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchTrending();
+    load();
   }, [userType]);
 
   if (loading) {
@@ -842,7 +717,7 @@ const TrendingProductsSection = () => {
                               const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
                               const variationName = firstVariation.value || firstVariation.attributeValue || Object.values(firstVariation)[0];
                               
-                              setQuickCheckoutItem({
+                              buyNow({
                                 id: product.id.toString(),
                                 skuid: skuid,
                                 name: `${product.name} - ${variationName}`,
@@ -853,7 +728,6 @@ const TrendingProductsSection = () => {
                                 variation: variationName,
                                 quantity: 1
                               });
-                              navigate('/checkout');
                               return;
                             }
                           } catch (e) {
@@ -863,7 +737,7 @@ const TrendingProductsSection = () => {
                         
                         // For regular products
                         const skuid = product.skuid || product.id.toString();
-                        setQuickCheckoutItem({
+                        buyNow({
                           id: product.id.toString(),
                           skuid: skuid,
                           name: product.name,
@@ -873,7 +747,6 @@ const TrendingProductsSection = () => {
                           category: product.category,
                           quantity: 1
                         });
-                        navigate('/checkout');
                       }}
                     >
                       <span className="text-xs">{translate('blocks.buy')}</span>
@@ -904,109 +777,32 @@ const DealsOfTheDaySection = () => {
   const [products, setProducts] = useState([]);
   const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
-  const [userType, setUserType] = useState('customer');
-  const { user } = useAuth();
+  const { data: userType = 'customer' } = useUserType();
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
+  const { buyNow } = useBuyNow();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
 
   useEffect(() => {
-    const fetchUserType = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          const timestamp = new Date().getTime();
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
-          if (response.ok) {
-            const result = await response.json();
-            if (result.data && result.data.attributes) {
-              setUserType(result.data.attributes.userType || 'customer');
-              return;
-            }
-          }
-        }
-        setUserType('customer');
-      } catch (error) {
-        setUserType('customer');
-      }
-    };
-    fetchUserType();
-  }, []);
-
-  useEffect(() => {
-    const fetchDeals = async () => {
+    const load = async () => {
       try {
         setLoading(true);
-        const timestamp = new Date().getTime();
-        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[type][$eq]=deals&filters[status][$eq]=true&pagination[pageSize]=10&timestamp=${timestamp}`);
-        
-        if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
-        
-        const data = await response.json();
-        let productList = Array.isArray(data) ? data : (data?.data || []);
-        
-        const formattedProducts = productList.map(item => {
-          const attributes = item.attributes || item;
-          const currentUserType = userType || 'customer';
-          
-          let price = getPriceByUserType(attributes, currentUserType);
-          let priceRange = null;
-          
-          if (attributes.isVariableProduct && attributes.variations) {
-            try {
-              const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
-              const prices = variations.map(variation => getPriceByUserType(variation, currentUserType));
-              
-              if (prices.length > 0) {
-                const minPrice = Math.min(...prices);
-                const maxPrice = Math.max(...prices);
-                price = minPrice;
-                priceRange = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
-              }
-            } catch (e) {
-              // Keep default price
-            }
-          }
-          
-          return {
-            id: item.id || Math.random().toString(),
-            name: attributes.Name || attributes.name || 'Product',
-            tamil: attributes.tamil || null,
-            price: price,
-            priceRange: priceRange,
-            image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
-            originalPrice: attributes.originalPrice || null,
-            category: attributes.category,
-            skuid: attributes.skuid || attributes.SKUID,
-            isVariableProduct: attributes.isVariableProduct,
-            variations: attributes.variations,
-            userType: userType || 'customer'
-          };
-        });
-        
-        setProducts(formattedProducts);
-        
-        const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
-        if (productIds.length > 0) {
-          try {
-            const stats = await getBulkProductReviewStats(productIds);
-            setReviewStats(stats);
-          } catch (reviewError) {
-            // Handle error
-          }
-        }
+        const { products: p, reviewStats: r } = await fetchProductsWithPhotos(
+          `${API_URL}/product-masters?filters[type][$eq]=deals&filters[status][$eq]=true&pagination[pageSize]=10`,
+          userType
+        );
+        setProducts(p);
+        setReviewStats(r);
       } catch (err) {
         setProducts([]);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchDeals();
+    load();
   }, [userType]);
 
   if (loading) {
@@ -1159,7 +955,7 @@ const DealsOfTheDaySection = () => {
                             const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
                             const variationName = firstVariation.value || firstVariation.attributeValue || Object.values(firstVariation)[0];
                             
-                            setQuickCheckoutItem({
+                            buyNow({
                               id: product.id.toString(),
                               skuid: skuid,
                               name: `${product.name} - ${variationName}`,
@@ -1170,7 +966,6 @@ const DealsOfTheDaySection = () => {
                               variation: variationName,
                               quantity: 1
                             });
-                            navigate('/checkout');
                             return;
                           }
                         } catch (e) {
@@ -1179,7 +974,7 @@ const DealsOfTheDaySection = () => {
                       }
                       
                       const skuid = product.skuid || product.id.toString();
-                      setQuickCheckoutItem({
+                      buyNow({
                         id: product.id.toString(),
                         skuid: skuid,
                         name: product.name,
@@ -1189,7 +984,6 @@ const DealsOfTheDaySection = () => {
                         category: product.category,
                         quantity: 1
                       });
-                      navigate('/checkout');
                     }}
                   >
                     <span className="text-xs">{translate('blocks.buy')}</span>
@@ -1249,109 +1043,32 @@ const PopularChoicesSection = () => {
   const [products, setProducts] = useState([]);
   const [reviewStats, setReviewStats] = useState({});
   const [loading, setLoading] = useState(true);
-  const [userType, setUserType] = useState('customer');
-  const { user } = useAuth();
+  const { data: userType = 'customer' } = useUserType();
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
+  const { buyNow } = useBuyNow();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
 
   useEffect(() => {
-    const fetchUserType = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          const timestamp = new Date().getTime();
-          const response = await fetch(`https://api.dharaniherbbals.com/api/ecom-users/${userData.id}?timestamp=${timestamp}`);
-          if (response.ok) {
-            const result = await response.json();
-            if (result.data && result.data.attributes) {
-              setUserType(result.data.attributes.userType || 'customer');
-              return;
-            }
-          }
-        }
-        setUserType('customer');
-      } catch (error) {
-        setUserType('customer');
-      }
-    };
-    fetchUserType();
-  }, []);
-
-  useEffect(() => {
-    const fetchPopular = async () => {
+    const load = async () => {
       try {
         setLoading(true);
-        const timestamp = new Date().getTime();
-        const response = await fetch(`https://api.dharaniherbbals.com/api/product-masters?filters[type][$eq]=popular&filters[status][$eq]=true&pagination[pageSize]=8&timestamp=${timestamp}`);
-        
-        if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
-        
-        const data = await response.json();
-        let productList = Array.isArray(data) ? data : (data?.data || []);
-        
-        const formattedProducts = productList.map(item => {
-          const attributes = item.attributes || item;
-          const currentUserType = userType || 'customer';
-          
-          let price = getPriceByUserType(attributes, currentUserType);
-          let priceRange = null;
-          
-          if (attributes.isVariableProduct && attributes.variations) {
-            try {
-              const variations = typeof attributes.variations === 'string' ? JSON.parse(attributes.variations) : attributes.variations;
-              const prices = variations.map(variation => getPriceByUserType(variation, currentUserType));
-              
-              if (prices.length > 0) {
-                const minPrice = Math.min(...prices);
-                const maxPrice = Math.max(...prices);
-                price = minPrice;
-                priceRange = minPrice === maxPrice ? formatPrice(minPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
-              }
-            } catch (e) {
-              // Keep default price
-            }
-          }
-          
-          return {
-            id: item.id || Math.random().toString(),
-            name: attributes.Name || attributes.name || 'Product',
-            tamil: attributes.tamil || null,
-            price: price,
-            priceRange: priceRange,
-            image: attributes.photo || attributes.image || 'https://via.placeholder.com/300x300?text=Product',
-            originalPrice: attributes.originalPrice || null,
-            category: attributes.category,
-            skuid: attributes.skuid || attributes.SKUID,
-            isVariableProduct: attributes.isVariableProduct,
-            variations: attributes.variations,
-            userType: userType || 'customer'
-          };
-        });
-        
-        setProducts(formattedProducts);
-        
-        const productIds = formattedProducts.map(p => parseInt(p.id)).filter(id => !isNaN(id));
-        if (productIds.length > 0) {
-          try {
-            const stats = await getBulkProductReviewStats(productIds);
-            setReviewStats(stats);
-          } catch (reviewError) {
-            // Handle error
-          }
-        }
+        const { products: p, reviewStats: r } = await fetchProductsWithPhotos(
+          `${API_URL}/product-masters?filters[type][$eq]=popular&filters[status][$eq]=true&pagination[pageSize]=8`,
+          userType
+        );
+        setProducts(p);
+        setReviewStats(r);
       } catch (err) {
         setProducts([]);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchPopular();
+    load();
   }, [userType]);
 
   if (loading) {
@@ -1497,7 +1214,7 @@ const PopularChoicesSection = () => {
                               const skuid = firstVariation.skuid || `${product.id}-${firstVariation.value || firstVariation.attributeValue}`;
                               const variationName = firstVariation.value || firstVariation.attributeValue || Object.values(firstVariation)[0];
                               
-                              setQuickCheckoutItem({
+                              buyNow({
                                 id: product.id.toString(),
                                 skuid: skuid,
                                 name: `${product.name} - ${variationName}`,
@@ -1508,7 +1225,6 @@ const PopularChoicesSection = () => {
                                 variation: variationName,
                                 quantity: 1
                               });
-                              navigate('/checkout');
                               return;
                             }
                           } catch (e) {
@@ -1518,7 +1234,7 @@ const PopularChoicesSection = () => {
                         
                         // For regular products
                         const skuid = product.skuid || product.id.toString();
-                        setQuickCheckoutItem({
+                        buyNow({
                           id: product.id.toString(),
                           skuid: skuid,
                           name: product.name,
@@ -1528,7 +1244,6 @@ const PopularChoicesSection = () => {
                           category: product.category,
                           quantity: 1
                         });
-                        navigate('/checkout');
                       }}
                     >
                       <span className="text-xs">{translate('blocks.buy')}</span>

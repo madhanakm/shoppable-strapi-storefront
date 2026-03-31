@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { getProductReviews, getProductReviewStats } from '@/services/reviews';
+
+import React, { useState } from 'react';
+import { getProductReviews } from '@/services/reviews';
 import StarRating from './StarRating';
 import { Skeleton } from './ui/skeleton';
 import { User, Calendar } from 'lucide-react';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
+import { useQuery } from '@tanstack/react-query';
 
 interface ProductReviewsProps {
   productId: number;
@@ -13,113 +15,49 @@ interface ProductReviewsProps {
 const ProductReviews: React.FC<ProductReviewsProps> = ({ productId, skuId }) => {
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
-  const [reviews, setReviews] = useState([]);
-  const [stats, setStats] = useState({ average: 0, count: 0 });
-  const [loading, setLoading] = useState(true);
 
   const [visibleReviews, setVisibleReviews] = useState(5); // Show 5 reviews initially
-  
-  useEffect(() => {
-    const fetchReviews = async () => {
-      setLoading(true);
-      try {
-        // Fetch reviews with productId filter
-        const url = `https://api.dharaniherbbals.com/api/product-reviews?filters[productId][$eq]=${productId}&filters[isActive][$eq]=true&pagination[limit]=-1&sort=createdAt:desc`;
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data && data.data && Array.isArray(data.data)) {
-          
-          // Filter reviews by productId
-          const apiReviews = data.data
-            .filter(item => {
-              // Filter by productId if it exists
-              const reviewProductId = item.attributes?.productId;
-              if (reviewProductId && reviewProductId.toString() === productId.toString()) {
-                return true;
-              }
-              
-              // Filter by skuId if it exists
-              const reviewSkuId = item.attributes?.skuId;
-              if (skuId && reviewSkuId && reviewSkuId.toString() === skuId.toString()) {
-                return true;
-              }
-              
-              // Only show active reviews
-              return item.attributes?.isActive === true;
-            })
-            .map(item => ({
-              id: item.id,
-              rating: item.attributes?.rating || 5,
-              comment: item.attributes?.comment || 'Great product!',
-              createdAt: item.attributes?.createdAt || new Date().toISOString(),
-              // Use userName field directly
-              userName: item.attributes?.userName || 'Customer',
-              // Add productId and productName
-              productId: item.attributes?.productId || productId.toString(),
-              productName: item.attributes?.productName || ''
-            }));
-          
 
-          
-          // Use the API reviews if available, otherwise use fallback
-          if (apiReviews.length > 0) {
-            setReviews(apiReviews);
-            
-            // Calculate stats from API reviews
-            const ratings = apiReviews.map(r => r.rating).filter(r => r >= 1 && r <= 5);
-            if (ratings.length > 0) {
-              const total = ratings.reduce((sum, r) => sum + r, 0);
-              const avg = total / ratings.length;
-              
-              setStats({
-                average: parseFloat(avg.toFixed(1)),
-                count: apiReviews.length
-              });
-            } else {
-              setStats({ average: 0, count: 0 });
-            }
-          } else {
-            // No reviews found - set empty state
-            setReviews([]);
-            setStats({ average: 0, count: 0 });
-          }
-        }
-      } catch (error) {
-        // Set empty state on error
-        setReviews([]);
-        setStats({ average: 0, count: 0 });
-      } finally {
-        setLoading(false);
+  const {
+    data: reviews = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['productReviews', productId, skuId],
+    queryFn: () => getProductReviews(productId, skuId),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Calculate stats from reviews
+  const ratings = reviews.map(r => r.rating).filter(r => r >= 1 && r <= 5);
+  const stats = ratings.length > 0
+    ? {
+        average: parseFloat((ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(1)),
+        count: reviews.length
       }
-    };
-    
-    fetchReviews();
-  }, [productId, skuId]);
-  
+    : { average: 0, count: 0 };
+
   const loadMoreReviews = () => {
     setVisibleReviews(reviews.length); // Show all reviews
   };
 
-  if (loading) {
-    return <ReviewsSkeleton />;
+  if (isLoading) return <ReviewsSkeleton />;
+  if (isError) return <div>Error loading reviews.</div>;
+  if (reviews.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <p className={isTamil ? 'tamil-text' : ''}>{isTamil ? 'இன்னும் விமர்சனங்கள் இல்லை. முதலில் விமர்சனம் இடுங்கள்!' : 'No reviews yet. Be the first to review!'}</p>
+      </div>
+    );
   }
 
-  // Always show reviews (either real or mock)
-
-  // Calculate rating distribution - ensure we have values for all ratings
+  // Calculate rating distribution
   const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
   reviews.forEach(review => {
-    if (review && review.rating && review.rating >= 1 && review.rating <= 5) {
+    if (review.rating >= 1 && review.rating <= 5) {
       ratingCounts[review.rating] = (ratingCounts[review.rating] || 0) + 1;
     }
   });
-  
-  // Don't add mock data for rating distribution
-
-
-  
-  // Reviews should always be available now from the service
   
   return (
     <div className="space-y-4">

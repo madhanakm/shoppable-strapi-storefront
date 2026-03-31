@@ -1,7 +1,4 @@
-/* Import Noto Sans Tamil font from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap');
-
-/* Apply Noto Sans Tamil font to Tamil text */
+/* Noto Sans Tamil loaded via HTML head */
 .tamil-text {
-  font-family: 'Noto Sans Tamil', 'Montserrat', sans-serif;
+  font-family: 'Anek Tamil', sans-serif;
 }

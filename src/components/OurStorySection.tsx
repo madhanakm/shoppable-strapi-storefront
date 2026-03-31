@@ -53,35 +53,42 @@ const OurStorySection = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center mb-16">
           <div className="order-2 lg:order-1">
             <div className="space-y-6">
+              <p className={`text-xl font-semibold italic text-emerald-700 ${isTamil ? 'tamil-text' : ''}`}>
+                {isTamil ? 'இது ஒரு தயாரிப்பிலிருந்து தொடங்கவில்லை. இது ஒரு கேள்வியிலிருந்து தொடங்கியது.' : "It didn't start with a product. It started with a question."}
+              </p>
+              <p className={`text-2xl font-bold text-gray-800 ${isTamil ? 'tamil-text' : ''}`}>
+                {isTamil ? 'குணப்படுத்துதல் மீண்டும் எளிமையாக இருந்தால் என்ன?' : 'What if healing could be simple again?'}
+              </p>
               <div className="relative">
                 <div className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-emerald-500 to-green-500 rounded-full"></div>
                 <p className={`text-lg leading-relaxed text-gray-700 pl-8 ${isTamil ? 'tamil-text' : ''}`}>
-                  {isTamil ? 
-                    'தரணி ஹெர்பல்ஸ் 2004 ஆம் ஆண்டில் சித்தா மற்றும் ஆயுர்வேதத்தில் ஆராய்ச்சி செய்வதற்காக உருவாக்கப்பட்டது. இதன் விளைவாக, தரணி ஹெர்பல்ஸ் 2007 இல் நிறுவப்பட்டது.' :
-                    'Dharani Herbbals commenced research initiatives in Siddha and Ayurveda in 2004, culminating in the company\'s formal incorporation in 2007.'
+                  {isTamil ?
+                    'எங்கள் பயணம் 2004 இல் சித்தா மற்றும் ஆயுர்வேதத்தில் அர்ப்பணிப்புடன் ஆராய்ச்சி செய்வதன் மூலம் தொடங்கியது, இயற்கை குணப்படுத்தல் மற்றும் காலத்தால் சோதிக்கப்பட்ட மரபுகளின் ஆழத்தை ஆராய்ந்தது. தரணி ஹெர்பல்ஸ் 2007 இல் முறையாக நிறுவப்பட்டது.' :
+                    'Our journey began in 2004 with dedicated research into Siddha and Ayurveda, exploring the depth of natural healing and time-tested traditions. Dharani Herbals was formally incorporated in 2007, built on a simple belief that true wellness should be natural, honest, and uncomplicated.'
                   }
                 </p>
               </div>
-              
               <div className="relative">
                 <div className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-green-500 to-emerald-500 rounded-full"></div>
                 <p className={`text-lg leading-relaxed text-gray-700 pl-8 ${isTamil ? 'tamil-text' : ''}`}>
-                  {isTamil ? 
-                    '100% மூலிகை மருந்துகளை அறிமுகப்படுத்துவதன் மூலம் இயற்கை சிகிச்சைக்கான விழிப்புணர்வை ஊக்குவிக்கவும். மூலிகை மருந்துகள் இயற்கையானவை மற்றும் பக்க விளைவுகள் இல்லாமல் தீங்கு விளைவிக்காதவை.' :
-                    'Promote awareness for nature cure by introducing 100% Herbal Medicines. Herbal medicines are Natural and harmless with no side effects.'
+                  {isTamil ?
+                    'செயற்கை தீர்வுகள் மற்றும் விரைவான தீர்வுகளால் நிரம்பிய உலகில், நாங்கள் வேறு ஒரு பாதையை தேர்ந்தெடுத்தோம் — தூய்மைக்கு, மரபுக்கு, மற்றும் இயற்கையின் அமைதியான சக்திக்கு திரும்பும் பாதை.' :
+                    'In a world overwhelmed by artificial solutions and quick fixes, we chose a different path — one that returns to purity, to tradition, and to the quiet power of nature.'
                   }
                 </p>
               </div>
-
               <div className="relative">
                 <div className="absolute -left-4 top-0 w-1 h-full bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
                 <p className={`text-lg leading-relaxed text-gray-700 pl-8 ${isTamil ? 'tamil-text' : ''}`}>
-                  {isTamil ? 
-                    'நாங்கள் மூலிகைகளில் அதிகமான ஆராய்ச்சி செய்து வருகிறோம். நமது ஆரோக்கியத்தைப் பாதுகாக்க ஒரே வழி இயற்கை சிகிச்சையை நோக்கி திரும்புவதுதான்.' :
-                    'We are doing more and more research in herbs. The only way to safe-guard our health is to turn back to nature cure.'
+                  {isTamil ?
+                    'நாங்கள் உருவாக்கும் ஒவ்வொரு தயாரிப்பும் இந்த அர்ப்பணிப்பை பிரதிபலிக்கிறது — பாதுகாப்பான, பயனுள்ள மற்றும் உண்மையிலேயே இயற்கையான குணப்படுத்தலை வழங்க பண்டைய ஞானத்தை நவீன கவனிப்புடன் இணைக்கிறது.' :
+                    'Every product we create reflects this commitment, blending ancient wisdom with modern care to deliver safe, effective, and truly natural healing.'
                   }
                 </p>
               </div>
+              <p className={`text-lg font-semibold text-emerald-700 italic ${isTamil ? 'tamil-text' : ''}`}>
+                {isTamil ? 'வேர்களுக்கு திரும்பு. சிறந்த வாழ்க்கையை நோக்கி முன்னேறு.' : 'Back to roots. Forward to better living.'}
+              </p>
             </div>
 
             {/* CTA Buttons */}
