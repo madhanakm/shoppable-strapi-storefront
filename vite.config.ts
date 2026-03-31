@@ -39,13 +39,25 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
-          pdf: ['jspdf', 'html2canvas']
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-router': ['react-router-dom'],
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-radix': [
+            '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select',
+            '@radix-ui/react-toast', '@radix-ui/react-tooltip', '@radix-ui/react-label',
+            '@radix-ui/react-checkbox', '@radix-ui/react-radio-group', '@radix-ui/react-slot',
+            '@radix-ui/react-separator', '@radix-ui/react-tabs', '@radix-ui/react-accordion',
+            '@radix-ui/react-popover', '@radix-ui/react-progress', '@radix-ui/react-switch'
+          ],
+          'vendor-icons': ['lucide-react'],
+          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'vendor-utils': ['clsx', 'tailwind-merge', 'class-variance-authority', 'date-fns'],
+          'vendor-misc': ['react-helmet-async', 'sonner', 'next-themes', 'embla-carousel-react'],
+          'pdf': ['jspdf', 'html2canvas', 'jspdf-autotable'],
         }
       }
     },
+    chunkSizeWarningLimit: 300,
   },
   publicDir: 'public',
   assetsInclude: ['**/.htaccess'],

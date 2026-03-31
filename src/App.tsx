@@ -1,41 +1,42 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QuickCheckoutProvider } from "@/contexts/QuickCheckoutContext";
 import { TranslationProvider } from "@/components/TranslationProvider";
 import Index from "./pages/Index";
-import AllProducts from "./pages/AllProducts.tsx";
-import ProductDetail from "./pages/ProductDetail";
-import AboutUs from "./pages/AboutUs";
-import ContactUs from "./pages/ContactUs";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsConditions from "./pages/TermsConditions";
-import ShippingPolicy from "./pages/ShippingPolicy";
-import Login from "./pages/Login";
-import OTPLogin from "./pages/OTPLogin";
-import Register from "./pages/Register";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import Wishlist from "./pages/Wishlist";
-import ForgotPassword from "./pages/ForgotPassword";
-import Profile from "./pages/Profile";
-import NotFound from "./pages/NotFound";
-import RefundReturns from "./pages/RefundReturns";
-import OrderSuccess from "./pages/OrderSuccess";
-import AdminPendingOrders from "./pages/AdminPendingOrders";
-
 import WhatsAppFloat from "./components/WhatsAppFloat";
 import ScrollToTop from "./components/ScrollToTop";
 import ScrollToTopButton from "./components/ScrollToTopButton";
 import FloatingCart from "@/components/FloatingCart";
 import SitePopup from "@/components/SitePopup";
+
+// Lazy load non-critical pages
+const AllProducts = lazy(() => import('./pages/AllProducts'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const AboutUs = lazy(() => import('./pages/AboutUs'));
+const ContactUs = lazy(() => import('./pages/ContactUs'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsConditions = lazy(() => import('./pages/TermsConditions'));
+const ShippingPolicy = lazy(() => import('./pages/ShippingPolicy'));
+const Login = lazy(() => import('./pages/Login'));
+const OTPLogin = lazy(() => import('./pages/OTPLogin'));
+const Register = lazy(() => import('./pages/Register'));
+const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const Profile = lazy(() => import('./pages/Profile'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const RefundReturns = lazy(() => import('./pages/RefundReturns'));
+const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
+const AdminPendingOrders = lazy(() => import('./pages/AdminPendingOrders'));
+const MobilePayment = lazy(() => import('./pages/MobilePayment'));
 
 // const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = ({ onAppMount }: { onAppMount?: () => void }) => {
               <BrowserRouter>
                 <FloatingCart />
                 <ScrollToTop />
+                <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div></div>}>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/products" element={<AllProducts />} />
@@ -81,10 +83,10 @@ const App = ({ onAppMount }: { onAppMount?: () => void }) => {
                   <Route path="/refund-returns" element={<RefundReturns />} />
                   <Route path="/order-success" element={<OrderSuccess />} />
                   <Route path="/admin/pending-orders" element={<AdminPendingOrders />} />
-
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="/mobile-payment" element={<MobilePayment />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                </Suspense>
               </BrowserRouter>
             </TooltipProvider>
             </WishlistProvider>

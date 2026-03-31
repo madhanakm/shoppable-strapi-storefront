@@ -105,13 +105,6 @@ const Index = () => {
           <BestSellingProducts />
         </ErrorBoundary>
         
-        {/* Hero Section */}
-        <ErrorBoundary>
-          <div className="relative z-10">
-            <Hero />
-          </div>
-        </ErrorBoundary>
-        
         {/* Categories Section */}
         <ErrorBoundary>
           <div className="py-16 bg-gradient-to-r from-green-50 to-emerald-50">
@@ -143,6 +136,13 @@ const Index = () => {
             <div className="relative z-10">
               <ProductBlocks />
             </div>
+          </div>
+        </ErrorBoundary>
+
+        {/* Hero Section */}
+        <ErrorBoundary>
+          <div className="relative z-10">
+            <Hero />
           </div>
         </ErrorBoundary>
         

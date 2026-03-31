@@ -16,7 +16,7 @@ const Categories = () => {
     if (!container || categories.length === 0) return;
     
     let scrollPosition = 0;
-    const cardWidth = 200; // Card width + gap
+    const cardWidth = 110; // Card width + gap (mobile: ~33vw each, 3 per view)
     const totalWidth = categories.length * cardWidth;
     
     const autoScroll = setInterval(() => {
@@ -32,9 +32,9 @@ const Categories = () => {
         setTimeout(() => {
           container.scrollTo({ left: 0, behavior: 'auto' });
           scrollPosition = 0;
-        }, 500); // Wait for smooth scroll to complete
+        }, 500);
       }
-    }, 3000);
+    }, 1500);
     
     return () => clearInterval(autoScroll);
   }, [categories]);
@@ -106,10 +106,10 @@ const Categories = () => {
       <div className="w-full px-4 relative z-10">
         {/* Enhanced header section */}
         <div className="text-center mb-8">
-          <h2 className={`text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
+          <h2 className={`text-xl md:text-3xl lg:text-4xl font-bold mb-2 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
             {translate('home.shopByCategory')}
           </h2>
-          <p className={`text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
+          <p className={`text-sm md:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
             {translate('home.categoryDescription')}
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-green-500 to-emerald-500 mx-auto mt-6 rounded-full"></div>
@@ -153,22 +153,22 @@ const Categories = () => {
                 e.currentTarget.style.scrollBehavior = 'smooth';
               }}
             >
-              <div className="flex gap-6 px-4 w-full">
+              <div className="flex gap-2 sm:gap-4 md:gap-6 px-2 sm:px-4 w-full">
                 {/* Original categories */}
                 {categories.map((category, index) => (
                   <Link 
                     to={`/products?category=${encodeURIComponent(category.name)}`}
                     key={`original-${category.id}`}
-                    className="snap-start flex-shrink-0 w-48 group"
+                    className="snap-start flex-shrink-0 w-[30vw] sm:w-36 md:w-40 lg:w-48 group"
                     style={{animationDelay: `${index * 0.1}s`}}
                   >
                     <Card className="hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border-0 shadow-lg hover:shadow-green-200/50 h-full bg-white/80 backdrop-blur-sm group-hover:bg-white overflow-hidden">
-                      <CardContent className="p-6 text-center relative">
+                      <CardContent className="p-2 sm:p-4 text-center relative">
                         {/* Hover effect overlay */}
                         <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         
                         {/* Enhanced image container with better styling */}
-                        <div className="relative w-28 h-28 mx-auto mb-4 group-hover:scale-110 transition-all duration-300">
+                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 mx-auto mb-2 group-hover:scale-110 transition-all duration-300">
                           <div className={`absolute inset-0 ${category.color} rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300`}></div>
                           <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white/10 backdrop-blur-sm border border-white/20">
                             {category.photo ? (
@@ -194,10 +194,10 @@ const Categories = () => {
                         </div>
                         
                         {/* Enhanced text content */}
-                        <h3 className={`font-bold text-base mb-2 text-gray-800 group-hover:text-green-700 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
+                        <h3 className={`font-bold text-xs sm:text-sm md:text-base mb-1 text-gray-800 group-hover:text-green-700 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
                           {category.name}
                         </h3>
-                        <p className={`text-sm text-gray-500 group-hover:text-green-600 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
+                        <p className={`text-xs text-gray-500 group-hover:text-green-600 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
                           {category.count}
                         </p>
                         
@@ -220,15 +220,15 @@ const Categories = () => {
                   <Link 
                     to={`/products?category=${encodeURIComponent(category.name)}`}
                     key={`duplicate-${category.id}`}
-                    className="snap-start flex-shrink-0 w-48 group"
+                    className="snap-start flex-shrink-0 w-[30vw] sm:w-36 md:w-40 lg:w-48 group"
                   >
                     <Card className="hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border-0 shadow-lg hover:shadow-green-200/50 h-full bg-white/80 backdrop-blur-sm group-hover:bg-white overflow-hidden">
-                      <CardContent className="p-6 text-center relative">
+                      <CardContent className="p-2 sm:p-4 text-center relative">
                         {/* Hover effect overlay */}
                         <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         
                         {/* Enhanced image container with better styling */}
-                        <div className="relative w-28 h-28 mx-auto mb-4 group-hover:scale-110 transition-all duration-300">
+                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 mx-auto mb-2 group-hover:scale-110 transition-all duration-300">
                           <div className={`absolute inset-0 ${category.color} rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300`}></div>
                           <div className="relative w-full h-full rounded-2xl overflow-hidden bg-white/10 backdrop-blur-sm border border-white/20">
                             {category.photo ? (
@@ -254,10 +254,10 @@ const Categories = () => {
                         </div>
                         
                         {/* Enhanced text content */}
-                        <h3 className={`font-bold text-base mb-2 text-gray-800 group-hover:text-green-700 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
+                        <h3 className={`font-bold text-xs sm:text-sm md:text-base mb-1 text-gray-800 group-hover:text-green-700 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
                           {category.name}
                         </h3>
-                        <p className={`text-sm text-gray-500 group-hover:text-green-600 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
+                        <p className={`text-xs text-gray-500 group-hover:text-green-600 transition-colors duration-300 relative z-10 ${isTamil ? 'tamil-text' : ''}`}>
                           {category.count}
                         </p>
                         

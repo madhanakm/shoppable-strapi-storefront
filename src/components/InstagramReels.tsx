@@ -54,13 +54,13 @@ const InstagramReels = () => {
     const scrollInterval = setInterval(() => {
       const maxScroll = container.scrollWidth - container.clientWidth;
       const currentScroll = container.scrollLeft;
-      
+      const cardWidth = window.innerWidth < 768 ? window.innerWidth * 0.3 + 8 : 300;
       if (currentScroll >= maxScroll - 10) {
         container.scrollTo({ left: 0, behavior: 'smooth' });
       } else {
-        container.scrollBy({ left: 300, behavior: 'smooth' });
+        container.scrollBy({ left: cardWidth, behavior: 'smooth' });
       }
-    }, 3000);
+    }, 1500);
 
     return () => clearInterval(scrollInterval);
   }, [posts, loading]);
@@ -287,10 +287,10 @@ const InstagramReels = () => {
           <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full mb-4">
             <Play className="w-6 h-6 md:w-8 md:h-8 text-white" />
           </div>
-          <h2 className={`text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent mb-2 ${isTamil ? 'tamil-text' : ''}`}>
+          <h2 className={`text-xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent mb-2 ${isTamil ? 'tamil-text' : ''}`}>
             {isTamil ? 'விளம்பர வீடியோக்கள்' : 'Featured Videos'}
           </h2>
-          <p className={`text-gray-600 text-sm md:text-base ${isTamil ? 'tamil-text' : ''}`}>
+          <p className={`text-gray-600 text-xs md:text-base ${isTamil ? 'tamil-text' : ''}`}>
             {isTamil ? 'எங்கள் சிறப்பு தயாரிப்புகளைப் பாருங்கள்' : 'Watch our featured products'}
           </p>
         </div>
@@ -329,10 +329,10 @@ const InstagramReels = () => {
             return (
                   <Card 
                     key={post.id} 
-                    className="flex-shrink-0 w-[240px] md:w-[280px] bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                    className="flex-shrink-0 w-[30vw] md:w-[280px] bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
                   >
                     {/* YouTube Shorts Thumbnail */}
-                    <div className="relative w-full h-[350px] md:h-[400px] bg-gray-900">
+                    <div className="relative w-full h-[42vw] md:h-[400px] bg-gray-900">
                       {(() => {
                         const videoId = getYouTubeVideoId(post.attributes.instaLink);
                         if (videoId) {
@@ -371,26 +371,26 @@ const InstagramReels = () => {
                     </div>
 
                     {/* Product Info */}
-                    <div className="p-4">
-                      <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 md:p-4">
+                      <div className="flex items-center gap-2 mb-2">
                         <img 
                           src={product.image || 'https://via.placeholder.com/50x50?text=Product'} 
                           alt={product.name}
-                          className="w-12 h-12 rounded-full object-cover border-2 border-pink-200"
+                          className="w-8 h-8 md:w-12 md:h-12 rounded-full object-cover border-2 border-pink-200"
                           onError={(e) => {
                             e.currentTarget.src = 'https://via.placeholder.com/50x50?text=Product';
                           }}
                         />
-                        <h3 className={`font-semibold text-base flex-1 line-clamp-2 uppercase ${isTamil ? 'tamil-text' : ''}`}>
+                        <h3 className={`font-semibold text-xs md:text-base flex-1 line-clamp-2 uppercase ${isTamil ? 'tamil-text' : ''}`}>
                           {product.name}
                         </h3>
                       </div>
-                      <p className="text-2xl font-bold text-primary mb-3">
+                      <p className="text-sm md:text-2xl font-bold text-primary mb-2">
                         {isRange ? `${formatPrice(price.minPrice)} - ${formatPrice(price.maxPrice)}` : formatPrice(price)}
                       </p>
                       <Link to={`/product/${product.id}`}>
-                        <Button className="w-full text-white" style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}>
-                          <ShoppingCart className="w-4 h-4 mr-2" />
+                        <Button className="w-full text-white text-xs md:text-sm py-1 md:py-2" style={{background: 'linear-gradient(to right, #009108, #55bf57)'}}>
+                          <ShoppingCart className="w-3 h-3 md:w-4 md:h-4 mr-1" />
                           <span className={isTamil ? 'tamil-text' : ''}>
                             {isTamil ? 'இப்போது வாங்கவும்' : 'Buy Now'}
                           </span>

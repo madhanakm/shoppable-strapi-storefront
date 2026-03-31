@@ -146,9 +146,9 @@ const AboutUs = () => {
                   {translate('about.ourMission')}
                 </h3>
                 <p className={`text-gray-600 leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
-                  {isTamil ? 
-                    '100% மூலிகை மருந்துகளை அறிமுகப்படுத்துவதன் மூலம் இயற்கை சிகிச்சைக்கான விழிப்புணர்வை ஊக்குவிக்கவும். மூலிகை மருந்துகள் இயற்கையானவை மற்றும் பக்க விளைவுகள் இல்லாமல் தீங்கு விளைவிக்காதவை. எனவே இந்த மருந்துகள் உலகம் முழுவதும் உள்ள மக்களிடையே அன்பான வரவேற்பைப் பெற்றுள்ளன. நாங்கள் மூலிகைகளில் அதிகமான ஆராய்ச்சி செய்து வருகிறோம். நாம் மாசுபட்ட சூழலில் வாழ்ந்து கொண்டிருப்பதால், நமது ஆரோக்கியத்தைப் பாதுகாக்க ஒரே வழி இயற்கை சிகிச்சையை நோக்கி திரும்புவதுதான்.' :
-                    'Promote awareness for nature cure by introducing 100% Herbal Medicines. Herbal medicines are Natural and harmless with no side effects.Hence these medicines have warm welcome among people all over the world. We are doing more and more research in herbs. As we are living in polluted atmosphere, the only way to safe-guard our health is to turn back to nature cure.'
+                  {isTamil ?
+                    'இயற்கை சிகிச்சைக்கான விழிப்புணர்வை ஊக்குவிக்கவும், மூலிகை மருந்துகளின் மூலம் பக்க விளைவுகள் இல்லாத இயற்கையான குணப்படுத்தலை அனைவருக்கும் எடுத்துச் செல்லுவது. பாரம்பரிய ஞானத்தை நவீன கவனிப்புடன் இணைத்து, பாதுகாப்பான, பயனுள்ள மற்றும் உண்மையிலேயே இயற்கையான குணப்படுத்தலை வழங்குவது எங்கள் திண்ம்.' :
+                    'To promote natural healing for all through herbal medicines that are safe, effective, and free from side effects — blending ancient wisdom with modern care to deliver truly natural wellness.'
                   }
                 </p>
               </CardContent>
@@ -163,9 +163,9 @@ const AboutUs = () => {
                   {isTamil ? 'எங்கள் வரலாறு' : 'Our History'}
                 </h3>
                 <p className={`text-gray-600 leading-relaxed ${isTamil ? 'tamil-text' : ''}`}>
-                  {isTamil ? 
-                    '100% மூலிகை மருந்துகளை அறிமுகப்படுத்துவதன் மூலம் இயற்கை சிகிச்சைக்கான விழிப்புணர்வை ஊக்குவிக்கவும். மூலிகை மருந்துகள் இயற்கையானவை மற்றும் பக்க விளைவுகள் இல்லாமல் தீங்கு விளைவிக்காதவை. எனவே இந்த மருந்துகள் உலகம் முழுவதும் உள்ள மக்களிடையே அன்பான வரவேற்பைப் பெற்றுள்ளன. நாங்கள் மூலிகைகளில் அதிகமான ஆராய்ச்சி செய்து வருகிறோம். நாம் மாசுபட்ட சூழலில் வாழ்ந்து கொண்டிருப்பதால், நமது ஆரோக்கியத்தைப் பாதுகாக்க ஒரே வழி இயற்கை சிகிச்சையை நோக்கி திரும்புவதுதான்.' :
-                    'Promote awareness for nature cure by introducing 100% Herbal Medicines. Herbal medicines are Natural and harmless with no side effects.Hence these medicines have warm welcome among people all over the world. We are doing more and more research in herbs. As we are living in polluted atmosphere, the only way to safe-guard our health is to turn back to nature cure.'
+                  {isTamil ?
+                    '2004 இல் சித்தா மற்றும் ஆயுர்வேத ஆராய்ச்சியுடன் தொடங்கி, 2007 இல் தரணி ஹெர்பல்ஸ் முறையாக நிறுவப்பட்டது. இன்று 15+ ஆண்டுகளாக 6 லட்சத்திற்கும் மேற்பட்ட வாடிக்கையாளர்களுடன், 350+ தயாரிப்புகளுடன் இயற்கை ஆரோக்கியத்தில் நம்பகமான பெயராக வளர்ந்திருக்கிறோம்.' :
+                    'Founded in 2004 through Siddha and Ayurveda research, formally incorporated in 2007. Over 15+ years we have grown to serve 6 lakh+ customers across India with 350+ herbal products, becoming a trusted name in natural wellness.'
                   }
                 </p>
               </CardContent>
