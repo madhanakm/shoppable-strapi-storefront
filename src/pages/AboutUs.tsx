@@ -102,7 +102,7 @@ const AboutUs = () => {
                 <p className={isTamil ? 'tamil-text' : ''}>
                   {isTamil ?
                     'எங்கள் பயணம் 2004 இல் சித்தா மற்றும் ஆயுர்வேதத்தில் அர்ப்பணிப்புடன் ஆராய்ச்சி செய்வதன் மூலம் தொடங்கியது, இயற்கை குணப்படுத்தல் மற்றும் காலத்தால் சோதிக்கப்பட்ட மரபுகளின் ஆழத்தை ஆராய்ந்தது. தரணி ஹெர்பல்ஸ் 2007 இல் முறையாக நிறுவப்பட்டது, உண்மையான ஆரோக்கியம் இயற்கையாக, நேர்மையாக மற்றும் சிக்கலற்றதாக இருக்க வேண்டும் என்ற எளிய நம்பிக்கையின் அடிப்படையில்.' :
-                    'Our journey began in 2004 with dedicated research into Siddha and Ayurveda, exploring the depth of natural healing and time-tested traditions. Dharani Herbals was formally incorporated in 2007, built on a simple belief that true wellness should be natural, honest, and uncomplicated.'
+                    'Our journey began in 2004 with dedicated research into Siddha and Ayurveda, exploring the depth of natural healing and time-tested traditions.'
                   }
                 </p>
                 <p className={isTamil ? 'tamil-text' : ''}>

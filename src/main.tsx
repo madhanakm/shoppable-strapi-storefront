@@ -67,7 +67,7 @@ const removePreloader = () => {
 
   const shownAt = (window as any).__preloaderShownAt || Date.now();
   const elapsed = Date.now() - shownAt;
-  const minDuration = 2500;
+  const minDuration = 4500;
   const delay = Math.max(0, minDuration - elapsed);
 
   setTimeout(() => {
