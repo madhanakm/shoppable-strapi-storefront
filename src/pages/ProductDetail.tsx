@@ -434,7 +434,6 @@ const ProductDetail = () => {
                 onMouseMove={handleMouseMove}
                 onMouseEnter={() => zoomedImageRef.current?.classList.add('scale-110')}
                 onMouseLeave={() => zoomedImageRef.current?.classList.remove('scale-110')}
-                onClick={() => setZoomActive(true)}
               >
                 {selectedImage ? (
                   <>
@@ -442,13 +441,8 @@ const ProductDetail = () => {
                       ref={zoomedImageRef}
                       src={selectedImage} 
                       alt={product.Name || product.name || product.title || 'Product'} 
-                      className="w-full h-auto max-h-[300px] object-contain cursor-zoom-in transition-all duration-500 rounded-2xl"
+                      className="w-full h-auto max-h-[300px] object-contain transition-all duration-500 rounded-2xl"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 rounded-2xl">
-                      <div className="opacity-0 group-hover:opacity-100 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-gray-800 font-medium shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 text-sm">
-                        🔍 {isTamil ? translate('product.clickToZoom') : 'Click to zoom'}
-                      </div>
-                    </div>
                   </>
                 ) : (
                   <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl">

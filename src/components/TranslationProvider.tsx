@@ -355,7 +355,7 @@ const enTranslations = {
   // Home Page Content
   'home.shopByCategory': 'Shop by Category',
   'home.categoryDescription': 'Explore our thoughtfully curated range of natural herbal products, crafted to support your journey to wellness.',
-  'home.ourValuableCustomerReviews': 'What Our Customers Say',
+  'home.ourValuableCustomerReviews': 'Customer Favorites & Experiences',
   'home.basedOnReviews': 'Based on {count}+ Google reviews',
   'home.writeReview': 'Write a Review',
   'home.viewAllReviews': 'View All Reviews',
@@ -732,7 +732,7 @@ const taTranslations = {
   // Home Page Content
   'home.shopByCategory': 'வகை வாரியாக வாங்குங்கள்',
   'home.categoryDescription': 'உங்கள் ஆரோக்கிய பயணத்திற்கு துணையாக உருவாக்கப்பட்ட இயற்கை மூலிகை தயாரிப்புகளின் எங்கள் கவனமாக தேர்ந்தெடுக்கப்பட்ட தொகுப்பை ஆராயுங்கள்.',
-  'home.ourValuableCustomerReviews': 'எங்கள் வாடிக்கையாளர்கள் சோல்வது',
+  'home.ourValuableCustomerReviews': 'வாடிக்கையாளர் விருப்பங்கள் மற்றும் அனுபவங்கள்',
   'home.basedOnReviews': '{count}+ கூகுள் விமர்சனங்களின் அடிப்படையில்',
   'home.writeReview': 'விமர்சனம் எழுதுங்கள்',
   'home.viewAllReviews': 'அனைத்து விமர்சனங்களை பார்க்க',

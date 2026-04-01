@@ -791,7 +791,7 @@ const DealsOfTheDaySection = () => {
       try {
         setLoading(true);
         const { products: p, reviewStats: r } = await fetchProductsWithPhotos(
-          `${API_URL}/product-masters?filters[type][$eq]=deals&filters[status][$eq]=true&pagination[pageSize]=10`,
+          `${API_URL}/product-masters?filters[type][$eq]=deals&filters[status][$eq]=true&pagination[pageSize]=6`,
           userType
         );
         setProducts(p);
@@ -856,9 +856,9 @@ const DealsOfTheDaySection = () => {
           </div>
         </div>
 
-        {/* 2 Column Layout for Mobile, 4 Column for Desktop */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-          {products.slice(0, 8).map((product, index) => (
+        {/* 2 Column Mobile, 3 Column Desktop = 2 rows of 3 = 6 products */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
+          {products.slice(0, 6).map((product, index) => (
             <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden bg-white rounded-2xl border border-gray-100 hover:border-green-200">
               <div className="relative overflow-hidden">
                 <Link to={`/product/${product.id}`}>
