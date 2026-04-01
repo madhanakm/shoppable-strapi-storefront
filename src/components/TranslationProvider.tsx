@@ -153,7 +153,7 @@ const enTranslations = {
   'product.relatedProducts': 'Related Products',
   
   // Cart Page
-  'cart.title': 'Your Cart',
+  'cart.title': 'My Cart',
   'cart.empty': 'Your cart is empty',
   'cart.continueShopping': 'Continue Shopping',
   'cart.product': 'Product',
@@ -175,7 +175,7 @@ const enTranslations = {
   'cart.finalShippingNote': '*Final shipping calculated at checkout based on delivery location',
   
   // Wishlist Page
-  'wishlist.title': 'Your Wishlist',
+  'wishlist.title': 'My Wishlist',
   'wishlist.empty': 'Your wishlist is empty',
   'wishlist.continueShopping': 'Continue Shopping',
   'wishlist.addToCart': 'Add to Cart',
@@ -483,7 +483,7 @@ const taTranslations = {
   'checkout.email': 'மின்னஞ்சல்',
   'checkout.shippingAddress': 'அனுப்புதல் முகவரி',
   'checkout.paymentMethod': 'கட்டண முறை',
-  'checkout.orderSummary': 'ஆர்டர் சாராஂசம்',
+  'checkout.orderSummary': 'ஆர்டர் சுருக்கம்',
   'checkout.subtotal': 'கூட்டுத்தொகை',
   'checkout.shipping': 'அனுப்புதல்',
   'checkout.free': 'இலவசம்',
@@ -530,7 +530,7 @@ const taTranslations = {
   'product.relatedProducts': 'தொடர்புடைய தயாரிப்புகள்',
   
   // Cart Page
-  'cart.title': 'உங்கள் கூடை',
+  'cart.title': 'என் கூடை',
   'cart.empty': 'உங்கள் கூடை காலியாக உள்ளது',
   'cart.continueShopping': 'ஷாப்பிங் தொடரவும்',
   'cart.product': 'தயாரிப்பு',
@@ -543,7 +543,7 @@ const taTranslations = {
   'cart.tax': 'வரி',
   'cart.orderTotal': 'ஆர்டர் மொத்தம்',
   'cart.checkout': 'செக்அவுட் செய்ய',
-  'cart.orderSummary': 'ஆர்டர் சாராஂசம்',
+  'cart.orderSummary': 'ஆர்டர் சுருக்கம்',
   'cart.free': 'இலவசம்',
   'cart.calculatedAtCheckout': 'செக்அவுட்டில் கணக்கிடும்',
   'cart.inclusive': 'உள்ளடங்கிய',
@@ -552,7 +552,7 @@ const taTranslations = {
   'cart.finalShippingNote': '*அனுப்புதல் கட்டணம் செக்அவுட்டில் கணக்கிடப்படும்',
   
   // Wishlist Page
-  'wishlist.title': 'உங்கள் விருப்பப்பட்டியல்',
+  'wishlist.title': 'என் விருப்பப்பட்டியல்',
   'wishlist.empty': 'உங்கள் விருப்பப்பட்டியல் காலியாக உள்ளது',
   'wishlist.continueShopping': 'ஷாப்பிங் தொடரவும்',
   'wishlist.addToCart': 'கூடையில் சேர்',

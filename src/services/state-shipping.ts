@@ -32,7 +32,7 @@ export const getStateShippingRates = async (): Promise<StateShippingRate[]> => {
       freeShippingThreshold: item.attributes.freeShippingThreshold,
       minimumOrderValue: item.attributes.minimumOrderValue,
       isActive: item.attributes.isActive
-    }));
+    })).sort((a, b) => a.stateName.localeCompare(b.stateName));
   } catch (error) {
     console.error('Failed to fetch state shipping rates:', error);
     return [];

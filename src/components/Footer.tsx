@@ -211,11 +211,13 @@ const Footer = () => {
                 </div>
               </div>
               <div className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-primary mt-1" />
-                <span className="text-gray-300">
+                <MapPin className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                <span className="text-gray-300 text-sm">
                   7/470-1, Chemparuthi Street,<br />
                   West Nehru Nagar, Punjai Puliampatti,<br />
-                  Sathyamangalam(TALUK), Erode - 638 459, TN, India
+                  Sathyamangalam (Taluk),<br />
+                  Erode – 638 459,<br />
+                  Tamil Nadu, India.
                 </span>
               </div>
               <div className="flex items-center space-x-3">
@@ -242,34 +244,34 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-6">
-            <h4 className="font-bold text-base md:text-xl text-white border-b border-gray-700 pb-3">Quick Links</h4>
+          <div className="space-y-6 text-center">
+            <h4 className="font-bold text-base md:text-xl text-white border-b border-gray-700 pb-3">Shop</h4>
             <ul className="space-y-3">
-              <li><Link to="/products" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/products" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                All Products
+                Browse All Products
               </Link></li>
-              <li><Link to="/products?type=deals" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/products?type=deals" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Deals of the Day
+                Handpicked Deals for You
               </Link></li>
-              <li><Link to="/products?type=trending" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/products?type=trending" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                 Trending Products
               </Link></li>
-              <li><Link to="/contact" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/about" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Contact Us
+                About Us
               </Link></li>
-              <li><Link to="/cart" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/contact" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Shopping Cart
+                Contact
               </Link></li>
             </ul>
           </div>
 
           {/* Brands */}
-          <div className="space-y-6">
+          <div className="space-y-6 text-center">
             <h4 className="font-bold text-base md:text-xl text-white border-b border-gray-700 pb-3">Our Brands</h4>
             <ul className="space-y-3">
               {loading ? (
@@ -279,7 +281,7 @@ const Footer = () => {
                   <li key={index}>
                     <Link 
                       to={`/products?brand=${encodeURIComponent(brand)}`} 
-                      className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}
+                      className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}
                     >
                       <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                       {brand}
@@ -293,37 +295,41 @@ const Footer = () => {
           </div>
 
           {/* Support & Policies */}
-          <div className="space-y-6">
-            <h4 className="font-bold text-base md:text-xl text-white border-b border-gray-700 pb-3">Support & Policies</h4>
+          <div className="space-y-6 text-center">
+            <h4 className="font-bold text-base md:text-xl text-white border-b border-gray-700 pb-3">Support</h4>
             <ul className="space-y-3">
-              <li><Link to="/profile" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/profile" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                 My Account
               </Link></li>
-              <li><a href="#" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/profile" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                 Order Tracking
-              </a></li>
-              <li><Link to="/privacy" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              </Link></li>
+              <li><Link to="/contact" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}>
+                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                FAQs
+              </Link></li>
+            </ul>
+
+            <h4 className="font-bold text-base md:text-xl text-white border-b border-gray-700 pb-3 mt-6">Policies</h4>
+            <ul className="space-y-3">
+              <li><Link to="/privacy" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                 Privacy Policy
               </Link></li>
-              <li><Link to="/terms" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/terms" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Terms & Conditions
+                Terms &amp; Conditions
               </Link></li>
-              <li><Link to="/refund-returns" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
+              <li><Link to="/shipping" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center justify-center group ${isTamil ? 'tamil-text' : ''}`}>
                 <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Refund/Returns
-              </Link></li>
-              <li><Link to="/shipping" className={`text-sm md:text-base text-gray-300 hover:text-primary transition-colors flex items-center group ${isTamil ? 'tamil-text' : ''}`}>
-                <ArrowRight className="w-4 h-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                Shipping
+                Shipping Policy
               </Link></li>
             </ul>
             
             {/* Play Store Download */}
-            <div className="mt-6">
+            <div className="mt-6 flex justify-center">
               <a 
                 href="https://play.google.com/store/apps/details?id=com.dharaniherbbals.app" 
                 target="_blank" 

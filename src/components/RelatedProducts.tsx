@@ -50,7 +50,7 @@ const RelatedProducts = () => {
         const formattedProducts = data.data
           .filter((item: any) => !cartSkuIds.includes(item.attributes?.skuid))
           .sort(() => Math.random() - 0.5)
-          .slice(0, 6)
+          .slice(0, 4)
           .map((item: any) => {
             const attrs = item.attributes;
             let variationsData = [];
@@ -129,12 +129,12 @@ const RelatedProducts = () => {
             <ShoppingCart className="w-5 h-5 text-white" />
           </div>
           <h2 className={`text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
-            {isTamil ? 'நீங்கள் விரும்பக்கூடியவை' : 'You May Also Like'}
+            {isTamil ? 'நீங்கள் தவறவிட்டிரக்கலாம்' : 'Items You May Have Missed'}
           </h2>
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {products.map((product, index) => {
             const price = getProductPrice(product);
             const isRange = typeof price === 'object' && price.minPrice !== undefined;
@@ -157,11 +157,6 @@ const RelatedProducts = () => {
                       }}
                     />
                   </Link>
-                  
-                  {/* Floating Badge */}
-                  <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-pulse">
-                    ✨ New
-                  </div>
                   
                   {/* Overlay on Hover */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>

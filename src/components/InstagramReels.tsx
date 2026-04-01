@@ -60,7 +60,7 @@ const InstagramReels = () => {
       } else {
         container.scrollBy({ left: cardWidth, behavior: 'smooth' });
       }
-    }, 1500);
+    }, 1800);
 
     return () => clearInterval(scrollInterval);
   }, [posts, loading]);
@@ -314,7 +314,7 @@ const InstagramReels = () => {
           <ChevronRight className="w-6 h-6 text-gray-800" />
         </button>
 
-        <div ref={scrollContainerRef} className="overflow-x-auto scrollbar-hide">
+        <div ref={scrollContainerRef} className="overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <div className="flex gap-4 md:gap-6 pb-4 px-4">
           {posts.map((post) => {
             const productId = parseInt(post.attributes.product_id);

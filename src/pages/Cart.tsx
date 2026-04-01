@@ -156,9 +156,6 @@ const Cart = () => {
             <h1 className={`text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4 ${isTamil ? 'tamil-text' : ''}`}>
               {translate('cart.title')}
             </h1>
-            <p className={`text-gray-600 text-lg ${isTamil ? 'tamil-text' : ''}`}>
-              {cartCount} {cartCount === 1 ? translate('cart.item') : translate('cart.items')} in your cart
-            </p>
           </div>
           
           <div className="grid lg:grid-cols-3 gap-8">
@@ -282,11 +279,6 @@ const Cart = () => {
                         {shippingInfo.isFree ? translate('cart.free') : translate('cart.calculatedAtCheckout')}
                       </span>
                     </div>
-                    {!shippingInfo.isFree && shippingInfo.remainingForFreeShipping > 0 && (
-                      <div className="text-sm text-green-600 mt-2 p-3 bg-green-50 rounded-lg border border-green-200">
-                        🎉 Add {formatPrice(shippingInfo.remainingForFreeShipping)} more for free shipping in Tamil Nadu!
-                      </div>
-                    )}
 
                     <div className="flex justify-between text-lg">
                       <span className={`text-gray-600 ${isTamil ? 'tamil-text' : ''}`}>{translate('cart.tax')}</span>
@@ -330,11 +322,15 @@ const Cart = () => {
                     </Link>
                   </div>
                   
-                  {/* Security Badge */}
-                  <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-800 text-center">
-                      🔒 Secure checkout with SSL encryption
-                    </p>
+                  {/* Payment Badge */}
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-xs text-gray-500 text-center mb-2">Secured & Powered by</p>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <img src="https://razorpay.com/assets/razorpay-glyph.svg" alt="Razorpay" className="h-5" onError={(e) => { e.currentTarget.style.display='none'; }} />
+                      <span className="text-sm font-semibold text-[#072654]">Razorpay</span>
+                      <span className="text-gray-300 hidden sm:inline">|</span>
+                      <span className="text-xs text-gray-500 whitespace-nowrap">🔒 256-bit SSL &bull; PCI DSS Compliant</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

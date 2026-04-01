@@ -75,9 +75,6 @@ const Wishlist = () => {
             <h1 className={`text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent mb-4 ${isTamil ? 'tamil-text' : ''}`}>
               {translate('wishlist.title')}
             </h1>
-            <p className={`text-gray-600 text-lg ${isTamil ? 'tamil-text' : ''}`}>
-              {wishlistCount} {wishlistCount === 1 ? translate('wishlist.item') : translate('wishlist.items')} saved for later
-            </p>
           </div>
           
           {/* Wishlist Items */}

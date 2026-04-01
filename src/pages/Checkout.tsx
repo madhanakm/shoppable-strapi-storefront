@@ -1535,13 +1535,14 @@ const Checkout = () => {
                       })()
                     )}
 
-                    {/* Security Badge */}
-                    <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                      <div className="flex items-center justify-center gap-2">
-                        <ShieldCheck className="w-5 h-5 text-green-600" />
-                        <p className={`text-sm text-green-800 font-medium ${isTamil ? 'tamil-text' : ''}`}>
-                          {translate('checkout.secureCheckout')}
-                        </p>
+                    {/* Payment Badge */}
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <p className="text-xs text-gray-500 text-center mb-2">Secured & Powered by</p>
+                      <div className="flex flex-wrap items-center justify-center gap-2">
+                        <img src="https://razorpay.com/assets/razorpay-glyph.svg" alt="Razorpay" className="h-5" onError={(e) => { e.currentTarget.style.display='none'; }} />
+                        <span className="text-sm font-semibold text-[#072654]">Razorpay</span>
+                        <span className="text-gray-300 hidden sm:inline">|</span>
+                        <span className="text-xs text-gray-500 whitespace-nowrap">🔒 256-bit SSL &bull; PCI DSS Compliant</span>
                       </div>
                     </div>
                   </CardContent>

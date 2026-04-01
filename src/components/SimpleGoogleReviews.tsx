@@ -22,7 +22,7 @@ const SimpleGoogleReviews: React.FC<SimpleGoogleReviewsProps> = ({
       <Star
         key={i}
         className={`w-5 h-5 ${
-          i < Math.floor(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+          i < Math.round(rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
         }`}
       />
     ));
