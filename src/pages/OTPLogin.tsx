@@ -282,6 +282,9 @@ const OTPLogin = () => {
                         className="pl-12 h-12 border-gray-200 focus:border-green-500 focus:ring-green-500"
                       />
                     </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {isTamil ? '10 இலக்கங்கள் மட்டும் உள்ளிடவும் (எ.கா: 9876543210)' : 'Enter 10 digits only, without +91 or spaces (e.g. 9876543210)'}
+                    </p>
                   </div>
                   
                   <Button 

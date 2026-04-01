@@ -304,6 +304,7 @@ const Login = () => {
                         className="pl-12 h-12 border-gray-200 focus:border-primary focus:ring-primary/20 transition-all"
                       />
                     </div>
+                    <p className="text-xs text-gray-500 mt-1">If using phone, enter 10 digits only without +91 or spaces (e.g. 9876543210)</p>
                   </div>
                   
                   <div>

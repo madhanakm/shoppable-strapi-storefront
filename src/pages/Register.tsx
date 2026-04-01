@@ -234,6 +234,7 @@ const Register = () => {
                         className="pl-12 h-12 border-gray-200 focus:border-green-500 focus:ring-green-500/20 transition-all"
                       />
                     </div>
+                    <p className="text-xs text-gray-500 mt-1">Enter 10 digits only, without +91 or spaces (e.g. 9876543210)</p>
                   </div>
                   
                   <div>
