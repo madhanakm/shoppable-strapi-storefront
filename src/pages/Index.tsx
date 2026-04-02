@@ -107,7 +107,7 @@ const Index = () => {
         
         {/* Categories Section */}
         <ErrorBoundary>
-          <div className="py-16 bg-gradient-to-r from-green-50 to-emerald-50">
+          <div className="py-6 md:py-16 bg-gradient-to-r from-green-50 to-emerald-50">
             <Categories />
           </div>
         </ErrorBoundary>
@@ -119,7 +119,7 @@ const Index = () => {
         
         {/* Google Reviews Section - Full Screen */}
         <ErrorBoundary>
-          <section className="py-16 bg-gray-50 w-full">
+          <section className="py-6 md:py-16 bg-gray-50 w-full">
             <SimpleGoogleReviews 
               businessName="Dharani Herbbals"
               googleMapsUrl="https://www.google.com/maps/place/Dharani+Herbbals/@11.3580339,77.1641668,17.06z/data=!4m8!3m7!1s0x3ba8e1bdd6179ddb:0x82f81936cbaf1a2!8m2!3d11.3580361!4d77.166633!9m1!1b1!16s%2Fg%2F11c6f588fq!5m1!1e1?entry=ttu&g_ep=EgoyMDI1MDkwMy4wIKXMDSoASAFQAw%3D%3D"
@@ -131,7 +131,7 @@ const Index = () => {
         
         {/* Product Blocks Section */}
         <ErrorBoundary>
-          <div className="py-16 bg-white relative">
+          <div className="py-6 md:py-16 bg-white relative">
             <div className="absolute inset-0 bg-gradient-to-b from-green-50/20 to-transparent" />
             <div className="relative z-10">
               <ProductBlocks />

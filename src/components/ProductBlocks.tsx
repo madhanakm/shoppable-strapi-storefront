@@ -354,12 +354,12 @@ const ProductBlock = ({ type, title, description, icon, bgColor, accentColor }) 
       </div>
       
       <div className="w-full px-0 relative z-10">
-        <div className="text-left mb-8 px-4">
-          <div className="flex items-center gap-4 mb-4">
-            <div className={`p-4 rounded-2xl ${accentColor} shadow-xl`}>
+        <div className="text-left mb-6 md:mb-8 px-4">
+          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mb-4">
+            <div className={`p-3 md:p-4 rounded-2xl ${accentColor} shadow-xl`}>
               <div className="relative">{icon}</div>
             </div>
-            <h2 className={`text-2xl md:text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent tracking-tight ${isTamil ? 'tamil-text' : ''}`}>
+            <h2 className={`text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent tracking-tight ${isTamil ? 'tamil-text' : ''}`}>
               {typeof title === 'string' ? title : title}
             </h2>
           </div>
@@ -597,12 +597,12 @@ const TrendingProductsSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl">
+        <div className="text-center mb-6">
+          <div className="inline-flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 mb-2 md:mb-3">
+            <div className="p-3 md:p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl animate-bounce">
               <TrendingUp className="w-8 h-8 text-white" />
             </div>
-            <h2 className={`text-3xl md:text-4xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
+            <h2 className={`text-xl md:text-3xl lg:text-4xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
               {translate('blocks.trendingProducts')}
             </h2>
           </div>
@@ -837,12 +837,12 @@ const DealsOfTheDaySection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl animate-bounce">
+        <div className="text-center mb-6">
+          <div className="inline-flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 mb-2 md:mb-3">
+            <div className="p-3 md:p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl animate-bounce">
               <Tag className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent">
+            <h2 className="text-xl md:text-3xl lg:text-4xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent">
               {translate('blocks.dealsOfTheDay')}
             </h2>
           </div>
@@ -1098,12 +1098,12 @@ const PopularChoicesSection = () => {
 
       <div className="w-full max-w-7xl mx-auto px-2 relative z-10">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl">
+        <div className="text-center mb-6">
+          <div className="inline-flex flex-col md:flex-row items-center justify-center gap-2 md:gap-3 mb-2 md:mb-3">
+            <div className="p-3 md:p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl animate-bounce">
               <Zap className="w-8 h-8 text-white" />
             </div>
-            <h2 className={`text-3xl md:text-4xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
+            <h2 className={`text-xl md:text-3xl lg:text-4xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
               {translate('blocks.popularChoices')}
             </h2>
           </div>

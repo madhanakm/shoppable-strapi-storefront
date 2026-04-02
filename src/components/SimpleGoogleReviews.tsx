@@ -30,7 +30,7 @@ const SimpleGoogleReviews: React.FC<SimpleGoogleReviewsProps> = ({
 
   return (
     <div className="w-full px-4">
-      <div className="text-center mb-8">
+      <div className="text-center mb-4 md:mb-8">
         <h2 className={`text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 ${isTamil ? 'tamil-text' : ''}`}>
           {translate('home.ourValuableCustomerReviews')}
         </h2>
@@ -105,7 +105,7 @@ const SimpleGoogleReviews: React.FC<SimpleGoogleReviewsProps> = ({
         </div>
         
         {/* View All Reviews Button */}
-        <div className="text-center mt-8">
+        <div className="text-center mt-4 md:mt-8">
           <a
             href="https://www.google.com/maps/place/Dharani+Herbbals/@11.3580785,77.1641708,17z/data=!4m8!3m7!1s0x3ba8e1bdd6179ddb:0x82f81936cbaf1a2!8m2!3d11.3580361!4d77.166633!9m1!1b1!16s%2Fg%2F11c6f588fq!5m1!1e1?entry=ttu&g_ep=EgoyMDI1MDkwMy4wIKXMDSoASAFQAw%3D%3D"
             target="_blank"

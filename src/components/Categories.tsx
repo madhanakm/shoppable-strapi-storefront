@@ -105,7 +105,7 @@ const Categories = () => {
       
       <div className="w-full px-4 relative z-10">
         {/* Enhanced header section */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-4 md:mb-8">
           <h2 className={`text-xl md:text-3xl lg:text-4xl font-bold mb-2 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent ${isTamil ? 'tamil-text' : ''}`}>
             {translate('home.shopByCategory')}
           </h2>
@@ -142,7 +142,7 @@ const Categories = () => {
             
             <div 
               id="categories-slider"
-              className="flex overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-smooth w-full"
+              className="flex overflow-x-auto pb-2 md:pb-8 scrollbar-hide snap-x snap-mandatory scroll-smooth w-full"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               onMouseEnter={(e) => {
                 // Pause auto scroll on hover
@@ -294,7 +294,7 @@ const Categories = () => {
         )}
         
         {/* Call to action */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-4 md:mt-12">
           <Link 
             to="/products" 
             className={`inline-flex items-center px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-full hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 ${isTamil ? 'tamil-text' : ''}`}
