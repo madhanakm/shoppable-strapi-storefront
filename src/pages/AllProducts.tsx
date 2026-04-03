@@ -186,22 +186,25 @@ const AllProducts = () => {
       const productsData = await getProducts(page, itemsPerPage, filters, { ...sortOptions, random: true });
       const productList = Array.isArray(productsData) ? productsData : productsData.data || [];
       
+      // Shuffle randomly when no sort selected
+      const finalList = sortBy === 'name' ? [...productList].sort(() => Math.random() - 0.5) : productList;
+      
       if (page === 1) {
-        setProducts(productList);
+        setProducts(finalList);
       } else {
-        setProducts(prev => [...prev, ...productList]);
+        setProducts(prev => [...prev, ...finalList]);
       }
       
       if (productsData.meta?.pagination) {
         setTotalProducts(productsData.meta.pagination.total);
-        const currentTotal = page === 1 ? productList.length : products.length + productList.length;
-        setHasMore(productList.length === itemsPerPage && currentTotal < productsData.meta.pagination.total);
+        const currentTotal = page === 1 ? finalList.length : products.length + finalList.length;
+        setHasMore(finalList.length === itemsPerPage && currentTotal < productsData.meta.pagination.total);
       } else {
-        setTotalProducts(productList.length);
-        setHasMore(productList.length === itemsPerPage);
+        setTotalProducts(finalList.length);
+        setHasMore(finalList.length === itemsPerPage);
       }
       
-      const productIds = productList.map(p => p.id).filter(id => id && !isNaN(parseInt(id)));
+      const productIds = finalList.map(p => p.id).filter(id => id && !isNaN(parseInt(id)));
       if (productIds.length > 0) {
         setTimeout(() => {
           getBulkProductReviewStats(productIds.map(id => parseInt(id)))
@@ -212,7 +215,7 @@ const AllProducts = () => {
 
       // Fetch photos in parallel
       Promise.all(
-        productList.map(p =>
+        finalList.map(p =>
           fetch(`https://api.dharaniherbbals.com/api/product-masters/${p.id}?fields[0]=photo`, {
             headers: { 'Authorization': `Bearer ${import.meta.env.VITE_STRAPI_API_TOKEN}` }
           })
@@ -475,7 +478,7 @@ const AllProducts = () => {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="flex-1 sm:flex-none px-2 md:px-3 py-2 border border-gray-300 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                 >
-                  <option value="name">{translate('ui.sortByName')}</option>
+                  <option value="name">Random</option>
                   <option value="price-low">{translate('ui.priceLowToHigh')}</option>
                   <option value="price-high">{translate('ui.priceHighToLow')}</option>
                 </select>

@@ -64,9 +64,8 @@ export const getProducts = async (
       queryParams.push('sort=mrp:asc');
     } else if (sortOptions.sortBy === 'price-high') {
       queryParams.push('sort=mrp:desc');
-    } else {
-      queryParams.push('sort=Name:asc');
     }
+    // No default sort — client will shuffle for random order
     
     const response = await fetch(
       `https://api.dharaniherbbals.com/api/product-masters?${queryParams.join('&')}`,
