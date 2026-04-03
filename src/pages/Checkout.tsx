@@ -73,19 +73,6 @@ const Checkout = () => {
   const location = useLocation();
   
   // Handle beforeunload event for browser navigation
-  useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (cartItems.length > 0 && !isLoading) {
-        e.preventDefault();
-        e.returnValue = 'Are you sure you want to cancel this payment? Your order details will be lost.';
-        return e.returnValue;
-      }
-    };
-    
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [cartItems.length, isLoading]);
-  
   // Override navigation using history API - removed (was blocking React Router globally)
   
   const handleNavigationConfirm = () => {
@@ -168,19 +155,20 @@ const Checkout = () => {
     }
   }, [user?.username, user?.email, user?.phone]);
   
-// Add payment warning when user tries to close tab during payment
+  // Payment warning on tab close
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (isPaymentInProgress) {
+      if (isPaymentInProgress || (cartItems.length > 0 && !isLoading)) {
         e.preventDefault();
-        e.returnValue = 'Payment is in progress. Closing this tab may cause your order to fail. Are you sure you want to leave?';
+        e.returnValue = isPaymentInProgress
+          ? 'Payment is in progress. Please do not close this tab.'
+          : 'Are you sure you want to cancel this payment?';
         return e.returnValue;
       }
     };
-    
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [isPaymentInProgress]);
+  }, [isPaymentInProgress, cartItems.length, isLoading]);
   
   // Fetch ecommerce settings and state rates
   useEffect(() => {
@@ -223,8 +211,14 @@ const Checkout = () => {
       } else {
         state = formData.shippingState || '';
       }
+
+      // No state selected — show 0 until user picks a state
+      if (!state) {
+        setShippingInfo({ charges: 0, isFree: false, isTamilNadu: false, freeShippingThreshold: 0, remainingForFreeShipping: 0 });
+        return;
+      }
       
-      if (state && stateRates.length > 0) {
+      if (stateRates.length > 0) {
         const info = await calculateShipping({
           cartTotal,
           state,
@@ -233,7 +227,6 @@ const Checkout = () => {
         });
         setShippingInfo(info);
       } else {
-        // Fallback to sync calculation
         const info = calculateShippingSync({
           cartTotal,
           state,
@@ -1440,7 +1433,7 @@ const Checkout = () => {
                       <div className="flex justify-between text-lg">
                         <span className={isTamil ? 'tamil-text' : ''}>{translate('checkout.shipping')}</span>
                         <span className={`font-semibold ${shippingInfo.isFree ? 'text-green-600' : ''}`}>
-                          {shippingInfo.isFree ? translate('checkout.free') : formatPrice(shippingCharges)}
+                          {shippingInfo.isFree ? translate('checkout.free') : shippingCharges === 0 && !currentState ? <span className="text-gray-400 text-sm">Select state to calculate</span> : formatPrice(shippingCharges)}
                         </span>
                       </div>
                       {!shippingInfo.isFree && shippingInfo.remainingForFreeShipping > 0 && shippingInfo.freeShippingThreshold !== -1 && (
