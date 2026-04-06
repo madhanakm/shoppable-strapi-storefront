@@ -98,28 +98,28 @@ const ContactUs = () => {
     {
       icon: Phone,
       title: isTamil ? 'தொலைபேசி' : 'Phone',
-      details: ['+91 97881 22001'],
+      details: [{ text: '+91 97881 22001', href: 'tel:+919788122001' }],
       color: 'text-green-600',
       bgColor: 'bg-green-100'
     },
     {
       icon: Mail,
       title: isTamil ? 'மின்னஞ்சல்' : 'Email',
-      details: ['info@dharaniherbbals.in', 'salesdharani@gmail.com'],
+      details: [{ text: 'info@dharaniherbbals.in', href: 'mailto:info@dharaniherbbals.in' }, { text: 'salesdharani@gmail.com', href: 'mailto:salesdharani@gmail.com' }],
       color: 'text-blue-600',
       bgColor: 'bg-blue-100'
     },
     {
       icon: MapPin,
       title: isTamil ? 'முகவரி' : 'Address',
-      details: ['7/470-1, Chemparuthi Street,', 'West Nehru Nagar, Punjai Puliampatti,', 'Sathyamangalam(TALUK), Erode - 638 459, TN, India'],
+      details: [{ text: '7/470-1, Chemparuthi Street,' }, { text: 'West Nehru Nagar, Punjai Puliampatti,' }, { text: 'Sathyamangalam(TALUK), Erode - 638 459, TN, India' }],
       color: 'text-red-600',
       bgColor: 'bg-red-100'
     },
     {
       icon: Clock,
       title: isTamil ? 'வணிக நேரம்' : 'Business Hours',
-      details: isTamil ? ['திங்கள் - சனி: காலை 9:00 - மாலை 7:00'] : ['Mon - Sat: 9:00 AM - 7:00 PM'],
+      details: isTamil ? [{ text: 'திங்கள் - சனி: காலை 9:00 - மாலை 7:00' }] : [{ text: 'Mon - Sat: 9:00 AM - 7:00 PM' }],
       color: 'text-purple-600',
       bgColor: 'bg-purple-100'
     }
@@ -178,7 +178,9 @@ const ContactUs = () => {
                 </h3>
                 <div className="space-y-1">
                   {info.details.map((detail, idx) => (
-                    <p key={idx} className="text-gray-600">{detail}</p>
+                    detail.href
+                      ? <a key={idx} href={detail.href} className="block text-gray-600 hover:text-primary transition-colors">{detail.text}</a>
+                      : <p key={idx} className="text-gray-600">{detail.text}</p>
                   ))}
                 </div>
               </CardContent>
@@ -315,17 +317,17 @@ const ContactUs = () => {
                   {isTamil ? 'சமூக ஊடகங்களில் எங்களுடன் இணைந்திருங்கள், சமீபத்திய புதுப்பிப்புகள், ஆரோக்கிய குறிப்புகள் மற்றும் தயாரிப்பு அறிமுகங்களுக்காக.' : 'Stay connected with us on social media for the latest updates, health tips, and product launches.'}
                 </p>
                 <div className="flex space-x-4">
-                  <a href="https://www.facebook.com/share/12JML3gctZN/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors">
-                    <Facebook className="w-6 h-6 text-white" />
+                  <a href="https://www.facebook.com/share/12JML3gctZN/" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-primary/20 hover:bg-primary rounded-full flex items-center justify-center transition-colors group">
+                    <Facebook className="w-6 h-6 text-primary group-hover:text-white" />
                   </a>
-                  <a href="https://www.instagram.com/dharani_herbbals?igsh=MXRueWJqMmtpZHRjOQ==" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-pink-600 hover:bg-pink-700 rounded-full flex items-center justify-center transition-colors">
-                    <Instagram className="w-6 h-6 text-white" />
+                  <a href="https://www.instagram.com/dharani_herbbals?igsh=MXRueWJqMmtpZHRjOQ==" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-primary/20 hover:bg-primary rounded-full flex items-center justify-center transition-colors group">
+                    <Instagram className="w-6 h-6 text-primary group-hover:text-white" />
                   </a>
-                  <a href="https://youtube.com/@dharaniherbbals1236?si=6fZfr3WVwFS6nLCC" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-colors">
-                    <Youtube className="w-6 h-6 text-white" />
+                  <a href="https://youtube.com/@dharaniherbbals1236?si=6fZfr3WVwFS6nLCC" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-primary/20 hover:bg-primary rounded-full flex items-center justify-center transition-colors group">
+                    <Youtube className="w-6 h-6 text-primary group-hover:text-white" />
                   </a>
-                  <a href="https://twitter.com/HerbbalsDharani" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-blue-400 hover:bg-blue-500 rounded-full flex items-center justify-center transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-white"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+                  <a href="https://twitter.com/HerbbalsDharani" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-primary/20 hover:bg-primary rounded-full flex items-center justify-center transition-colors group">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-primary group-hover:text-white"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
                   </a>
                 </div>
               </CardContent>

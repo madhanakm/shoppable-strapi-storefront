@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Menu, X, Search, ShoppingCart, Heart, User, Leaf, Globe, Phone, Mail } from 'lucide-react';
+import { Menu, X, Search, ShoppingCart, Heart, User, Leaf, Globe, Phone, Mail, Facebook, Instagram, Youtube } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -96,17 +96,17 @@ const Header = () => {
       <style>{dropdownAnimation}</style>
       {/* Top Bar */}
       <div className="bg-gradient-to-r from-primary/90 to-green-600 text-white py-2 hidden md:block sticky top-0 z-50">
-        <div className="container mx-auto px-4">
+        <div className="w-full pl-6 pr-6">
           <div className="flex justify-between items-center text-sm">
             <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-2">
+              <a href="tel:+919788122001" className="flex items-center space-x-2 hover:text-white/80">
                 <Phone className="w-4 h-4" />
                 <span>+91 97881 22001</span>
-              </div>
-              <div className="flex items-center space-x-2">
+              </a>
+              <a href="mailto:info@dharaniherbbals.in" className="flex items-center space-x-2 hover:text-white/80">
                 <Mail className="w-4 h-4" />
                 <span>info@dharaniherbbals.in</span>
-              </div>
+              </a>
             </div>
             <div className="flex items-center space-x-4">
               {/* Search Bar in Top Header */}
@@ -146,6 +146,14 @@ const Header = () => {
                 </form>
               </div>
               
+              <div className="flex items-center space-x-3">
+                <a href="https://www.facebook.com/share/12JML3gctZN/" target="_blank" rel="noopener noreferrer" className="hover:text-white/70 transition-colors"><Facebook className="w-4 h-4" /></a>
+                <a href="https://www.instagram.com/dharani_herbbals?igsh=MXRueWJqMmtpZHRjOQ==" target="_blank" rel="noopener noreferrer" className="hover:text-white/70 transition-colors"><Instagram className="w-4 h-4" /></a>
+                <a href="https://youtube.com/@dharaniherbbals1236?si=6fZfr3WVwFS6nLCC" target="_blank" rel="noopener noreferrer" className="hover:text-white/70 transition-colors"><Youtube className="w-4 h-4" /></a>
+                <a href="https://twitter.com/HerbbalsDharani" target="_blank" rel="noopener noreferrer" className="hover:text-white/70 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+                </a>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -162,7 +170,7 @@ const Header = () => {
 
       {/* Main Header */}
       <header className="bg-white border-b-2 border-primary sticky top-0 md:top-12 z-40 shadow-lg">
-        <div className="container mx-auto px-4">
+        <div className="w-full pl-6 pr-6">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
             <Link to="/" className="flex items-center">
