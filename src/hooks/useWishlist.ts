@@ -6,30 +6,26 @@ import { toast } from '@/hooks/use-toast';
 export const useWishlist = () => {
   const [wishlistProductIds, setWishlistProductIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { user, isAuthenticated } = useAuth();
+  const [loaded, setLoaded] = useState(false);
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    loadWishlist();
-  }, [isAuthenticated, user?.id]);
+    if (!authLoading) loadWishlist();
+  }, [isAuthenticated, user?.id, authLoading]);
 
   useEffect(() => {
-    if (isAuthenticated && user?.id) {
-      saveWishlistToAPI(user.id, wishlistProductIds);
-    } else {
-      localStorage.setItem('wishlist', JSON.stringify(wishlistProductIds));
-    }
-  }, [wishlistProductIds, isAuthenticated, user?.id]);
+    if (authLoading || !isAuthenticated || !user?.id || !loaded) return;
+    saveWishlistToAPI(user.id, wishlistProductIds);
+  }, [wishlistProductIds, isAuthenticated, user?.id, authLoading, loaded]);
 
   const loadWishlist = async () => {
+    if (authLoading) return;
+    if (!isAuthenticated || !user?.id) return;
     setLoading(true);
     try {
-      if (isAuthenticated && user?.id) {
-        const apiWishlist = await loadWishlistFromAPI(user.id);
-        setWishlistProductIds(apiWishlist);
-      } else {
-        // Clear wishlist when not authenticated
-        setWishlistProductIds([]);
-      }
+      const apiWishlist = await loadWishlistFromAPI(user.id);
+      setWishlistProductIds(apiWishlist);
+      setLoaded(true);
     } catch (error) {
       console.error('Error loading wishlist:', error);
     } finally {

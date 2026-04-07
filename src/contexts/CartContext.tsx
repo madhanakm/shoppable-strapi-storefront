@@ -18,7 +18,7 @@ interface CartContextType {
   addToCart: (productId: string, id: string, quantity?: number, name?: string, price?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
+  clearCart: () => Promise<void>;
   cartCount: number;
   syncCart: () => void;
   loading: boolean;
@@ -48,7 +48,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   }, [isAuthenticated, user?.id]);
 
   useEffect(() => {
-    if (cartItems.length > 0 || cartItems.length === 0) {
+    if (cartItems.length > 0) {
       if (isAuthenticated && user?.id) {
         saveCartToAPI(user.id, cartItems);
       } else {
@@ -201,8 +201,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     );
   };
 
-  const clearCart = () => {
+  const clearCart = async () => {
     setCartItems([]);
+    if (user?.id) {
+      await saveCartToAPI(user.id, []);
+    }
   };
 
   const syncCart = async () => {

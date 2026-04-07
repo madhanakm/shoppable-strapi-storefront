@@ -615,7 +615,7 @@ const Checkout = () => {
         if (isQuickCheckout) {
           clearQuickCheckout();
         } else {
-          clearCart();
+          await clearCart();
           localStorage.removeItem('cart');
         }
         
@@ -815,7 +815,7 @@ const Checkout = () => {
       if (isQuickCheckout) {
         clearQuickCheckout();
       } else {
-        clearCart();
+        await clearCart();
       }
       // Clear saved form data after successful order
       localStorage.removeItem('checkoutFormData');
