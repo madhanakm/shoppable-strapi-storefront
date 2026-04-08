@@ -23,7 +23,8 @@ export const saveCartToAPI = async (userId: number, cartItems: CartItem[]): Prom
         productId: item.productId,
         quantity: item.quantity,
         id: item.id
-      })))
+      }))),
+      reminderSent: false
     };
 
     if (response.ok) {
