@@ -224,7 +224,7 @@ const getPriceRange = (attributes: any, userType: string): string | null => {
       ? JSON.parse(attributes.variations)
       : attributes.variations;
 
-    const prices = variations.map((v: any) => getPriceByUserType(v, userType));
+    const prices = variations.map((v: any) => getPriceByUserType(v, userType)).filter((p: number) => p > 0);
 
     if (prices.length > 0) {
       const minPrice = Math.min(...prices);

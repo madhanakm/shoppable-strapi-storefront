@@ -148,17 +148,19 @@ const RelatedProducts = () => {
                 {/* Product Image */}
                 <div className="relative overflow-hidden rounded-t-3xl bg-gradient-to-br from-green-50 via-white to-emerald-50">
                   <Link to={`/product/${product.id}`} className="block cursor-pointer">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-500"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://via.placeholder.com/300x300?text=Product';
-                      }}
-                    />
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full aspect-square object-cover group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://via.placeholder.com/300x300?text=Product';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full aspect-square animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
+                    )}
                   </Link>
-                  
-                  {/* Overlay on Hover */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                 </div>
                 

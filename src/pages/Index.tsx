@@ -14,10 +14,20 @@ import InstagramReels from '@/components/InstagramReels';
 import NewLaunchProducts from '@/components/NewLaunchProducts';
 import BestSellingProducts from '@/components/BestSellingProducts';
 import OurStorySection from '@/components/OurStorySection';
+import { useInView } from '@/hooks/useInView';
 
 const Index = () => {
   const { translate, language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
+
+  const bestSelling = useInView();
+  const categories = useInView();
+  const reels = useInView();
+  const reviews = useInView();
+  const productBlocks = useInView();
+  const heroSection = useInView();
+  const ourStory = useInView();
+  const trustSection = useInView();
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50/30 via-white to-emerald-50/30">
       <Helmet>
@@ -102,53 +112,61 @@ const Index = () => {
         
         {/* Best Selling Products Section */}
         <ErrorBoundary>
-          <BestSellingProducts />
+          <div ref={bestSelling.ref} className="min-h-[200px]">
+            {bestSelling.inView && <BestSellingProducts />}
+          </div>
         </ErrorBoundary>
         
         {/* Categories Section */}
         <ErrorBoundary>
-          <div className="py-6 md:py-16 bg-gradient-to-r from-green-50 to-emerald-50">
-            <Categories />
+          <div ref={categories.ref} className="py-6 md:py-16 bg-gradient-to-r from-green-50 to-emerald-50 min-h-[200px]">
+            {categories.inView && <Categories />}
           </div>
         </ErrorBoundary>
         
         {/* Instagram Reels Section */}
         <ErrorBoundary>
-          <InstagramReels />
+          <div ref={reels.ref} className="min-h-[100px]">
+            {reels.inView && <InstagramReels />}
+          </div>
         </ErrorBoundary>
         
-        {/* Google Reviews Section - Full Screen */}
+        {/* Google Reviews Section */}
         <ErrorBoundary>
-          <section className="py-6 md:py-16 bg-gray-50 w-full">
-            <SimpleGoogleReviews 
-              businessName="Dharani Herbbals"
-              googleMapsUrl="https://www.google.com/maps/place/Dharani+Herbbals/@11.3580339,77.1641668,17.06z/data=!4m8!3m7!1s0x3ba8e1bdd6179ddb:0x82f81936cbaf1a2!8m2!3d11.3580361!4d77.166633!9m1!1b1!16s%2Fg%2F11c6f588fq!5m1!1e1?entry=ttu&g_ep=EgoyMDI1MDkwMy4wIKXMDSoASAFQAw%3D%3D"
-              rating={4.8}
-              reviewCount={150}
-            />
-          </section>
+          <div ref={reviews.ref} className="min-h-[100px]">
+            {reviews.inView && (
+              <section className="py-6 md:py-16 bg-gray-50 w-full">
+                <SimpleGoogleReviews
+                  businessName="Dharani Herbbals"
+                  googleMapsUrl="https://www.google.com/maps/place/Dharani+Herbbals/@11.3580339,77.1641668,17.06z/data=!4m8!3m7!1s0x3ba8e1bdd6179ddb:0x82f81936cbaf1a2!8m2!3d11.3580361!4d77.166633!9m1!1b1!16s%2Fg%2F11c6f588fq!5m1!1e1?entry=ttu&g_ep=EgoyMDI1MDkwMy4wIKXMDSoASAFQAw%3D%3D"
+                  rating={4.8}
+                  reviewCount={150}
+                />
+              </section>
+            )}
+          </div>
         </ErrorBoundary>
         
         {/* Product Blocks Section */}
         <ErrorBoundary>
-          <div className="py-6 md:py-16 bg-white relative">
-            <div className="absolute inset-0 bg-gradient-to-b from-green-50/20 to-transparent" />
-            <div className="relative z-10">
-              <ProductBlocks />
-            </div>
+          <div ref={productBlocks.ref} className="py-6 md:py-16 bg-white relative min-h-[200px]">
+            {productBlocks.inView && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-b from-green-50/20 to-transparent" />
+                <div className="relative z-10">
+                  <ProductBlocks />
+                </div>
+              </>
+            )}
           </div>
         </ErrorBoundary>
 
-        {/* Hero Section */}
-        <ErrorBoundary>
-          <div className="relative z-10">
-            <Hero />
-          </div>
-        </ErrorBoundary>
-        
+
         {/* Our Story Section */}
         <ErrorBoundary>
-          <OurStorySection />
+          <div ref={ourStory.ref} className="min-h-[100px]">
+            {ourStory.inView && <OurStorySection />}
+          </div>
         </ErrorBoundary>
         
         {/* Trust Indicators */}

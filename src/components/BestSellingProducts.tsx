@@ -12,30 +12,69 @@ import { useBuyNow } from '@/hooks/useBuyNow';
 import StarRating from './StarRating';
 import { filterPriceFromName } from '@/lib/productUtils';
 import ProductSectionSkeleton from './ProductSectionSkeleton';
-import { useBestSellingProducts } from '@/hooks/useProductQueries';
+import { getPriceByUserType } from '@/lib/pricing';
+import { getBulkProductReviewStats } from '@/services/reviews';
 import { useUserType } from '@/hooks/useUserTypeQuery';
+
+const API_URL = 'https://api.dharaniherbbals.com/api';
+const API_TOKEN = '5b53874a860fd597c93c694e40cae80141a2bc49ede3dc653df17c20f98d7ede2dd2f8b8f8872e4dedb0046b1c6a6575d19dce3b660332ebae2e956907397f547342095b842829a98776151195993b062109f076556946e4bc1d3b55b7638fb2a7c54ab473fdc7f9a3ad1b04ef2d05f7173de16529bc117406807f90c8502863';
+const PRODUCT_FIELDS = 'fields[0]=Name&fields[1]=skuid&fields[2]=mrp&fields[3]=resellerprice&fields[4]=customerprice&fields[5]=retailprice&fields[6]=sarvoprice&fields[7]=distributorprice&fields[8]=price&fields[9]=type&fields[10]=status&fields[11]=tamil&fields[12]=isVariableProduct&fields[13]=variations&fields[14]=category&fields[15]=newLaunch&fields[16]=stock';
 
 const BestSellingProducts = () => {
   const { data: userType = 'customer' } = useUserType();
-  const { data: { products = [], reviewStats = {} } = {}, isLoading: loading } = useBestSellingProducts(userType, 10);
+  const [products, setProducts] = useState<any[]>([]);
+  const [reviewStats, setReviewStats] = useState<any>({});
+  const [loading, setLoading] = useState(true);
   const [productImages, setProductImages] = useState<Record<number, string>>({});
 
   useEffect(() => {
-    if (products.length === 0) return;
-    const API_URL = 'https://api.dharaniherbbals.com/api';
-    const API_TOKEN = '5b53874a860fd597c93c694e40cae80141a2bc49ede3dc653df17c20f98d7ede2dd2f8b8f8872e4dedb0046b1c6a6575d19dce3b660332ebae2e956907397f547342095b842829a98776151195993b062109f076556946e4bc1d3b55b7638fb2a7c54ab473fdc7f9a3ad1b04ef2d05f7173de16529bc117406807f90c8502863';
-    products.forEach(async (product) => {
+    const load = async () => {
       try {
-        const r = await fetch(`${API_URL}/product-masters/${product.id}?fields[0]=photo`, {
-          headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+        setLoading(true);
+        const response = await fetch(
+          `${API_URL}/product-masters?filters[type][$eq]=Best Selling&filters[status][$eq]=true&pagination[pageSize]=10&${PRODUCT_FIELDS}`,
+          { headers: { 'Authorization': `Bearer ${API_TOKEN}` } }
+        );
+        if (!response.ok) return;
+        const data = await response.json();
+        const formatted = (data.data || []).map((p: any) => {
+          const attrs = p.attributes;
+          let displayPrice = getPriceByUserType(attrs, userType);
+          let priceRange = null;
+          if (attrs?.isVariableProduct && attrs?.variations) {
+            try {
+              const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+              const prices = variations.map((v: any) => getPriceByUserType(v, userType)).filter((pr: number) => pr > 0);
+              if (prices.length > 0) {
+                const min = Math.min(...prices);
+                const max = Math.max(...prices);
+                displayPrice = min;
+                priceRange = min === max ? `₹${min}` : `₹${min} - ₹${max}`;
+              }
+            } catch {}
+          }
+          return { id: p.id, image: '', displayPrice, priceRange, ...attrs, name: attrs?.Name || attrs?.name };
         });
-        if (!r.ok) return;
-        const d = await r.json();
-        const photo = d.data?.attributes?.photo;
-        if (photo) setProductImages(prev => ({ ...prev, [product.id]: photo }));
+        setProducts(formatted);
+        const productIds = formatted.map((p: any) => p.id).filter((id: number) => !isNaN(id));
+        if (productIds.length > 0) {
+          getBulkProductReviewStats(productIds).then(setReviewStats).catch(() => {});
+        }
+        // Lazy load photos
+        formatted.forEach(async (product: any) => {
+          try {
+            const r = await fetch(`${API_URL}/product-masters/${product.id}?fields[0]=photo`, { headers: { 'Authorization': `Bearer ${API_TOKEN}` } });
+            if (!r.ok) return;
+            const d = await r.json();
+            const photo = d.data?.attributes?.photo;
+            if (photo) setProductImages(prev => ({ ...prev, [product.id]: photo }));
+          } catch {}
+        });
       } catch {}
-    });
-  }, [products]);
+      finally { setLoading(false); }
+    };
+    load();
+  }, [userType]);
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const navigate = useNavigate();
@@ -150,7 +189,20 @@ const BestSellingProducts = () => {
                 
                 <div className="mb-3">
                   <p className="text-xl md:text-2xl font-bold" style={{color: '#0a7f06'}}>
-                    {product.priceRange || formatPrice(product.displayPrice)}
+                    {product.priceRange || (product.displayPrice > 0 ? formatPrice(product.displayPrice) : (() => {
+                      if (product.isVariableProduct && product.variations) {
+                        try {
+                          const variations = typeof product.variations === 'string' ? JSON.parse(product.variations) : product.variations;
+                          const prices = variations.map((v: any) => parseFloat(v.customerprice || 0)).filter((p: number) => p > 0);
+                          if (prices.length > 0) {
+                            const min = Math.min(...prices);
+                            const max = Math.max(...prices);
+                            return min === max ? formatPrice(min) : `${formatPrice(min)} - ${formatPrice(max)}`;
+                          }
+                        } catch {}
+                      }
+                      return formatPrice(0);
+                    })())}
                   </p>
                 </div>
 

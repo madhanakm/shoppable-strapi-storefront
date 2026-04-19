@@ -1,137 +1,160 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ImageSlider = () => {
   const [slides, setSlides] = useState([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [current, setCurrent] = useState(0);
+  const [prev, setPrev] = useState<number | null>(null);
+  const [animating, setAnimating] = useState(false);
   const [loading, setLoading] = useState(true);
+  const timerRef = useRef<any>(null);
 
   useEffect(() => {
     fetch('https://api.dharaniherbbals.com/api/sliders?filters[status][$eq]=true')
-      .then(response => response.json())
+      .then(r => r.json())
       .then(data => {
         let slidesData = [];
-        if (Array.isArray(data)) {
-          slidesData = data.filter(item => item.status === true);
-        } else if (data && Array.isArray(data.data)) {
+        if (data && Array.isArray(data.data)) {
           slidesData = data.data
-            .filter(item => {
-              const attrs = item.attributes || item;
-              return attrs.status === true;
-            })
+            .filter(item => (item.attributes || item).status === true)
             .map(item => ({
               id: item.id,
-              image: item.attributes?.image || item.image || item.attributes?.photo || item.photo,
+              image: item.attributes?.photo || item.attributes?.image || item.photo || item.image,
               title: item.attributes?.title || item.title,
-              description: item.attributes?.description || item.description
+              description: item.attributes?.description || item.description,
             }));
         }
         setSlides(slidesData);
         setLoading(false);
       })
-      .catch(error => {
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    if (slides.length > 0) {
-      const interval = setInterval(() => {
-        setCurrentSlide(prev => (prev + 1) % slides.length);
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [slides.length]);
+  const goTo = useCallback((index: number) => {
+    if (animating || index === current || slides.length === 0) return;
+    setAnimating(true);
+    setPrev(current);
+    setCurrent(index);
+    setTimeout(() => {
+      setPrev(null);
+      setAnimating(false);
+    }, 700);
+  }, [animating, current, slides.length]);
 
-  const goToSlide = (index) => {
-    setCurrentSlide(index);
-  };
+  const next = useCallback(() => goTo((current + 1) % slides.length), [current, goTo, slides.length]);
+  const prevSlide = useCallback(() => goTo((current - 1 + slides.length) % slides.length), [current, goTo, slides.length]);
+
+  useEffect(() => {
+    if (slides.length > 1) {
+      timerRef.current = setInterval(next, 5000);
+      return () => clearInterval(timerRef.current);
+    }
+  }, [next, slides.length]);
 
   if (loading) {
     return (
-      <div className="relative h-[250px] sm:h-[400px] md:h-[800px] bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 overflow-hidden">
-        <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
-        <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 md:p-8">
-          <div className="space-y-3 md:space-y-4 max-w-2xl">
-            <div className="h-6 sm:h-8 md:h-10 bg-gray-300/60 rounded-lg w-3/4 animate-pulse"></div>
-            <div className="h-4 sm:h-5 md:h-6 bg-gray-300/60 rounded-lg w-1/2 animate-pulse" style={{ animationDelay: '200ms' }}></div>
-          </div>
-        </div>
-        <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 flex justify-center space-x-2 sm:space-x-3">
-          {[1, 2, 3].map((i) => (
-            <div 
-              key={i} 
-              className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-white/50 rounded-full animate-pulse"
-              style={{ animationDelay: `${i * 150}ms` }}
-            />
-          ))}
-        </div>
-        <style>{`
-          @keyframes shimmer {
-            100% {
-              transform: translateX(100%);
-            }
-          }
-        `}</style>
+      <div className="relative w-full bg-gray-200 animate-pulse" style={{ height: 'clamp(250px, 55vh, 600px)' }}>
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
       </div>
     );
   }
 
-  if (slides.length === 0) {
-    return <div className="h-[250px] sm:h-[400px] md:h-[800px] bg-gray-100 flex items-center justify-center">No slides available</div>;
-  }
+  if (slides.length === 0) return null;
 
   return (
-    <div className="relative w-full h-[250px] sm:h-[400px] md:h-[800px] overflow-hidden shadow-2xl isolate">
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10"></div>
-      {slides.map((slide, index) => (
+    <div className="relative w-full overflow-hidden bg-black shadow-2xl" style={{ height: 'clamp(350px, 70vh, 800px)' }}>
+
+      {/* Slides */}
+      {slides.map((slide, i) => (
         <div
-          key={slide.id || index}
-          className={`absolute top-0 left-0 w-full h-full transition-all duration-1000 ease-in-out ${
-            index === currentSlide 
-              ? 'opacity-100 scale-100' 
-              : 'opacity-0 scale-105'
-          }`}
+          key={slide.id || i}
+          className="absolute inset-0"
+          style={{
+            opacity: i === current ? 1 : i === prev ? 0 : 0,
+            transition: 'opacity 700ms ease-in-out',
+            zIndex: i === current ? 2 : i === prev ? 1 : 0,
+          }}
         >
-          {slide.image && (
-            <img
-              src={slide.image}
-              alt={slide.title || `Slide ${index + 1}`}
-              className="w-full h-full object-cover object-center transition-transform duration-1000 hover:scale-105"
-              onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/1200x400?text=Image+Not+Available';
-              }}
-            />
-          )}
+          <img
+            src={slide.image}
+            alt={slide.title || `Slide ${i + 1}`}
+            className="w-full h-full object-cover object-center"
+            onError={(e: any) => { e.target.src = 'https://via.placeholder.com/1200x600?text=Dharani+Herbbals'; }}
+          />
+          {/* Overlay only if title/description exists */}
           {(slide.title || slide.description) && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white p-4 sm:p-6 md:p-8 z-20">
-              {slide.title && (
-                <h3 className="text-lg sm:text-2xl md:text-3xl font-bold mb-2 md:mb-3 animate-fade-in-up">
-                  {slide.title}
-                </h3>
-              )}
-              {slide.description && (
-                <p className="text-sm sm:text-base md:text-lg text-gray-200 max-w-2xl leading-relaxed animate-fade-in-up">
-                  {slide.description}
-                </p>
-              )}
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
           )}
         </div>
       ))}
-      <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 flex justify-center space-x-2 sm:space-x-3 z-20">
-        {slides.map((_, index) => (
+
+      {/* Content */}
+      {(slides[current]?.title || slides[current]?.description) && (
+        <div className="absolute inset-0 z-10 flex items-center px-6 md:px-16">
+          <div key={current} className="max-w-xl space-y-3" style={{ animation: 'slideUp 0.6s ease forwards' }}>
+            {slides[current]?.title && (
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-white leading-tight">
+                {slides[current].title}
+              </h2>
+            )}
+            {slides[current]?.description && (
+              <p className="text-gray-200 text-sm md:text-base max-w-md leading-relaxed">
+                {slides[current].description}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Prev / Next */}
+      {slides.length > 1 && (
+        <>
           <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`transition-all duration-300 rounded-full border-2 ${
-              index === currentSlide 
-                ? 'w-3 h-3 sm:w-4 sm:h-4 bg-white border-white shadow-lg scale-110' 
-                : 'w-2.5 h-2.5 sm:w-3 sm:h-3 bg-white/50 border-white/70 hover:bg-white/70 hover:scale-105'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+            onClick={prevSlide}
+            className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-black/30 hover:bg-black/60 backdrop-blur-sm border border-white/20 rounded-full flex items-center justify-center text-white transition-all"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={next}
+            className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-black/30 hover:bg-black/60 backdrop-blur-sm border border-white/20 rounded-full flex items-center justify-center text-white transition-all"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </>
+      )}
+
+      {/* Rectangle bar indicators */}
+      {slides.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2 items-center">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className="relative overflow-hidden rounded-sm transition-all duration-500"
+              style={{ width: i === current ? 40 : 20, height: 3, background: 'rgba(255,255,255,0.35)' }}
+            >
+              {i === current && (
+                <span
+                  className="absolute inset-0 bg-green-400 rounded-sm"
+                  style={{ animation: 'progress 5s linear forwards' }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes progress {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+      `}</style>
     </div>
   );
 };

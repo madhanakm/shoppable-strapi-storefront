@@ -110,7 +110,7 @@ const Cart = () => {
   }, [cartTotal, ecomSettings, stateRates]);
 
 
-  if (cartCount === 0) {
+  if (cartCount === 0 && !loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
         <Header />
@@ -163,7 +163,7 @@ const Cart = () => {
             <div className="lg:col-span-2 space-y-6">
               <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
                 <CardContent className="p-6 md:p-8">
-                  <div className="space-y-6">
+                  <div className="space-y-6 min-h-[200px]">
                     {loading ? (
                       <div className="text-center py-8">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
@@ -180,7 +180,7 @@ const Cart = () => {
                                 <img
                                   src={item.image}
                                   alt={item.name}
-                                  className="w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                  className={`w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-300 cursor-pointer ${item.image === 'https://via.placeholder.com/150x150?text=Product' ? 'animate-pulse bg-gray-100' : ''}`}
                                   onError={(e) => {
                                     e.target.src = 'https://via.placeholder.com/150x150?text=Product';
                                   }}
