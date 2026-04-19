@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,24 @@ import { useUserType } from '@/hooks/useUserTypeQuery';
 const BestSellingProducts = () => {
   const { data: userType = 'customer' } = useUserType();
   const { data: { products = [], reviewStats = {} } = {}, isLoading: loading } = useBestSellingProducts(userType, 10);
+  const [productImages, setProductImages] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    if (products.length === 0) return;
+    const API_URL = 'https://api.dharaniherbbals.com/api';
+    const API_TOKEN = '5b53874a860fd597c93c694e40cae80141a2bc49ede3dc653df17c20f98d7ede2dd2f8b8f8872e4dedb0046b1c6a6575d19dce3b660332ebae2e956907397f547342095b842829a98776151195993b062109f076556946e4bc1d3b55b7638fb2a7c54ab473fdc7f9a3ad1b04ef2d05f7173de16529bc117406807f90c8502863';
+    products.forEach(async (product) => {
+      try {
+        const r = await fetch(`${API_URL}/product-masters/${product.id}?fields[0]=photo`, {
+          headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+        });
+        if (!r.ok) return;
+        const d = await r.json();
+        const photo = d.data?.attributes?.photo;
+        if (photo) setProductImages(prev => ({ ...prev, [product.id]: photo }));
+      } catch {}
+    });
+  }, [products]);
   const { language } = useTranslation();
   const isTamil = language === LANGUAGES.TAMIL;
   const navigate = useNavigate();
@@ -85,14 +103,18 @@ const BestSellingProducts = () => {
               {/* Product Image */}
               <div className="aspect-square overflow-hidden bg-gray-100 relative">
                 <Link to={`/product/${product.id}`} className="block w-full h-full relative z-0">
-                  <img
-                    src={product.image || 'https://via.placeholder.com/400x400?text=Product'}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/400x400?text=Product';
-                    }}
-                  />
+                  {productImages[product.id] || product.image ? (
+                    <img
+                      src={productImages[product.id] || product.image || 'https://via.placeholder.com/400x400?text=Product'}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://via.placeholder.com/400x400?text=Product';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%]" style={{animation: 'shimmer 1.5s infinite', backgroundSize: '200% 100%'}} />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                 </Link>
                 

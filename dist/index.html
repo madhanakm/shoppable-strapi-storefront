@@ -61,6 +61,8 @@
     <!-- Fonts: preconnect + inline critical CSS to avoid FOUT -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://api.dharaniherbbals.com" />
+    <link rel="preload" as="image" href="https://api.dharaniherbbals.com/uploads/logo_12f2d3e78e.png" />
     <style>
       /* System font stack as fallback — matches Montserrat metrics to prevent layout shift */
       @font-face {
@@ -322,7 +324,7 @@
 
       body.preloader-active { overflow: hidden; }
     </style>
-    <script type="module" crossorigin src="/assets/index-fuytKgHx.js"></script>
+    <script type="module" crossorigin src="/assets/index-C9X28vOE.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/vendor-react-DU8b7Rjc.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-query-DfSbLivA.js">
     <link rel="modulepreload" crossorigin href="/assets/pdf-D7HrI6pR.js">
@@ -331,7 +333,7 @@
     <link rel="modulepreload" crossorigin href="/assets/vendor-icons-B7iQh_2q.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-misc-CrEB73Ai.js">
     <link rel="modulepreload" crossorigin href="/assets/vendor-router-DI-XvA7o.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-BHZZ9IRm.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-DMckqGiw.css">
   </head>
 
   <body class="preloader-active">
@@ -374,12 +376,12 @@
     <div id="root"></div>
     <script>
       window.__preloaderShownAt = Date.now();
-      // Safety fallback: hide preloader after 4s even if JS is slow
+      // Safety fallback: hide preloader after 3s even if JS is slow
       setTimeout(function() {
         var p = document.getElementById('site-preloader');
         if (p) { p.style.opacity = '0'; p.style.pointerEvents = 'none'; setTimeout(function(){ p.remove(); }, 600); }
         document.body.classList.remove('preloader-active');
-      }, 6000);
+      }, 3500);
     </script>
   </body>
 </html>

@@ -323,7 +323,7 @@ const ContactUs = () => {
                   <a href="https://www.instagram.com/dharani_herbbals?igsh=MXRueWJqMmtpZHRjOQ==" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-primary/20 hover:bg-primary rounded-full flex items-center justify-center transition-colors group">
                     <Instagram className="w-6 h-6 text-primary group-hover:text-white" />
                   </a>
-                  <a href="https://youtube.com/@dharaniherbbals1236?si=6fZfr3WVwFS6nLCC" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-primary/20 hover:bg-primary rounded-full flex items-center justify-center transition-colors group">
+                  <a href="https://www.youtube.com/@dharaniherbbalsppy" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-primary/20 hover:bg-primary rounded-full flex items-center justify-center transition-colors group">
                     <Youtube className="w-6 h-6 text-primary group-hover:text-white" />
                   </a>
                   <a href="https://twitter.com/HerbbalsDharani" target="_blank" rel="noopener noreferrer" className="w-12 h-12 bg-primary/20 hover:bg-primary rounded-full flex items-center justify-center transition-colors group">

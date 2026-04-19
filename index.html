@@ -61,6 +61,8 @@
     <!-- Fonts: preconnect + inline critical CSS to avoid FOUT -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://api.dharaniherbbals.com" />
+    <link rel="preload" as="image" href="https://api.dharaniherbbals.com/uploads/logo_12f2d3e78e.png" />
     <style>
       /* System font stack as fallback — matches Montserrat metrics to prevent layout shift */
       @font-face {
@@ -363,12 +365,12 @@
     <div id="root"></div>
     <script>
       window.__preloaderShownAt = Date.now();
-      // Safety fallback: hide preloader after 4s even if JS is slow
+      // Safety fallback: hide preloader after 3s even if JS is slow
       setTimeout(function() {
         var p = document.getElementById('site-preloader');
         if (p) { p.style.opacity = '0'; p.style.pointerEvents = 'none'; setTimeout(function(){ p.remove(); }, 600); }
         document.body.classList.remove('preloader-active');
-      }, 6000);
+      }, 3500);
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>

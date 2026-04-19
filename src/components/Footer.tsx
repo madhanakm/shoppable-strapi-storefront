@@ -234,7 +234,7 @@ const Footer = () => {
               <a href="https://www.instagram.com/dharani_herbbals?igsh=MXRueWJqMmtpZHRjOQ==" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-gray-700 hover:bg-primary rounded-full flex items-center justify-center transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="https://youtube.com/@dharaniherbbals1236?si=6fZfr3WVwFS6nLCC" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-gray-700 hover:bg-primary rounded-full flex items-center justify-center transition-colors">
+              <a href="https://www.youtube.com/@dharaniherbbalsppy" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-gray-700 hover:bg-primary rounded-full flex items-center justify-center transition-colors">
                 <Youtube className="w-5 h-5" />
               </a>
               <a href="https://twitter.com/HerbbalsDharani" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-gray-700 hover:bg-primary rounded-full flex items-center justify-center transition-colors">

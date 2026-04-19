@@ -159,15 +159,9 @@ export const useBestSellingProducts = (userType: string = 'customer', limit: num
       }));
 
       const productIds = formatted.map(p => p.id).filter((id: number) => !isNaN(id));
-      let reviewStats = {};
-
-      const [reviewStatsResult, ...photos] = await Promise.all([
-        productIds.length > 0 ? getBulkProductReviewStats(productIds).catch(() => ({})) : Promise.resolve({}),
-        ...formatted.map((p: any) => fetchProductPhoto(p.id))
-      ]);
-
-      reviewStats = reviewStatsResult;
-      formatted.forEach((p: any, i: number) => { p.image = photos[i] || ''; });
+      const reviewStats = productIds.length > 0
+        ? await getBulkProductReviewStats(productIds).catch(() => ({}))
+        : {};
 
       return { products: formatted, reviewStats };
     },
