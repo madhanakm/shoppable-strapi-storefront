@@ -61,9 +61,9 @@ export const getProducts = async (
     queryParams.push('filters[status][$eq]=true');
     
     if (sortOptions.sortBy === 'price-low') {
-      queryParams.push('sort=mrp:asc');
+      // Client-side sort handles variable products correctly
     } else if (sortOptions.sortBy === 'price-high') {
-      queryParams.push('sort=mrp:desc');
+      // Client-side sort handles variable products correctly
     }
     // No default sort — client will shuffle for random order
     

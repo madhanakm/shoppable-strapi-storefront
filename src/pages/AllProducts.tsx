@@ -183,11 +183,36 @@ const AllProducts = () => {
       
       const sortOptions = { sortBy };
       
-      const productsData = await getProducts(page, itemsPerPage, filters, { ...sortOptions, random: true });
+      const isPriceSort = sortBy === 'price-low' || sortBy === 'price-high';
+      const fetchPageSize = isPriceSort ? 500 : itemsPerPage;
+      const fetchPage = isPriceSort ? 1 : page;
+
+      const productsData = await getProducts(fetchPage, fetchPageSize, filters, { ...sortOptions, random: true });
       const productList = Array.isArray(productsData) ? productsData : productsData.data || [];
-      
-      // Shuffle randomly when no sort selected
-      const finalList = sortBy === 'name' ? [...productList].sort(() => Math.random() - 0.5) : productList;
+
+      // Client-side sort to handle variable products correctly
+      const getEffectivePrice = (item: any) => {
+        const attrs = item.attributes || item;
+        if (attrs.isVariableProduct && attrs.variations) {
+          try {
+            const variations = typeof attrs.variations === 'string' ? JSON.parse(attrs.variations) : attrs.variations;
+            const prices = variations.map((v: any) => parseFloat(v.customerprice || v.mrp || 0)).filter((p: number) => p > 0);
+            if (prices.length > 0) return Math.min(...prices);
+          } catch {}
+        }
+        return parseFloat(attrs.customerprice || attrs.price || 0);
+      };
+
+      let finalList;
+      if (sortBy === 'name') {
+        finalList = [...productList].sort(() => Math.random() - 0.5);
+      } else if (sortBy === 'price-low') {
+        finalList = [...productList].sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
+      } else if (sortBy === 'price-high') {
+        finalList = [...productList].sort((a, b) => getEffectivePrice(b) - getEffectivePrice(a));
+      } else {
+        finalList = productList;
+      }
       
       if (page === 1) {
         setProducts(finalList);
