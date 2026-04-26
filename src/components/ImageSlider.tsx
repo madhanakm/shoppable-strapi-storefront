@@ -62,7 +62,7 @@ const ImageSlider = () => {
   if (slides.length === 0) return null;
 
   return (
-    <div className="relative w-full overflow-hidden bg-black shadow-2xl" style={{ height: 'clamp(350px, 70vh, 800px)' }}>
+    <div className="relative w-full overflow-hidden bg-black shadow-2xl" style={{ height: 'clamp(200px, 50vw, 800px)' }}>
 
       {/* Slides */}
       {slides.map((slide, i) => (

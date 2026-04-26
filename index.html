@@ -186,17 +186,30 @@
         flex-direction: column;
         align-items: center;
         gap: 0;
+        padding: 20px;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
       }
 
       /* Logo container */
       .pl-logo-wrap {
         position: relative;
-        width: 140px;
-        height: 140px;
+        width: 120px;
+        height: 120px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 32px;
+        margin-bottom: 24px;
+      }
+
+      @media (max-width: 480px) {
+        .pl-logo-wrap { width: 90px; height: 90px; margin-bottom: 16px; }
+        .pl-logo { width: 60px !important; height: 60px !important; }
+        .pl-brand { font-size: 1.2rem !important; letter-spacing: 2px !important; }
+        .pl-tagline { font-size: 0.6rem !important; letter-spacing: 2px !important; margin-bottom: 24px !important; }
+        .pl-bar-wrap { width: 160px !important; }
+        .pl-status { font-size: 0.55rem !important; }
       }
 
       /* Rotating ring */
@@ -241,8 +254,8 @@
       .pl-logo {
         position: relative;
         z-index: 1;
-        width: 90px;
-        height: 90px;
+        width: 80px;
+        height: 80px;
         object-fit: contain;
         animation: logo-breathe 3s ease-in-out infinite;
         filter: drop-shadow(0 0 12px rgba(74,183,72,0.5));
