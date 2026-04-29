@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, TrendingUp, Flame, Heart } from 'lucide-react';
+import { ShoppingCart, TrendingUp, Flame, Heart, GitCompare } from 'lucide-react';
+import { useCompare } from '@/contexts/CompareContext';
 import { formatPrice } from '@/lib/utils';
 import { useTranslation, LANGUAGES } from '@/components/TranslationProvider';
 import { useWishlistContext } from '@/contexts/WishlistContext';
@@ -82,6 +83,7 @@ const BestSellingProducts = () => {
   const { setQuickCheckoutItem } = useQuickCheckout();
   const { buyNow } = useBuyNow();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
+  const { addToCompare, removeFromCompare, isInCompare, compareList } = useCompare();
 
   if (loading) {
     return (
@@ -169,6 +171,35 @@ const BestSellingProducts = () => {
                   }}
                 >
                   <Heart className={`w-3 h-3 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+                </Button>
+
+                {/* Compare Button */}
+                <Button
+                  size="sm"
+                  className={`absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-all rounded-full shadow-lg p-1.5 border ${
+                    isInCompare(product.id) ? 'bg-primary text-white border-primary' : 'bg-white/95 hover:bg-white border-gray-100 hover:border-primary text-gray-600'
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (isInCompare(product.id)) {
+                      removeFromCompare(product.id);
+                    } else if (compareList.length < 3) {
+                      addToCompare({
+                        id: product.id,
+                        name: product.name,
+                        price: product.displayPrice,
+                        priceRange: product.priceRange || null,
+                        image: productImages[product.id] || product.image || '',
+                        category: product.category,
+                        skuid: product.skuid
+                      });
+                    }
+                  }}
+                  disabled={compareList.length >= 3 && !isInCompare(product.id)}
+                  title={compareList.length >= 3 && !isInCompare(product.id) ? 'Max 3 products' : 'Compare'}
+                >
+                  <GitCompare className="w-3 h-3" />
                 </Button>
               </div>
 

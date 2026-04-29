@@ -17,6 +17,17 @@ export default defineConfig(({ mode }) => ({
           target: 'https://api.dharaniherbbals.com',
           changeOrigin: true,
           secure: true,
+          timeout: 30000,
+          proxyTimeout: 30000,
+          on: {
+            error: (err: any, _req: any, res: any) => {
+              console.warn('[proxy] API error:', err.message);
+              if (res && !res.headersSent) {
+                res.writeHead(503);
+                res.end('API unavailable');
+              }
+            }
+          }
         }
       }
     })

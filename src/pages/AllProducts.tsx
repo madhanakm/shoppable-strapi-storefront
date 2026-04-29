@@ -4,7 +4,8 @@ import Footer from '@/components/Footer';
 import SEOHead from '@/components/SEOHead';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Filter, Grid, List, Heart, Search, X, CreditCard } from 'lucide-react';
+import { ShoppingCart, Filter, Grid, List, Heart, Search, X, CreditCard, GitCompare } from 'lucide-react';
+import { useCompare } from '@/contexts/CompareContext';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useQuickCheckout } from '@/hooks/useQuickCheckout';
@@ -23,6 +24,7 @@ import FloatingCart from '@/components/FloatingCart';
 const AllProducts = () => {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
+  const { addToCompare, removeFromCompare, isInCompare, compareList } = useCompare();
   const { setQuickCheckoutItem } = useQuickCheckout();
   const { buyNow } = useBuyNow();
   const navigate = useNavigate();
@@ -571,6 +573,47 @@ const AllProducts = () => {
                           onClick={() => handleWishlistToggle(product)}
                         >
                           <Heart className={`w-4 h-4 ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : ''}`} />
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className={`absolute top-12 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full shadow-md ${isInCompare(product.id) ? 'bg-primary text-white' : ''}`}
+                          onClick={() => {
+                            if (isInCompare(product.id)) {
+                              removeFromCompare(product.id);
+                            } else {
+                              const a = product.attributes || product;
+                              const uType = userType || 'customer';
+                              let effectivePrice = getPriceByUserType(a, uType);
+                              let priceRange = null;
+                              if (a.isVariableProduct && a.variations) {
+                                try {
+                                  const vars = typeof a.variations === 'string' ? JSON.parse(a.variations) : a.variations;
+                                  const prices = vars.map((v: any) => getPriceByUserType(v, uType)).filter((p: number) => p > 0);
+                                  if (prices.length > 0) {
+                                    const min = Math.min(...prices);
+                                    const max = Math.max(...prices);
+                                    effectivePrice = min;
+                                    priceRange = min === max ? `₹${min}` : `₹${min} - ₹${max}`;
+                                  }
+                                } catch {}
+                              }
+                              addToCompare({
+                                id: product.id,
+                                name: a.Name || a.name || '',
+                                price: effectivePrice,
+                                priceRange: priceRange,
+                                image: a.photo || '',
+                                category: a.category || '',
+                                skuid: a.skuid || product.id.toString()
+                              });
+                            }
+                          }}
+                          title={compareList.length >= 3 && !isInCompare(product.id) ? 'Max 3 products' : 'Compare'}
+                          disabled={compareList.length >= 3 && !isInCompare(product.id)}
+                        >
+                          <GitCompare className={`w-4 h-4 ${isInCompare(product.id) ? 'text-white' : ''}`} />
                         </Button>
 
                         {attrs.type && (

@@ -31,7 +31,7 @@ const prefetchHomeData = async () => {
     queryClient.prefetchQuery({
       queryKey: ['menuCategories'],
       queryFn: async () => {
-        const r = await fetch(`${API}/product-categories?filters[type][$eq]=Best Selling&filters[status][$eq]=true&pagination[pageSize]=1&fields[0]=Name&fields[1]=menuItem`, { headers: HEADERS });
+        const r = await fetch(`${API}/product-categories?filters[menuItem][$eq]=true&fields[0]=Name&fields[1]=menuItem`, { headers: HEADERS });
         if (!r.ok) return [];
         const data = await r.json();
         return data.data || [];

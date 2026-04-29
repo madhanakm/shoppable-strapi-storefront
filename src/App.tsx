@@ -6,6 +6,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import { useEffect, lazy, Suspense } from 'react';
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { CompareProvider } from "@/contexts/CompareContext";
+import CompareBar from "@/components/CompareBar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QuickCheckoutProvider } from "@/contexts/QuickCheckoutContext";
 import { TranslationProvider } from "@/components/TranslationProvider";
@@ -53,14 +55,16 @@ const App = ({ onAppMount }: { onAppMount?: () => void }) => {
         <QuickCheckoutProvider>
           <CartProvider>
             <WishlistProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <SitePopup />
-              <WhatsAppFloat />
-              <ScrollToTopButton />
-              <BrowserRouter>
+              <CompareProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <SitePopup />
+                  <WhatsAppFloat />
+                  <ScrollToTopButton />
+                  <BrowserRouter>
                 <FloatingCart />
+                <CompareBar />
                 <ScrollToTop />
                 <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div></div>}>
                 <Routes>
@@ -87,8 +91,9 @@ const App = ({ onAppMount }: { onAppMount?: () => void }) => {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 </Suspense>
-              </BrowserRouter>
-            </TooltipProvider>
+                  </BrowserRouter>
+                </TooltipProvider>
+              </CompareProvider>
             </WishlistProvider>
           </CartProvider>
         </QuickCheckoutProvider>

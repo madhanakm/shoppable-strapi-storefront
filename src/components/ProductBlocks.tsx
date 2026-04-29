@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Star, ShoppingCart, Heart, TrendingUp, Flame, Zap, Tag, ArrowRight, Eye } from 'lucide-react';
+import { Star, ShoppingCart, Heart, TrendingUp, Flame, Zap, Tag, ArrowRight, Eye, GitCompare } from 'lucide-react';
+import { useCompare } from '@/contexts/CompareContext';
 import StarRating from './StarRating';
 import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
@@ -82,6 +83,7 @@ const fetchProductsWithPhotos = async (url: string, userType: string) => {
 // Product Card Component
 const ProductCard = ({ product, reviewStats = {} }) => {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
+  const { addToCompare, removeFromCompare, isInCompare, compareList } = useCompare();
   const { addToCart } = useCart();
   const { setQuickCheckoutItem } = useQuickCheckout();
   const { buyNow } = useBuyNow();
@@ -225,6 +227,34 @@ const ProductCard = ({ product, reviewStats = {} }) => {
           }}
         >
           <Heart className={`w-4 h-4 transition-colors ${isInWishlist(product.id.toString()) ? 'fill-red-500 text-red-500' : 'text-gray-600 hover:text-red-500'} `} />
+        </Button>
+        <Button
+          size="sm"
+          className={`absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full shadow-xl border-2 hover:scale-110 p-1.5 ${
+            isInCompare(product.id) ? 'bg-primary text-white border-primary' : 'bg-white/95 hover:bg-white border-gray-100 hover:border-primary text-gray-600'
+          }`}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isInCompare(product.id)) {
+              removeFromCompare(product.id);
+            } else if (compareList.length < 3) {
+              const attrs = product.attributes || product;
+              addToCompare({
+                id: product.id,
+                name: attrs.Name || attrs.name || product.name,
+                price: product.price || 0,
+                priceRange: product.priceRange || null,
+                image: product.image || '',
+                category: attrs.category || product.category,
+                skuid: attrs.skuid || product.id.toString()
+              });
+            }
+          }}
+          disabled={compareList.length >= 3 && !isInCompare(product.id)}
+          title={compareList.length >= 3 && !isInCompare(product.id) ? 'Max 3 products' : 'Compare'}
+        >
+          <GitCompare className="w-4 h-4" />
         </Button>
       </div>
       

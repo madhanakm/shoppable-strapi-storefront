@@ -5,7 +5,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Heart, Star, Sparkles } from 'lucide-react';
+import { ShoppingCart, Heart, Star, Sparkles, GitCompare } from 'lucide-react';
+import { useCompare } from '@/contexts/CompareContext';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlistContext } from '@/contexts/WishlistContext';
 import { useQuickCheckout } from '@/hooks/useQuickCheckout';
@@ -26,6 +27,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistContext();
+  const { addToCompare, removeFromCompare, isInCompare, compareList } = useCompare();
   const { setQuickCheckoutItem } = useQuickCheckout();
   const { buyNow } = useBuyNow();
   const { translate, language } = useTranslation();
@@ -611,6 +613,36 @@ const ProductDetail = () => {
                       {isInWishlist(product.id.toString()) ? translate('product.removeFromWishlist') : translate('product.addToWishlist')}
                     </span>
                   </Button>
+                  <Button
+                    variant="outline"
+                    className={`w-full border-2 shadow-md transition-all duration-300 py-2.5 text-sm font-medium rounded-xl ${
+                      isInCompare(product.id) ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 hover:border-primary hover:bg-primary/5 hover:text-primary'
+                    }`}
+                    onClick={() => {
+                      if (isInCompare(product.id)) {
+                        removeFromCompare(product.id);
+                      } else if (compareList.length < 3) {
+                        addToCompare({
+                          id: product.id,
+                          name: product.name || product.Name,
+                          price: getCurrentPrice() || 0,
+                          priceRange: (product.isVariableProduct && product.variations ? (() => { try { const vars = typeof product.variations === "string" ? JSON.parse(product.variations) : product.variations; const prices = vars.map((v) => getPriceByUserType(v, userType || "customer")).filter((p) => p > 0); if (prices.length > 0) { const min = Math.min(...prices); const max = Math.max(...prices); return min === max ? `₹${min}` : `₹${min} - ₹${max}`; } } catch {} return null; })() : null),
+                          image: selectedImage || product?.photo || "",
+                          category: product.category,
+                          description: product.description,
+                          brand: product.brand,
+                          weight: product.weight || product.size || product.quantity,
+                          rating: reviewStats?.average || 0,
+                          reviewCount: reviewStats?.count || 0,
+                          skuid: product.skuid || product.SKUID || product.id?.toString()
+                        });
+                      }
+                    }}
+                    disabled={compareList.length >= 3 && !isInCompare(product.id)}
+                  >
+                    <GitCompare className="mr-2 h-4 w-4" />
+                    {isInCompare(product.id) ? 'Remove from Compare' : compareList.length >= 3 ? 'Max 3 products' : 'Add to Compare'}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -1013,6 +1045,36 @@ const ProductDetail = () => {
                     <span className={`${isTamil ? 'tamil-text' : ''}`}>
                       {isInWishlist(product.id.toString()) ? translate('product.removeFromWishlist') : translate('product.addToWishlist')}
                     </span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className={`w-full border-2 shadow-md transition-all duration-300 py-3 text-base font-medium rounded-xl ${
+                      isInCompare(product.id) ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 hover:border-primary hover:bg-primary/5 hover:text-primary'
+                    }`}
+                    onClick={() => {
+                      if (isInCompare(product.id)) {
+                        removeFromCompare(product.id);
+                      } else if (compareList.length < 3) {
+                        addToCompare({
+                          id: product.id,
+                          name: product.name || product.Name,
+                          price: getCurrentPrice() || 0,
+                          priceRange: (product.isVariableProduct && product.variations ? (() => { try { const vars = typeof product.variations === "string" ? JSON.parse(product.variations) : product.variations; const prices = vars.map((v) => getPriceByUserType(v, userType || "customer")).filter((p) => p > 0); if (prices.length > 0) { const min = Math.min(...prices); const max = Math.max(...prices); return min === max ? `₹${min}` : `₹${min} - ₹${max}`; } } catch {} return null; })() : null),
+                          image: selectedImage || product?.photo || "",
+                          category: product.category,
+                          description: product.description,
+                          brand: product.brand,
+                          weight: product.weight || product.size || product.quantity,
+                          rating: reviewStats?.average || 0,
+                          reviewCount: reviewStats?.count || 0,
+                          skuid: product.skuid || product.SKUID || product.id?.toString()
+                        });
+                      }
+                    }}
+                    disabled={compareList.length >= 3 && !isInCompare(product.id)}
+                  >
+                    <GitCompare className="mr-2 h-5 w-5" />
+                    {isInCompare(product.id) ? 'Remove from Compare' : compareList.length >= 3 ? 'Max 3 products' : 'Add to Compare'}
                   </Button>
                 </div>
               </div>
