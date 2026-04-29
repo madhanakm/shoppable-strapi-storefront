@@ -623,7 +623,7 @@ const ProductDetail = () => {
                 </div>
                 <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.description')}</span>
               </h3>
-              <div className="prose prose-gray max-w-none">
+              <div className="prose prose-sm md:prose-base prose-gray max-w-none text-justify">
                 <p className={`text-gray-700 leading-relaxed text-sm ${isTamil ? 'tamil-text' : ''}`}>
                   {product.description || product.desc || (isTamil ? translate('product.noDescriptionAvailable') : 'No description available for this product.')}
                 </p>
@@ -863,7 +863,7 @@ const ProductDetail = () => {
                   </div>
                   <span className={`${isTamil ? 'tamil-text' : ''}`}>{translate('product.description')}</span>
                 </h3>
-                <div className="prose prose-gray max-w-none">
+                <div className="prose prose-sm md:prose-base prose-gray max-w-none text-justify">
                   <p className={`text-gray-700 leading-relaxed text-sm ${isTamil ? 'tamil-text' : ''}`}>
                     {product.description || product.desc || (isTamil ? translate('product.noDescriptionAvailable') : 'No description available for this product.')}
                   </p>
@@ -1117,7 +1117,7 @@ const ProductDetail = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                 {relatedProducts.map((relatedProduct, index) => {
                   const productImage = relatedProduct.photo || null;
                   

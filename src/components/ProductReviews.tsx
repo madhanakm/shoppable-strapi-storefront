@@ -115,7 +115,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId, skuId }) => 
                   {new Date(review.createdAt).toLocaleDateString()}
                 </div>
               </div>
-              <p className="text-gray-700">{review.comment}</p>
+              <p className="text-gray-700 text-sm md:text-base text-justify">{review.comment}</p>
             </div>
           ))}
           
